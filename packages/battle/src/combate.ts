@@ -53,6 +53,13 @@ export interface Peticion {
 	equipo: MiembroPeticion[];
 }
 
+/** Pokémon en campo de un lado, visible para ambos. */
+export interface ActivoPublico {
+	especie: string;
+	hp: number;
+	hpMax: number;
+}
+
 const MAX_EQUIPO = 3;
 const NIVEL = 50;
 const SLOT: Record<Lado, "p1" | "p2"> = { jugador: "p1", rival: "p2" };
@@ -130,6 +137,10 @@ export class Combate {
 	};
 	private readonly hpMax = new Map<string, number>();
 	private ganador: Lado | "empate" | null = null;
+	private readonly activos: Record<Lado, ActivoPublico | null> = {
+		jugador: null,
+		rival: null,
+	};
 
 	private constructor(
 		private readonly flujo: BattleStreams.BattleStream,
@@ -212,6 +223,12 @@ export class Combate {
 	 */
 	peticion(lado: Lado): Peticion | null {
 		return this.ganador ? null : this.pendientes[lado];
+	}
+
+	/** Pokémon en campo de `lado` (visible para ambos), o null antes del primer cambio. */
+	activo(lado: Lado): ActivoPublico | null {
+		const a = this.activos[lado];
+		return a && { ...a };
 	}
 
 	/** Ganador (`empate` incluido) o null si el combate sigue. */
@@ -335,6 +352,19 @@ export class Combate {
 		const ev = this.analizador.analizar(linea);
 		if (!ev) return;
 		if (ev.tipo === "fin") this.ganador = ev.ganador;
+		if (ev.tipo === "cambio")
+			this.activos[ev.lado] = {
+				especie: ev.especie,
+				hp: ev.hp,
+				hpMax: ev.hpMax,
+			};
+		else if (ev.tipo === "dano" || ev.tipo === "curacion") {
+			const a = this.activos[ev.lado];
+			if (a) {
+				a.hp = ev.hp;
+				a.hpMax = ev.hpMax;
+			}
+		}
 		eventos.push(ev);
 	}
 
@@ -375,6 +405,7 @@ export class Combate {
 					movimiento: aSlug(m.move, this.conocidos),
 					pp: m.pp ?? 0,
 					ppMax: m.maxpp ?? 0,
+					// Struggle llega sin datos de PP: sigue siendo elegible.
 					deshabilitado: m.disabled || m.pp === 0,
 				}));
 		return {

@@ -251,3 +251,29 @@ describe("propiedad", () => {
 		);
 	});
 });
+
+describe("Combate: activo", () => {
+	it("expone el Pokémon en campo de cada lado y su salud", async () => {
+		const c = await crear("act");
+		expect(c.activo("jugador")).toMatchObject({ especie: "pikachu" });
+		expect(c.activo("rival")).toMatchObject({ especie: "geodude" });
+		const antes = c.activo("rival");
+		const antesJ = c.activo("jugador");
+		await c.resolver(
+			primera(c.peticion("jugador") as Peticion),
+			primera(c.peticion("rival") as Peticion),
+		);
+		const ahora = c.activo("rival");
+		expect(ahora?.hpMax).toBe(antes?.hpMax);
+		// Pikachu no daña a Geodude (inmune), pero Rock Slide sí daña a Pikachu.
+		expect(ahora?.hp).toBe(antes?.hp);
+		expect(c.activo("jugador")?.hp).toBeLessThan(antesJ?.hp ?? 0);
+		// Tras un debilitamiento y el cambio forzado, el activo es el relevo.
+		await jugar(c);
+		const fin = c.activo("jugador");
+		expect(fin?.especie).toBeTruthy();
+		expect(c.activo("jugador")?.hp === 0 || c.activo("rival")?.hp === 0).toBe(
+			true,
+		);
+	});
+});
