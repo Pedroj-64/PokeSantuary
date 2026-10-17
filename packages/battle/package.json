@@ -6,14 +6,16 @@
 	"dependencies": {
 		"@pkmn/sim": "0.10.11",
 		"@santuario/core": "workspace:*",
-		"@santuario/data": "workspace:*"
+		"@santuario/data": "workspace:*",
+		"comlink": "4.4.2"
 	},
 	"devDependencies": {
 		"@types/node": "26.6.5",
 		"fast-check": "4.10.2"
 	},
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./servidor": "./src/servidor.ts"
 	},
 	"types": "./src/index.ts"
 }

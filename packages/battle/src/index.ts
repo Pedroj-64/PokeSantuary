@@ -1,16 +1,21 @@
-export {
-	type ActivoPublico,
-	Combate,
-	type Eleccion,
-	type MiembroEquipo,
-	type MiembroPeticion,
-	type OpcionMovimiento,
-	type Peticion,
+// Entrada segura para el paquete principal: tipos y el cliente del Worker.
+// Combate, la IA y la sesión viven en `@santuario/battle/servidor`.
+
+export type {
+	CombateAbierto,
+	CombateRemoto,
+	OpcionesCliente,
+	OpcionesCombate,
+	ResultadoTurno,
+} from "./cliente.js";
+export { abrirCombate } from "./cliente.js";
+export type {
+	ActivoPublico,
+	Eleccion,
+	MiembroEquipo,
+	MiembroPeticion,
+	OpcionMovimiento,
+	Peticion,
 } from "./combate.js";
-export {
-	crearEstimador,
-	type DatosMovimiento,
-	type Estimador,
-	elegirIA,
-} from "./ia.js";
+export type { DatosMovimiento, Estimador } from "./ia.js";
 export type { EventoCombate, Lado } from "./protocolo.js";
