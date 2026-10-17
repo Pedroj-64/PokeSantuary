@@ -1,7 +1,8 @@
+import { fileURLToPath } from "node:url";
 import { construir } from "./construir.js";
 import { verificar } from "./verificar.js";
 
-const aqui = (ruta: string) => new URL(ruta, import.meta.url).pathname;
+const aqui = (ruta: string) => fileURLToPath(new URL(ruta, import.meta.url));
 const dirPack = aqui("../../../packs/kanto");
 
 const [comando] = process.argv.slice(2);

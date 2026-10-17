@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { TrabajosPorTipoSchema } from "@santuario/data";
 import { descargar, type Red } from "./descargar.js";
@@ -16,7 +16,7 @@ export type OpcionesConstruir = {
 // Archivos del pack que entran al manifiesto: todos menos el propio manifest.json.
 export const archivosDelPack = (dirPack: string) =>
 	readdirSync(dirPack)
-		.filter((f) => f !== "manifest.json")
+		.filter((f) => f !== "manifest.json" && statSync(join(dirPack, f)).isFile())
 		.sort();
 
 export const aJson = (v: unknown) => `${JSON.stringify(v, null, "\t")}\n`;

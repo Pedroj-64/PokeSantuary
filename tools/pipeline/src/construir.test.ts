@@ -1,11 +1,18 @@
-import { cpSync, mkdtempSync, readFileSync } from "node:fs";
+import {
+	cpSync,
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
-import { construir } from "./construir.js";
+import { archivosDelPack, construir } from "./construir.js";
 import { verificar } from "./verificar.js";
 
-const raiz = new URL("../", import.meta.url).pathname;
+const raiz = fileURLToPath(new URL("../", import.meta.url));
 
 describe("construir", () => {
 	it("es determinista y verificable, usando solo la caché", async () => {
@@ -30,5 +37,16 @@ describe("construir", () => {
 		}
 		expect(verificar(a)).toEqual([]);
 		expect(red).not.toHaveBeenCalled();
+	});
+});
+
+describe("archivosDelPack", () => {
+	it("solo lista archivos regulares, sin carpetas ni el manifiesto", () => {
+		const dir = mkdtempSync(join(tmpdir(), "pack-"));
+		writeFileSync(join(dir, "b.json"), "{}");
+		writeFileSync(join(dir, "a.json"), "{}");
+		writeFileSync(join(dir, "manifest.json"), "{}");
+		mkdirSync(join(dir, "carpeta"));
+		expect(archivosDelPack(dir)).toEqual(["a.json", "b.json"]);
 	});
 });

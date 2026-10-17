@@ -1,10 +1,13 @@
 import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { verificar } from "./verificar.js";
 
-const PACK_REAL = new URL("../../../packs/kanto", import.meta.url).pathname;
+const PACK_REAL = fileURLToPath(
+	new URL("../../../packs/kanto", import.meta.url),
+);
 
 const copia = () => {
 	const dir = mkdtempSync(join(tmpdir(), "pack-"));
