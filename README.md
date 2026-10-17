@@ -11,6 +11,7 @@ Este es un proyecto de fans, **no oficial**, sin fines de lucro y sin afiliació
 ## Estructura
 
 - `packages/core`: lógica del juego sin dependencias de motor.
+- `packages/battle`: adaptador de combate sobre @pkmn/sim, IA rival y Worker.
 - `packages/data`: esquemas y paquetes de datos.
 - `tools/pipeline`: generación y verificación de datos.
 - `apps/game`: el juego (Phaser 4 + Vite).

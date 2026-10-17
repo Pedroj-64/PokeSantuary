@@ -46,9 +46,8 @@ async function jugarHastaElFinal(p: Page): Promise<number> {
 		else {
 			if (s.peticion?.tipo === "cambio-forzado") {
 				forzados++;
-				// con el activo caído solo hay lista de cambio: Esc no vuelve al menú
-				await p.keyboard.press("Escape");
-				await expect.poll(async () => (await estado(p)).fase).toBe("cambio");
+				// con el activo caído solo hay lista de cambio (Esc ahí sale a la lista, no vuelve al menú)
+				expect((await estado(p)).fase).toBe("cambio");
 			}
 			e = {
 				tipo: "cambio",
@@ -338,3 +337,17 @@ for (const idioma of ["es-ES", "en-US"] as const) {
 		});
 	});
 }
+
+test("Esc en el menú principal abandona el combate y no deja errores", async ({
+	page,
+}) => {
+	await abrir(page, "e2e-a");
+	await page.keyboard.press("Escape");
+	await page.locator('[data-estado="listo"]').waitFor();
+	// teclas posteriores no tocan un combate muerto (el afterEach exige cero errores)
+	for (const k of ["1", "c", "Escape"]) await page.keyboard.press(k);
+	await page.waitForTimeout(300);
+	expect(await page.evaluate("window.__santuario.combate === undefined")).toBe(
+		true,
+	);
+});

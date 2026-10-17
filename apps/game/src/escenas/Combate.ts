@@ -546,6 +546,8 @@ export class Combate extends Phaser.Scene {
 				}),
 			error ? "#ff8b8b" : "#ffffff",
 		);
+		// Esc abandona el combate desde el menú principal (cierra el Worker al salir de la escena)
+		this.teclas.set("escape", () => this.volverALista());
 	}
 
 	private mostrarCambio(error?: string): void {
@@ -573,7 +575,8 @@ export class Combate extends Phaser.Scene {
 				String(i + 1),
 			);
 		});
-		if (!forzado) {
+		if (forzado) this.teclas.set("escape", () => this.volverALista());
+		else {
 			const volver = (): void => this.mostrarMenu();
 			this.boton(326, 240, 144, [t("combate.volver")], true, volver, "escape");
 		}
