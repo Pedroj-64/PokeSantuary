@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/branding/logo.png" alt="Logo de Ecos del Santuario" width="160" style="image-rendering: pixelated"></p>
+
 # Ecos del Santuario
 
 Fan game roguelike de gestión: expediciones por turnos y un santuario que cuidar. Hecho con Phaser 4 y TypeScript.
