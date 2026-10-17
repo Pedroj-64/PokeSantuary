@@ -1,6 +1,7 @@
 {
 	"name": "ecos-del-santuario",
 	"private": true,
+	"license": "SEE LICENSE IN LICENSE",
 	"packageManager": "pnpm@12.14.0",
 	"type": "module",
 	"scripts": {

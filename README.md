@@ -2,7 +2,18 @@
 
 # Ecos del Santuario
 
+**🇪🇸 Español** · [🇬🇧 English](#echoes-of-the-sanctuary)
+
+![licencia](https://img.shields.io/badge/licencia-PolyForm%20Noncommercial-blue) ![Phaser 4](https://img.shields.io/badge/Phaser-4-8a2be2) ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
+
 Fan game roguelike de gestión: expediciones por turnos y un santuario que cuidar. Hecho con Phaser 4 y TypeScript.
+
+## Licencia y comunidad
+
+- Código: [PolyForm Noncommercial 1.0.0](LICENSE). Puedes leerlo, aprender y modificarlo para uso **no comercial**; no puedes venderlo ni monetizarlo.
+- Logo y arte original: todos los derechos reservados.
+- La historia y el diseño del juego son obra original del autor y no se ceden con el código.
+- [Contribuir](CONTRIBUTING.md) · [Código de conducta](CODE_OF_CONDUCT.md)
 
 ## Documentación
 
@@ -45,3 +56,44 @@ Requiere Node y pnpm.
 ## Pruebas
 
 Antes de subir cambios, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm data:verify`, `pnpm build`, `pnpm budget` y `pnpm e2e`. La primera vez instala el navegador con `pnpm --filter @santuario/game exec playwright install chromium`. Los e2e usan `?test=1`, que expone ganchos de prueba y acorta las pausas.
+
+---
+
+# Echoes of the Sanctuary
+
+[🇪🇸 Español](#ecos-del-santuario) · **🇬🇧 English**
+
+A roguelike management fan game: turn-based expeditions and a sanctuary to take care of. Built with Phaser 4 and TypeScript.
+
+## License and community
+
+- Code: [PolyForm Noncommercial 1.0.0](LICENSE). You may read, learn from and modify it for **noncommercial** use; you may not sell or monetize it.
+- Logo and original art: all rights reserved.
+- The game's story and design are the author's original work and are not granted with the code.
+- [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## Disclaimer
+
+This is an **unofficial** fan project, non-profit and not affiliated with the rights holders. Pokémon and its characters, names and related elements belong to Nintendo, Creatures Inc., GAME FREAK inc. and The Pokémon Company. No official logos or music are used, and the project receives no money in any form.
+
+## Structure
+
+- `packages/core`: engine-independent game logic.
+- `packages/battle`: battle adapter over @pkmn/sim, enemy AI and Worker.
+- `packages/data`: schemas and data packs.
+- `tools/pipeline`: data generation and verification.
+- `apps/game`: the game (Phaser 4 + Vite).
+
+## Quick start
+
+Requires Node and pnpm.
+
+```
+pnpm install
+pnpm dev     # dev server
+pnpm test    # Vitest
+pnpm build   # production build
+pnpm e2e     # end-to-end tests (Chromium)
+```
+
+In the species list press `B` to start a test 3v3 battle. Keys `1`–`4` pick moves, `C` opens the switch list, `Esc` goes back. Add `?semilla=abc` to the URL for a reproducible battle.
