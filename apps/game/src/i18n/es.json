@@ -1,0 +1,9 @@
+{
+	"titulo": "Ecos del Santuario",
+	"subtitulo": "Pokédex del Santuario",
+	"cantidadEspecies": "{n} especies",
+	"botonIdioma": "Idioma: ES  [L]",
+	"tipo": "Tipo",
+	"errorDatos": "Error al cargar los datos de especies",
+	"dex": "N.º"
+}

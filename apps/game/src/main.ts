@@ -1,0 +1,38 @@
+import Phaser from "phaser";
+import { ListaEspecies } from "./escenas/ListaEspecies.js";
+import { alCambiarIdioma, idiomaActual } from "./i18n/index.js";
+
+export const ANCHO = 480;
+export const ALTO = 270;
+
+/** Mayor zoom entero que cabe en la ventana (mínimo 1): nunca escala fraccionaria. */
+export function zoomEntero(anchoVentana: number, altoVentana: number): number {
+	return Math.max(
+		1,
+		Math.floor(Math.min(anchoVentana / ANCHO, altoVentana / ALTO)),
+	);
+}
+
+const juego = new Phaser.Game({
+	type: Phaser.AUTO,
+	parent: "juego",
+	width: ANCHO,
+	height: ALTO,
+	backgroundColor: "#1b1b2f",
+	pixelArt: true,
+	roundPixels: true,
+	scale: {
+		mode: Phaser.Scale.NONE,
+		zoom: zoomEntero(window.innerWidth, window.innerHeight),
+	},
+	scene: [ListaEspecies],
+});
+
+window.addEventListener("resize", () =>
+	juego.scale.setZoom(zoomEntero(window.innerWidth, window.innerHeight)),
+);
+
+document.documentElement.lang = idiomaActual();
+alCambiarIdioma((idioma) => {
+	document.documentElement.lang = idioma;
+});

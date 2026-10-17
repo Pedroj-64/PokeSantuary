@@ -10,6 +10,7 @@
 		"data:build": "pnpm -r --if-present data:build",
 		"data:verify": "pnpm -r --if-present data:verify",
 		"dev": "pnpm --filter @santuario/game --if-present dev",
+		"build": "pnpm --filter @santuario/game --if-present build",
 		"e2e": "pnpm --filter @santuario/game --if-present e2e"
 	},
 	"devDependencies": {

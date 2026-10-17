@@ -1,0 +1,9 @@
+{
+	"titulo": "Echoes of the Sanctuary",
+	"subtitulo": "Sanctuary Pokédex",
+	"cantidadEspecies": "{n} species",
+	"botonIdioma": "Language: EN  [L]",
+	"tipo": "Type",
+	"errorDatos": "Failed to load species data",
+	"dex": "No."
+}
