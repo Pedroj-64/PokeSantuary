@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { construir } from "./construir.js";
+import { evaluar, leerSalida } from "./presupuesto.js";
 import { verificar } from "./verificar.js";
 
 const aqui = (ruta: string) => fileURLToPath(new URL(ruta, import.meta.url));
@@ -22,7 +23,18 @@ if (comando === "build") {
 		);
 		process.exitCode = 1;
 	} else console.log("packs/kanto: verificación correcta");
+} else if (comando === "budget") {
+	const { errores, resumen } = evaluar(
+		leerSalida(aqui("../../../apps/game/dist/web")),
+	);
+	for (const l of resumen) console.log(l);
+	if (errores.length > 0) {
+		console.error(
+			`Presupuesto de carga superado:\n${errores.map((e) => `- ${e}`).join("\n")}`,
+		);
+		process.exitCode = 1;
+	} else console.log("presupuesto de carga correcto");
 } else {
-	console.error("Uso: cli.ts build | verify");
+	console.error("Uso: cli.ts build | verify | budget");
 	process.exitCode = 1;
 }

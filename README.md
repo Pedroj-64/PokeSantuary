@@ -25,4 +25,17 @@ Requiere Node y pnpm.
 - `pnpm lint`: Biome.
 - `pnpm data:build` / `pnpm data:verify`: construir y verificar los datos.
 - `pnpm dev`: servidor de desarrollo del juego.
-- `pnpm e2e`: pruebas de extremo a extremo.
+- `pnpm build`: compila el juego en `apps/game/dist/web`.
+- `pnpm budget`: comprueba el presupuesto de carga tras compilar (el simulador no debe ir en el chunk principal, que pesa menos de 450 KB comprimido; la carga inicial, menos de 5 MB).
+- `pnpm e2e`: pruebas de extremo a extremo (compilan el juego y lo abren en Chromium).
+
+## Cómo jugar el combate de prueba
+
+1. Ejecuta `pnpm dev` y abre la dirección que indique Vite.
+2. En la lista de especies pulsa `B` (o el botón de combate) para empezar un combate de 3 contra 3.
+3. Controles: `1`–`4` eligen movimiento, `C` abre la lista de cambio (con `1`–`3` eliges al compañero), `Esc` vuelve atrás o sale a la lista; con el ratón basta con pulsar los botones. Cualquier tecla o clic salta el mensaje en curso.
+4. Para repetir un combate idéntico añade `?semilla=` a la dirección, por ejemplo `/?semilla=abc`: la misma semilla y las mismas elecciones dan siempre el mismo combate.
+
+## Pruebas
+
+Antes de subir cambios, en este orden: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm data:verify`, `pnpm build`, `pnpm budget` y `pnpm e2e`. La primera vez instala el navegador con `pnpm --filter @santuario/game exec playwright install chromium`. Los e2e usan `?test=1`, que expone ganchos de prueba y acorta las pausas.

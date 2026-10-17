@@ -3,10 +3,12 @@ import { expect, type Page, test } from "@playwright/test";
 type Estado = {
 	fase: string;
 	peticion: {
+		tipo: string;
 		movimientos: { deshabilitado: boolean }[];
 		equipo: { activo: boolean; debilitado: boolean }[];
 	} | null;
 	terminado: string | null;
+	panel: string | null;
 	mensajes: string[];
 	hpJugador: number;
 	hpRival: number;
@@ -22,33 +24,44 @@ async function esperarFase(p: Page, fase: string) {
 	await expect.poll(async () => (await estado(p)).fase).toBe(fase);
 }
 
-/** Juega hasta el final eligiendo siempre el primer movimiento o cambio posible. */
-async function jugarHastaElFinal(p: Page) {
-	for (let i = 0; i < 100; i++) {
+/**
+ * Juega hasta el final con una política fija: siempre el primer movimiento con PP
+ * y, si toca cambiar, el primer miembro vivo. Devuelve cuántos cambios forzados hubo.
+ */
+async function jugarHastaElFinal(p: Page): Promise<number> {
+	let forzados = 0;
+	for (let i = 0; i < 200; i++) {
+		await expect
+			.poll(async () => (await estado(p)).fase)
+			.toMatch(/^(menu|cambio|fin|error)$/);
 		const s = await estado(p);
-		if (s.fase === "fin") return;
-		if (s.fase === "menu" || s.fase === "cambio") {
-			const e =
-				s.fase === "menu"
-					? {
-							tipo: "movimiento",
-							indice:
-								s.peticion?.movimientos.findIndex((m) => !m.deshabilitado) ?? 0,
-						}
-					: {
-							tipo: "cambio",
-							indice:
-								s.peticion?.equipo.findIndex(
-									(m) => !m.activo && !m.debilitado,
-								) ?? 0,
-						};
-			await p.evaluate(
-				`window.__santuario.combate.elegir(${JSON.stringify(e)})`,
-			);
-		} else await p.waitForTimeout(50);
+		if (s.fase === "fin") return forzados;
+		if (s.fase === "error") throw new Error(`error: ${s.error?.detalle}`);
+		let e: object;
+		if (s.fase === "menu")
+			e = {
+				tipo: "movimiento",
+				indice: s.peticion?.movimientos.findIndex((m) => !m.deshabilitado),
+			};
+		else {
+			if (s.peticion?.tipo === "cambio-forzado") {
+				forzados++;
+				// con el activo caído solo hay lista de cambio: Esc no vuelve al menú
+				await p.keyboard.press("Escape");
+				await expect.poll(async () => (await estado(p)).fase).toBe("cambio");
+			}
+			e = {
+				tipo: "cambio",
+				indice: s.peticion?.equipo.findIndex((m) => !m.activo && !m.debilitado),
+			};
+		}
+		await p.evaluate(`window.__santuario.combate.elegir(${JSON.stringify(e)})`);
 	}
 	throw new Error("el combate no terminó");
 }
+
+const hashRegistro = (p: Page) =>
+	p.evaluate("window.__santuario.combate.registroHash()") as Promise<string>;
 
 async function abrir(page: Page, semilla: string) {
 	await page.goto(`/?test=1&semilla=${semilla}`);
@@ -56,6 +69,22 @@ async function abrir(page: Page, semilla: string) {
 	await page.keyboard.press("b");
 	await esperarFase(page, "menu");
 }
+
+/*
+ * Semillas con política fija (primer movimiento con PP; primer miembro vivo al
+ * caer el activo). Se hallaron recorriendo `s1`…`s40` en un bucle e2e desechable
+ * con esa misma política: `s1` termina en derrota y `s4` en victoria, y ambas
+ * incluyen cambio forzado del jugador.
+ */
+const SEMILLA_VICTORIA = "s4";
+const SEMILLA_DERROTA = "s1";
+/**
+ * Hash SHA-256 del registro crudo de `s4` con esa política. Si esta prueba falla,
+ * cambió el motor, los datos o la IA y los combates ya no son los mismos:
+ * revisa el cambio y, si es deliberado, actualiza el valor a propósito.
+ */
+const HASH_VICTORIA =
+	"e3179aa5ba3922b5a68c8eaaa1cd03d51f2741b665c0b8c9a8c0cdbdfc1fda0c";
 
 let errores: string[] = [];
 test.beforeEach(({ page }) => {
@@ -70,10 +99,10 @@ test.afterEach(() => expect(errores).toEqual([]));
 
 test.use({ locale: "es-ES" });
 
-test("combate completo, vuelta a la lista y determinismo por semilla", async ({
+test("determinismo: misma semilla y elecciones, mismo registro; otra semilla, otro", async ({
 	page,
 }) => {
-	await abrir(page, "e2e-a");
+	await abrir(page, SEMILLA_VICTORIA);
 	const inicial = await estado(page);
 	expect(inicial.peticion?.movimientos).toHaveLength(4);
 	expect(inicial.mensajes[0]).toBe("¡Comienza el combate!");
@@ -85,13 +114,13 @@ test("combate completo, vuelta a la lista y determinismo por semilla", async ({
 		),
 	).resolves.toBeUndefined();
 	await esperarFase(page, "menu");
-	expect((await estado(page)).mensajes.length).toBeGreaterThan(0);
 
 	await jugarHastaElFinal(page);
-	const fin = await estado(page);
-	expect(fin.terminado).not.toBeNull();
-	const hash = await page.evaluate("window.__santuario.combate.registroHash()");
-	expect(hash).toMatch(/^[0-9a-f]{64}$/);
+	const hash = await hashRegistro(page);
+	expect(
+		hash,
+		"El registro del combate fijo cambió (motor, datos o IA). Revisa el cambio y, si es deliberado, actualiza HASH_VICTORIA.",
+	).toBe(HASH_VICTORIA);
 
 	// misma semilla y mismas elecciones: mismo registro
 	await page.keyboard.press("Escape");
@@ -99,17 +128,43 @@ test("combate completo, vuelta a la lista y determinismo por semilla", async ({
 	await page.keyboard.press("b");
 	await esperarFase(page, "menu");
 	await jugarHastaElFinal(page);
-	expect(await page.evaluate("window.__santuario.combate.registroHash()")).toBe(
-		hash,
-	);
+	expect(await hashRegistro(page)).toBe(hash);
 
 	// semilla distinta: registro distinto
-	await abrir(page, "e2e-b");
+	await abrir(page, SEMILLA_DERROTA);
 	await jugarHastaElFinal(page);
-	expect(
-		await page.evaluate("window.__santuario.combate.registroHash()"),
-	).not.toBe(hash);
+	expect(await hashRegistro(page)).not.toBe(hash);
 });
+
+const FINALES = {
+	"es-ES": { victoria: "¡Victoria!", derrota: "Derrota" },
+	"en-US": { victoria: "Victory!", derrota: "Defeat" },
+} as const;
+
+for (const idioma of ["es-ES", "en-US"] as const) {
+	test.describe(`final real (${idioma})`, () => {
+		test.use({ locale: idioma });
+
+		for (const [resultado, semilla, ganador] of [
+			["victoria", SEMILLA_VICTORIA, "jugador"],
+			["derrota", SEMILLA_DERROTA, "rival"],
+		] as const) {
+			test(`${resultado} completa con cambio forzado`, async ({ page }) => {
+				await abrir(page, semilla);
+				const forzados = await jugarHastaElFinal(page);
+				expect(forzados).toBeGreaterThan(0);
+				const fin = await estado(page);
+				expect(fin.terminado).toBe(ganador);
+				expect(fin.panel).toBe(FINALES[idioma][resultado]);
+				await page.screenshot({
+					path: `test-results/combate-${resultado}-${idioma}.png`,
+				});
+				await page.keyboard.press("Escape");
+				await page.locator('[data-estado="listo"]').waitFor();
+			});
+		}
+	});
+}
 
 test("el teclado elige movimiento y la lista de cambio", async ({ page }) => {
 	await abrir(page, "e2e-a");
@@ -196,10 +251,90 @@ test("cualquier tecla o clic salta el mensaje en curso (tiempos reales)", async 
 	await expect.poll(n, { timeout: 600, intervals: [30] }).toBeGreaterThan(2);
 });
 
-test("Esc durante la carga vuelve a la lista", async ({ page }) => {
+/** Detiene la petición del chunk del Worker hasta llamar a `soltar`. */
+async function retenerWorker(page: Page) {
+	let soltar = () => {};
+	const puerta = new Promise<void>((r) => {
+		soltar = r;
+	});
+	await page.route(/worker-.*\.js/, async (route) => {
+		await puerta;
+		await route.continue();
+	});
+	return soltar;
+}
+
+test("Esc durante la carga vuelve a la lista y no arranca ningún combate", async ({
+	page,
+}) => {
+	const soltar = await retenerWorker(page);
 	await page.goto("/?test=1&semilla=e2e-a");
 	await page.locator('[data-estado="listo"]').waitFor();
 	await page.keyboard.press("b");
+	// la escena de combate está viva y sigue cargando (el Worker está retenido)
+	await page.locator('[data-estado="combate"]').waitFor();
+	await esperarFase(page, "cargando");
 	await page.keyboard.press("Escape");
 	await page.locator('[data-estado="listo"]').waitFor();
+	const respuesta = page.waitForResponse(/worker-.*\.js/);
+	soltar();
+	await respuesta;
+	// unos fotogramas después, la lista sigue ahí y no hay combate
+	await page.waitForFunction(
+		() =>
+			new Promise<boolean>((ok) => {
+				let n = 0;
+				const f = () => (++n >= 60 ? ok(true) : requestAnimationFrame(f));
+				f();
+			}),
+	);
+	expect((await estado(page)).fase).toBe("sin-gancho");
+	await expect(page.locator('[data-estado="listo"]')).toHaveCount(1);
 });
+
+test("carga diferida: el Worker y el simulador solo se piden al combatir", async ({
+	page,
+}) => {
+	const urls: string[] = [];
+	page.on("request", (r) => urls.push(r.url()));
+	await page.goto("/?test=1");
+	await page.locator('[data-estado="listo"]').waitFor();
+	// asentamiento determinista: 120 fotogramas y un instante de reposo; si algo pidiera
+	// el Worker o el simulador por su cuenta (precarga, temporizador), ya se habría visto
+	await page.evaluate(
+		() =>
+			new Promise<void>((ok) => {
+				let n = 0;
+				const f = () =>
+					++n >= 120
+						? "requestIdleCallback" in window
+							? requestIdleCallback(() => ok())
+							: ok()
+						: requestAnimationFrame(f);
+				requestAnimationFrame(f);
+			}),
+	);
+	expect(urls.filter((u) => /worker-.*\.js|pkmn/.test(u))).toEqual([]);
+	await page.keyboard.press("b");
+	await expect.poll(() => urls.some((u) => /worker-.*\.js/.test(u))).toBe(true);
+	await esperarFase(page, "menu");
+});
+
+for (const idioma of ["es-ES", "en-US"] as const) {
+	test.describe(`Worker real caído (${idioma})`, () => {
+		test.use({ locale: idioma });
+
+		test("panel de error localizado y vuelta a la lista", async ({ page }) => {
+			await page.route(/worker-.*\.js/, (r) => r.fulfill({ status: 404 }));
+			await page.goto("/?test=1&semilla=e2e-a");
+			await page.locator('[data-estado="listo"]').waitFor();
+			await page.keyboard.press("b");
+			await esperarFase(page, "error");
+			const { error } = await estado(page);
+			expect(error?.titulo).toBe(TEXTOS[idioma].titulo);
+			expect(error?.cuerpo).toBe(TEXTOS[idioma].cuerpo);
+			await page.keyboard.press("Escape");
+			await page.locator('[data-estado="listo"]').waitFor();
+		});
+	});
+}

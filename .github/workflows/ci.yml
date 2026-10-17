@@ -23,6 +23,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm data:verify
+      - run: pnpm build
+      - run: pnpm budget
       - run: pnpm --filter @santuario/game exec playwright install --with-deps chromium
       - run: pnpm e2e
       - uses: actions/upload-artifact@v7

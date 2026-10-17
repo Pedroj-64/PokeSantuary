@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"data:build": "tsx src/cli.ts build",
-		"data:verify": "tsx src/cli.ts verify"
+		"data:verify": "tsx src/cli.ts verify",
+		"budget": "tsx src/cli.ts budget"
 	},
 	"dependencies": {
 		"@pkmn/data": "0.10.11",

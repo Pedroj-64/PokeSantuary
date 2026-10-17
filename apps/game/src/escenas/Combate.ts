@@ -83,6 +83,8 @@ export class Combate extends Phaser.Scene {
 	private fase: Fase = "cargando";
 	private peticion: Peticion | null = null;
 	private terminado: string | null = null;
+	/** Título del panel final o de error visible (solo para las pruebas e2e). */
+	private tituloPanel: string | null = null;
 	private readonly mensajes: string[] = [];
 	private campo!: Record<Lado, LadoVisual>;
 	private cajaTexto!: Phaser.GameObjects.Text;
@@ -118,6 +120,7 @@ export class Combate extends Phaser.Scene {
 		this.fase = "cargando";
 		this.peticion = null;
 		this.terminado = null;
+		this.tituloPanel = null;
 		this.mensajes.length = 0;
 		this.menu = [];
 		this.panelFinal = [];
@@ -590,6 +593,7 @@ export class Combate extends Phaser.Scene {
 	): void {
 		this.cajaTexto.setText("");
 		this.limpiarMenu();
+		this.tituloPanel = titulo;
 		const alto = cuerpo ? 176 : 100;
 		const y0 = Math.round((270 - alto) / 2);
 		const objetos = this.panelFinal;
@@ -711,6 +715,7 @@ export class Combate extends Phaser.Scene {
 				fase: this.fase,
 				peticion: this.peticion,
 				terminado: this.terminado,
+				panel: this.tituloPanel,
 				mensajes: [...this.mensajes],
 				hpJugador: this.campo.jugador.hp,
 				hpRival: this.campo.rival.hp,

@@ -11,6 +11,7 @@
 		"data:verify": "pnpm -r --if-present data:verify",
 		"dev": "pnpm --filter @santuario/game --if-present dev",
 		"build": "pnpm --filter @santuario/game --if-present build",
+		"budget": "pnpm --filter @santuario/pipeline --if-present budget",
 		"e2e": "pnpm --filter @santuario/game --if-present e2e"
 	},
 	"devDependencies": {
