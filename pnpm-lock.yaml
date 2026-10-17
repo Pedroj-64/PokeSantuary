@@ -181,7 +181,7 @@ importers:
   packages/core:
     devDependencies:
       fast-check:
-        specifier: ^4.10.2
+        specifier: 4.10.2
         version: 4.10.2
 
   packages/data: {}

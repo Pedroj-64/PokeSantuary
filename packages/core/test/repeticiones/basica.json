@@ -1,0 +1,145 @@
+{
+	"semilla": "golden-1",
+	"acciones": [
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "recolectar"
+		},
+		{
+			"tipo": "descansar"
+		},
+		{
+			"tipo": "recolectar"
+		}
+	],
+	"esperado": {
+		"estado": {
+			"turno": 20,
+			"bayas": 22
+		},
+		"eventos": [
+			{
+				"tipo": "recolectado",
+				"cantidad": 3
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 3
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 1
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 1
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 1
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 2
+			},
+			{
+				"tipo": "descansado"
+			},
+			{
+				"tipo": "recolectado",
+				"cantidad": 1
+			}
+		]
+	}
+}
