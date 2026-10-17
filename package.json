@@ -1,0 +1,20 @@
+{
+	"name": "ecos-del-santuario",
+	"private": true,
+	"packageManager": "pnpm@12.14.0",
+	"type": "module",
+	"scripts": {
+		"test": "vitest run --passWithNoTests",
+		"typecheck": "tsc -b",
+		"lint": "biome check .",
+		"data:build": "pnpm -r --if-present data:build",
+		"data:verify": "pnpm -r --if-present data:verify",
+		"dev": "pnpm --filter @santuario/game --if-present dev",
+		"e2e": "pnpm --filter @santuario/game --if-present e2e"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"typescript": "7.0.2",
+		"vitest": "5.0.5"
+	}
+}
