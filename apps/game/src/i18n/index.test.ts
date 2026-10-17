@@ -1,3 +1,4 @@
+import { TipoIdSchema } from "@santuario/data";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import en from "./en.json";
 import es from "./es.json";
@@ -42,6 +43,13 @@ describe("i18n", () => {
 
 	it("es.json y en.json tienen las mismas claves", () => {
 		expect(Object.keys(es).sort()).toEqual(Object.keys(en).sort());
+	});
+
+	it("cada TipoId tiene texto en es y en", () => {
+		for (const id of TipoIdSchema.options) {
+			expect(es).toHaveProperty([`tipo.${id}`]);
+			expect(en).toHaveProperty([`tipo.${id}`]);
+		}
 	});
 
 	it("idioma por defecto sale de navigator.language", async () => {

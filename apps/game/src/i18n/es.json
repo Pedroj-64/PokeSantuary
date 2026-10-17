@@ -1,9 +1,25 @@
 {
 	"titulo": "Ecos del Santuario",
-	"subtitulo": "Pokédex del Santuario",
+	"subtitulo": "Registro del Santuario",
 	"cantidadEspecies": "{n} especies",
 	"botonIdioma": "Idioma: ES  [L]",
-	"tipo": "Tipo",
 	"errorDatos": "Error al cargar los datos de especies",
-	"dex": "N.º"
+	"tipo.normal": "Normal",
+	"tipo.fire": "Fuego",
+	"tipo.water": "Agua",
+	"tipo.electric": "Eléctrico",
+	"tipo.grass": "Planta",
+	"tipo.ice": "Hielo",
+	"tipo.fighting": "Lucha",
+	"tipo.poison": "Veneno",
+	"tipo.ground": "Tierra",
+	"tipo.flying": "Volador",
+	"tipo.psychic": "Psíquico",
+	"tipo.bug": "Bicho",
+	"tipo.rock": "Roca",
+	"tipo.ghost": "Fantasma",
+	"tipo.dragon": "Dragón",
+	"tipo.dark": "Siniestro",
+	"tipo.steel": "Acero",
+	"tipo.fairy": "Hada"
 }

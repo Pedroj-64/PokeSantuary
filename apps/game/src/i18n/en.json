@@ -1,9 +1,25 @@
 {
 	"titulo": "Echoes of the Sanctuary",
-	"subtitulo": "Sanctuary Pokédex",
+	"subtitulo": "Sanctuary Registry",
 	"cantidadEspecies": "{n} species",
 	"botonIdioma": "Language: EN  [L]",
-	"tipo": "Type",
 	"errorDatos": "Failed to load species data",
-	"dex": "No."
+	"tipo.normal": "Normal",
+	"tipo.fire": "Fire",
+	"tipo.water": "Water",
+	"tipo.electric": "Electric",
+	"tipo.grass": "Grass",
+	"tipo.ice": "Ice",
+	"tipo.fighting": "Fighting",
+	"tipo.poison": "Poison",
+	"tipo.ground": "Ground",
+	"tipo.flying": "Flying",
+	"tipo.psychic": "Psychic",
+	"tipo.bug": "Bug",
+	"tipo.rock": "Rock",
+	"tipo.ghost": "Ghost",
+	"tipo.dragon": "Dragon",
+	"tipo.dark": "Dark",
+	"tipo.steel": "Steel",
+	"tipo.fairy": "Fairy"
 }

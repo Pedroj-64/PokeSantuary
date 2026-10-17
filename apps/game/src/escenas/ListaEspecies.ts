@@ -28,6 +28,7 @@ function cargarEspecies(): { especies: Especie[] } | { error: string } {
 export class ListaEspecies extends Phaser.Scene {
 	private dibujados: Phaser.GameObjects.GameObject[] = [];
 	private nombres: string[] = [];
+	private tipos: string[] = [];
 	private boton?: Phaser.GameObjects.Text;
 
 	constructor() {
@@ -49,6 +50,7 @@ export class ListaEspecies extends Phaser.Scene {
 			(window as unknown as { __santuario: unknown }).__santuario = {
 				idioma: () => idiomaActual(),
 				especies: () => [...this.nombres],
+				tipos: () => [...this.tipos],
 				titulo: () => t("titulo"),
 				/** Centro del botón de idioma en coordenadas de página. */
 				botonIdioma: () => {
@@ -69,6 +71,7 @@ export class ListaEspecies extends Phaser.Scene {
 		for (const o of this.dibujados) o.destroy();
 		this.dibujados = [];
 		this.nombres = [];
+		this.tipos = [];
 		const idioma = idiomaActual();
 		const texto = (
 			x: number,
@@ -108,13 +111,10 @@ export class ListaEspecies extends Phaser.Scene {
 		datos.especies.forEach((e, i) => {
 			const nombre = e.nombre[idioma];
 			this.nombres.push(nombre);
+			const tiposTexto = e.tipos.map((x) => t(`tipo.${x}`)).join("/");
+			this.tipos.push(tiposTexto);
 			const dex = String(e.dex).padStart(3, "0");
-			texto(
-				12,
-				52 + i * 18,
-				`${dex}  ${nombre.padEnd(12)} ${e.tipos.join("/")}`,
-				11,
-			);
+			texto(12, 52 + i * 18, `${dex}  ${nombre.padEnd(12)} ${tiposTexto}`, 11);
 		});
 
 		const boton = this.add

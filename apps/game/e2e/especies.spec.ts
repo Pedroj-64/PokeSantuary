@@ -3,6 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 type Gancho = {
 	idioma(): string;
 	especies(): string[];
+	tipos(): string[];
 	titulo(): string;
 	botonIdioma(): { x: number; y: number };
 };
@@ -41,6 +42,7 @@ test.describe("español", () => {
 		expect(especies).toHaveLength(10);
 		expect(especies).toContain("Pikachu");
 		expect(especies).toContain("Bulbasaur");
+		expect((await gancho(page, (g) => g.tipos()))[0]).toBe("Planta/Veneno");
 		await expect(page.locator("html")).toHaveAttribute("lang", "es");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.es);
 		await page.screenshot({ path: "test-results/especies-es.png" });
@@ -51,6 +53,7 @@ test.describe("español", () => {
 		expect(await gancho(page, (g) => g.idioma())).toBe("en");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.en);
 		expect(await gancho(page, (g) => g.especies())).toHaveLength(10);
+		expect((await gancho(page, (g) => g.tipos()))[0]).toBe("Grass/Poison");
 		await page.screenshot({ path: "test-results/especies-en.png" });
 	}
 
