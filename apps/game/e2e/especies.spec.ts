@@ -45,6 +45,7 @@ test.describe("español", () => {
 		expect((await gancho(page, (g) => g.tipos()))[0]).toBe("Planta/Veneno");
 		await expect(page.locator("html")).toHaveAttribute("lang", "es");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.es);
+		await expect(page).toHaveTitle(TITULO.es);
 		await page.screenshot({ path: "test-results/especies-es.png" });
 	}
 
@@ -52,6 +53,7 @@ test.describe("español", () => {
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		expect(await gancho(page, (g) => g.idioma())).toBe("en");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.en);
+		await expect(page).toHaveTitle(TITULO.en);
 		expect(await gancho(page, (g) => g.especies())).toHaveLength(10);
 		expect((await gancho(page, (g) => g.tipos()))[0]).toBe("Grass/Poison");
 		await page.screenshot({ path: "test-results/especies-en.png" });
@@ -68,6 +70,7 @@ test.describe("español", () => {
 		await page.locator('[data-estado="listo"]').waitFor();
 		expect(await gancho(page, (g) => g.idioma())).toBe("en");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.en);
+		await expect(page).toHaveTitle(TITULO.en);
 	});
 
 	test("cambia de idioma con la tecla L", async ({ page }) => {
@@ -84,5 +87,6 @@ test.describe("inglés", () => {
 		await abrir(page);
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
 		expect(await gancho(page, (g) => g.titulo())).toBe(TITULO.en);
+		await expect(page).toHaveTitle(TITULO.en);
 	});
 });

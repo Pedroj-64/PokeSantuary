@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { ListaEspecies } from "./escenas/ListaEspecies.js";
-import { alCambiarIdioma, idiomaActual } from "./i18n/index.js";
+import { alCambiarIdioma, idiomaActual, t } from "./i18n/index.js";
 
 export const ANCHO = 480;
 export const ALTO = 270;
@@ -32,7 +32,11 @@ window.addEventListener("resize", () =>
 	juego.scale.setZoom(zoomEntero(window.innerWidth, window.innerHeight)),
 );
 
-document.documentElement.lang = idiomaActual();
-alCambiarIdioma((idioma) => {
+/** Sincroniza el idioma y el título de la pestaña con el idioma activo. */
+function aplicarIdiomaALaPagina(idioma: string): void {
 	document.documentElement.lang = idioma;
-});
+	document.title = t("titulo");
+}
+
+aplicarIdiomaALaPagina(idiomaActual());
+alCambiarIdioma(aplicarIdiomaALaPagina);
