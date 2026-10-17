@@ -17,5 +17,6 @@ export type {
 	OpcionMovimiento,
 	Peticion,
 } from "./combate.js";
+export { eleccionIlegal, esEleccionIlegal } from "./errores.js";
 export type { DatosMovimiento, Estimador } from "./ia.js";
 export type { EventoCombate, Lado } from "./protocolo.js";

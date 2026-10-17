@@ -9,6 +9,7 @@ import {
 	type ResultadoTurno,
 } from "./cliente.js";
 import type { Eleccion, MiembroEquipo, Peticion } from "./combate.js";
+import { esEleccionIlegal } from "./errores.js";
 import { SesionCombate } from "./sesion.js";
 
 const SETS: SetCombate[] = JSON.parse(
@@ -119,6 +120,22 @@ describe("cliente de combate sobre MessageChannel", () => {
 		const r = await a.remoto.elegirJugador({ tipo: "movimiento", indice: 0 });
 		expect(r.eventos.length).toBeGreaterThan(0);
 		a.remoto.cerrar();
+	});
+
+	it("ilegal rechaza con name EleccionIlegal; un Worker caído no", async () => {
+		const a = await abrir("discrimina");
+		const ilegal = await a.remoto
+			.elegirJugador({ tipo: "movimiento", indice: 9 })
+			.catch((e: unknown) => e);
+		expect(esEleccionIlegal(ilegal)).toBe(true);
+		expect((ilegal as Error).name).toBe("EleccionIlegal");
+		a.remoto.cerrar();
+		const caido = await a.remoto
+			.elegirJugador({ tipo: "movimiento", indice: 0 })
+			.catch((e: unknown) => e);
+		expect(caido).toBeInstanceOf(Error);
+		expect(esEleccionIlegal(caido)).toBe(false);
+		expect(esEleccionIlegal("texto")).toBe(false);
 	});
 
 	it("elección con forma inválida se rechaza con mensaje legible", async () => {

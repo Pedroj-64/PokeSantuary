@@ -9,6 +9,8 @@
 		"e2e": "playwright test"
 	},
 	"dependencies": {
+		"@santuario/battle": "workspace:*",
+		"@santuario/core": "workspace:*",
 		"@santuario/data": "workspace:*",
 		"phaser": "4.2.1",
 		"zod": "4.6.7"

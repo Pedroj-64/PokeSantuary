@@ -41,6 +41,14 @@ describe("i18n", () => {
 		expect(console.warn).toHaveBeenCalled();
 	});
 
+	it("interpola {parámetros} y deja intactos los desconocidos", async () => {
+		const i = await cargar("es-ES", almacenFalso());
+		expect(i.t("cantidadEspecies", { n: 10 })).toBe("10 especies");
+		expect(i.t("msg.movimiento.jugador", { especie: "Abra" })).toBe(
+			"¡Abra usó {movimiento}!",
+		);
+	});
+
 	it("es.json y en.json tienen las mismas claves", () => {
 		expect(Object.keys(es).sort()).toEqual(Object.keys(en).sort());
 	});

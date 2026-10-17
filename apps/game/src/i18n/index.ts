@@ -43,11 +43,18 @@ export function alCambiarIdioma(cb: (idioma: Idioma) => void): () => void {
 	return () => void oyentes.delete(cb);
 }
 
-export function t(clave: string): string {
+/** Texto de `clave` en el idioma activo; `{nombre}` se sustituye por `params.nombre` (si falta, queda tal cual). */
+export function t(
+	clave: string,
+	params?: Record<string, string | number>,
+): string {
 	const texto = textos[actual][clave];
 	if (texto === undefined) {
 		console.warn(`[i18n] clave inexistente: ${clave}`);
 		return clave;
 	}
-	return texto;
+	if (!params) return texto;
+	return texto.replace(/\{(\w+)\}/g, (marca, k: string) =>
+		params[k] === undefined ? marca : String(params[k]),
+	);
 }

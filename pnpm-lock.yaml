@@ -178,6 +178,12 @@ importers:
 
   apps/game:
     dependencies:
+      '@santuario/battle':
+        specifier: workspace:*
+        version: link:../../packages/battle
+      '@santuario/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@santuario/data':
         specifier: workspace:*
         version: link:../../packages/data

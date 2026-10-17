@@ -43,6 +43,7 @@ export class ListaEspecies extends Phaser.Scene {
 		const quitar = alCambiarIdioma(dibujar);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, quitar);
 		this.input.keyboard?.on("keydown-L", alternarIdioma);
+		this.input.keyboard?.on("keydown-B", () => this.scene.start("Combate"));
 
 		// A propósito también en la compilación de producción (la prueba e2e usa
 		// vite preview); es inerte sin el parámetro ?test=1.
@@ -130,6 +131,19 @@ export class ListaEspecies extends Phaser.Scene {
 		boton.on("pointerdown", alternarIdioma);
 		this.boton = boton;
 		this.dibujados.push(boton);
+
+		const combate = this.add
+			.text(468, 262, t("botonCombate"), {
+				fontFamily: FUENTE,
+				fontSize: "10px",
+				color: "#1b1b2f",
+				backgroundColor: "#9ad1ff",
+				padding: { x: 4, y: 3 },
+			})
+			.setOrigin(1, 1)
+			.setInteractive({ useHandCursor: true });
+		combate.on("pointerdown", () => this.scene.start("Combate"));
+		this.dibujados.push(combate);
 	}
 }
 

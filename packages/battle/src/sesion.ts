@@ -5,6 +5,7 @@ import {
 	type MiembroEquipo,
 	type Peticion,
 } from "./combate.js";
+import { eleccionIlegal } from "./errores.js";
 import { crearEstimador, elegirIA } from "./ia.js";
 import type { EventoCombate, Lado } from "./protocolo.js";
 
@@ -64,7 +65,7 @@ export class SesionCombate {
 			(e.tipo !== "movimiento" && e.tipo !== "cambio") ||
 			!Number.isInteger(e.indice)
 		) {
-			throw new Error(`Elección inválida: ${JSON.stringify(e)}`);
+			throw eleccionIlegal(`Elección inválida: ${JSON.stringify(e)}`);
 		}
 		if (this.inconsistente) {
 			throw new Error(

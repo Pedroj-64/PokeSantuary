@@ -1,6 +1,7 @@
 import { BattleStreams, Dex, Teams } from "@pkmn/sim";
 import { crearRng } from "@santuario/core";
 import type { SetCombate } from "@santuario/data";
+import { eleccionIlegal } from "./errores.js";
 import {
 	Analizador,
 	aSlug,
@@ -288,29 +289,32 @@ export class Combate {
 	}
 
 	private validar(lado: Lado, e: Eleccion): void {
-		if (this.ganador) throw new Error("El combate ya terminó");
+		if (this.ganador) throw eleccionIlegal("El combate ya terminó");
 		const p = this.pendientes[lado];
-		if (!p) throw new Error(`No es el turno del ${lado} para elegir`);
+		if (!p) throw eleccionIlegal(`No es el turno del ${lado} para elegir`);
 		if (!Number.isInteger(e.indice) || e.indice < 0) {
-			throw new Error(`Índice de ${e.tipo} inválido: ${e.indice}`);
+			throw eleccionIlegal(`Índice de ${e.tipo} inválido: ${e.indice}`);
 		}
 		if (e.tipo === "movimiento") {
 			if (p.tipo !== "movimiento") {
-				throw new Error(`El ${lado} debe elegir un cambio, no un movimiento`);
+				throw eleccionIlegal(
+					`El ${lado} debe elegir un cambio, no un movimiento`,
+				);
 			}
 			const m = p.movimientos[e.indice];
-			if (!m) throw new Error(`Movimiento fuera de rango: ${e.indice}`);
+			if (!m) throw eleccionIlegal(`Movimiento fuera de rango: ${e.indice}`);
 			if (m.deshabilitado)
-				throw new Error(
+				throw eleccionIlegal(
 					`El movimiento ${m.movimiento} no se puede usar (sin PP)`,
 				);
 			return;
 		}
 		const destino = p.equipo[e.indice];
-		if (!destino) throw new Error(`Cambio fuera de rango: ${e.indice}`);
+		if (!destino) throw eleccionIlegal(`Cambio fuera de rango: ${e.indice}`);
 		if (destino.debilitado)
-			throw new Error(`${destino.especie} está debilitado`);
-		if (destino.activo) throw new Error(`${destino.especie} ya está activo`);
+			throw eleccionIlegal(`${destino.especie} está debilitado`);
+		if (destino.activo)
+			throw eleccionIlegal(`${destino.especie} ya está activo`);
 	}
 
 	/** Consume lo que el simulador emitió desde la última vez: registro, eventos y peticiones. */
