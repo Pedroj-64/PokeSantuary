@@ -28,6 +28,7 @@ function cargarEspecies(): { especies: Especie[] } | { error: string } {
 export class ListaEspecies extends Phaser.Scene {
 	private dibujados: Phaser.GameObjects.GameObject[] = [];
 	private nombres: string[] = [];
+	private boton?: Phaser.GameObjects.Text;
 
 	constructor() {
 		super("ListaEspecies");
@@ -42,10 +43,23 @@ export class ListaEspecies extends Phaser.Scene {
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, quitar);
 		this.input.keyboard?.on("keydown-L", alternarIdioma);
 
+		// A propósito también en la compilación de producción (la prueba e2e usa
+		// vite preview); es inerte sin el parámetro ?test=1.
 		if (new URLSearchParams(location.search).get("test") === "1") {
 			(window as unknown as { __santuario: unknown }).__santuario = {
 				idioma: () => idiomaActual(),
 				especies: () => [...this.nombres],
+				titulo: () => t("titulo"),
+				/** Centro del botón de idioma en coordenadas de página. */
+				botonIdioma: () => {
+					const c = this.game.canvas.getBoundingClientRect();
+					const b = this.boton?.getBounds();
+					const k = c.width / this.scale.width;
+					return {
+						x: c.left + (b ? b.centerX : 0) * k,
+						y: c.top + (b ? b.centerY : 0) * k,
+					};
+				},
 			};
 		}
 		this.game.canvas.parentElement?.setAttribute("data-estado", "listo");
@@ -114,6 +128,7 @@ export class ListaEspecies extends Phaser.Scene {
 			.setOrigin(1, 0)
 			.setInteractive({ useHandCursor: true });
 		boton.on("pointerdown", alternarIdioma);
+		this.boton = boton;
 		this.dibujados.push(boton);
 	}
 }
