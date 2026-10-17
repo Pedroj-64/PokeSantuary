@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { slug } from "./slug.js";
 
 export const TipoIdSchema = z.enum([
 	"normal",
@@ -23,7 +24,6 @@ export const TipoIdSchema = z.enum([
 export type TipoId = z.infer<typeof TipoIdSchema>;
 
 // La lista de trabajos vive en los packs; aquí solo se valida la forma del slug.
-const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 export const TrabajoIdSchema = slug;
 export type TrabajoId = z.infer<typeof TrabajoIdSchema>;
 

@@ -9,12 +9,13 @@ const [comando] = process.argv.slice(2);
 if (comando === "build") {
 	const n = await construir({
 		especies: aqui("../especies.json"),
+		movimientos: aqui("../movimientos.json"),
 		dirCache: aqui("../cache"),
 		dirPack,
 	});
-	console.log(`${n} especies escritas en packs/kanto`);
+	console.log(`${n} especies, movimientos y sets escritos en packs/kanto`);
 } else if (comando === "verify") {
-	const errores = verificar(dirPack);
+	const errores = await verificar(dirPack);
 	if (errores.length > 0) {
 		console.error(
 			`Verificación fallida:\n${errores.map((e) => `- ${e}`).join("\n")}`,

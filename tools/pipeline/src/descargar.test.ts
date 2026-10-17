@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { descargar } from "./descargar.js";
+import { descargar, descargarMovimiento } from "./descargar.js";
 
 describe("descargar", () => {
 	it("con caché no usa la red", async () => {
@@ -38,5 +38,24 @@ describe("descargar", () => {
 		// segunda llamada: ya en caché
 		await descargar("abra", { dirCache: dir, red, pausaMs: 0 });
 		expect(red).toHaveBeenCalledTimes(2);
+	});
+
+	it("descarga un movimiento por su slug y lo cachea", async () => {
+		const dir = mkdtempSync(join(tmpdir(), "cache-"));
+		const red = vi.fn(async () => new Response('{"name":"surf"}'));
+		const a = await descargarMovimiento("surf", {
+			dirCache: dir,
+			red,
+			pausaMs: 0,
+		});
+		expect(a).toEqual({ name: "surf" });
+		expect(String((red.mock.calls[0] as unknown[])[0])).toBe(
+			"https://pokeapi.co/api/v2/move/surf",
+		);
+		await descargarMovimiento("surf", { dirCache: dir, red, pausaMs: 0 });
+		expect(red).toHaveBeenCalledTimes(1);
+		await expect(
+			descargarMovimiento("../x", { dirCache: dir, red }),
+		).rejects.toThrow(/slug/);
 	});
 });

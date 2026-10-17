@@ -1,0 +1,374 @@
+[
+	{
+		"id": "aura-sphere",
+		"nombre": {
+			"es": "Esfera Aural",
+			"en": "Aura Sphere"
+		},
+		"tipo": "fighting",
+		"categoria": "especial",
+		"potencia": 80,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "body-slam",
+		"nombre": {
+			"es": "Golpe Cuerpo",
+			"en": "Body Slam"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 85,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "brave-bird",
+		"nombre": {
+			"es": "Pájaro Osado",
+			"en": "Brave Bird"
+		},
+		"tipo": "flying",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "brick-break",
+		"nombre": {
+			"es": "Demolición",
+			"en": "Brick Break"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 75,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "bullet-punch",
+		"nombre": {
+			"es": "Puño Bala",
+			"en": "Bullet Punch"
+		},
+		"tipo": "steel",
+		"categoria": "fisico",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "close-combat",
+		"nombre": {
+			"es": "A Bocajarro",
+			"en": "Close Combat"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 5
+	},
+	{
+		"id": "dazzling-gleam",
+		"nombre": {
+			"es": "Brillo Mágico",
+			"en": "Dazzling Gleam"
+		},
+		"tipo": "fairy",
+		"categoria": "especial",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "dragon-claw",
+		"nombre": {
+			"es": "Garra Dragón",
+			"en": "Dragon Claw"
+		},
+		"tipo": "dragon",
+		"categoria": "fisico",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "earthquake",
+		"nombre": {
+			"es": "Terremoto",
+			"en": "Earthquake"
+		},
+		"tipo": "ground",
+		"categoria": "fisico",
+		"potencia": 100,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "flamethrower",
+		"nombre": {
+			"es": "Lanzallamas",
+			"en": "Flamethrower"
+		},
+		"tipo": "fire",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "giga-drain",
+		"nombre": {
+			"es": "Gigadrenado",
+			"en": "Giga Drain"
+		},
+		"tipo": "grass",
+		"categoria": "especial",
+		"potencia": 75,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "hypnosis",
+		"nombre": {
+			"es": "Hipnosis",
+			"en": "Hypnosis"
+		},
+		"tipo": "psychic",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 60,
+		"pp": 20
+	},
+	{
+		"id": "ice-beam",
+		"nombre": {
+			"es": "Rayo Hielo",
+			"en": "Ice Beam"
+		},
+		"tipo": "ice",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "knock-off",
+		"nombre": {
+			"es": "Desarme",
+			"en": "Knock Off"
+		},
+		"tipo": "dark",
+		"categoria": "fisico",
+		"potencia": 65,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "poison-fang",
+		"nombre": {
+			"es": "Colmillo Veneno",
+			"en": "Poison Fang"
+		},
+		"tipo": "poison",
+		"categoria": "fisico",
+		"potencia": 50,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "protect",
+		"nombre": {
+			"es": "Protección",
+			"en": "Protect"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 10
+	},
+	{
+		"id": "psychic",
+		"nombre": {
+			"es": "Psíquico",
+			"en": "Psychic"
+		},
+		"tipo": "psychic",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "quick-attack",
+		"nombre": {
+			"es": "Ataque Rápido",
+			"en": "Quick Attack"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "rapid-spin",
+		"nombre": {
+			"es": "Giro Rápido",
+			"en": "Rapid Spin"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 50,
+		"precision": 100,
+		"pp": 40
+	},
+	{
+		"id": "rock-slide",
+		"nombre": {
+			"es": "Avalancha",
+			"en": "Rock Slide"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 75,
+		"precision": 90,
+		"pp": 10
+	},
+	{
+		"id": "roost",
+		"nombre": {
+			"es": "Respiro",
+			"en": "Roost"
+		},
+		"tipo": "flying",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 5
+	},
+	{
+		"id": "shadow-ball",
+		"nombre": {
+			"es": "Bola Sombra",
+			"en": "Shadow Ball"
+		},
+		"tipo": "ghost",
+		"categoria": "especial",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "sleep-powder",
+		"nombre": {
+			"es": "Somnífero",
+			"en": "Sleep Powder"
+		},
+		"tipo": "grass",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 75,
+		"pp": 15
+	},
+	{
+		"id": "sludge-bomb",
+		"nombre": {
+			"es": "Bomba Lodo",
+			"en": "Sludge Bomb"
+		},
+		"tipo": "poison",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "stealth-rock",
+		"nombre": {
+			"es": "Trampa Rocas",
+			"en": "Stealth Rock"
+		},
+		"tipo": "rock",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "surf",
+		"nombre": {
+			"es": "Surf",
+			"en": "Surf"
+		},
+		"tipo": "water",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "thunder-punch",
+		"nombre": {
+			"es": "Puño Trueno",
+			"en": "Thunder Punch"
+		},
+		"tipo": "electric",
+		"categoria": "fisico",
+		"potencia": 75,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "thunder-wave",
+		"nombre": {
+			"es": "Onda Trueno",
+			"en": "Thunder Wave"
+		},
+		"tipo": "electric",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 90,
+		"pp": 20
+	},
+	{
+		"id": "thunderbolt",
+		"nombre": {
+			"es": "Rayo",
+			"en": "Thunderbolt"
+		},
+		"tipo": "electric",
+		"categoria": "especial",
+		"potencia": 90,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "u-turn",
+		"nombre": {
+			"es": "Ida y Vuelta",
+			"en": "U-turn"
+		},
+		"tipo": "bug",
+		"categoria": "fisico",
+		"potencia": 70,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "will-o-wisp",
+		"nombre": {
+			"es": "Fuego Fatuo",
+			"en": "Will-O-Wisp"
+		},
+		"tipo": "fire",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 85,
+		"pp": 15
+	}
+]

@@ -8,7 +8,8 @@ import {
 import type { Recorte } from "./recortar.js";
 
 // Sin filtro de existencia: Machop y otras no están en la lista estándar de gen 9.
-export const especiesPkmn = new Generations(Dex, () => true).get(9).species;
+export const gen9 = new Generations(Dex, () => true).get(9);
+export const especiesPkmn = gen9.species;
 
 export function unir(
 	recorte: Recorte,

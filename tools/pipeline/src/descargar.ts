@@ -41,9 +41,18 @@ async function obtener(
 	return datos;
 }
 
-export async function descargar(slug: string, o: OpcionesDescarga) {
+const validarSlug = (slug: string) => {
 	if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug))
 		throw new Error(`slug no válido: ${slug}`);
+};
+
+export async function descargarMovimiento(slug: string, o: OpcionesDescarga) {
+	validarSlug(slug);
+	return obtener("move", slug, o);
+}
+
+export async function descargar(slug: string, o: OpcionesDescarga) {
+	validarSlug(slug);
 	const pokemon = await obtener("pokemon", slug, o);
 	const especie = await obtener("pokemon-species", slug, o);
 	return { pokemon, especie };

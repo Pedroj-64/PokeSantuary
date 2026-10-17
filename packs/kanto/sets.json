@@ -1,0 +1,72 @@
+[
+	{
+		"especie": "bulbasaur",
+		"movimientos": ["giga-drain", "sludge-bomb", "sleep-powder", "body-slam"],
+		"habilidad": "overgrow",
+		"naturaleza": "Modest"
+	},
+	{
+		"especie": "charmander",
+		"movimientos": [
+			"flamethrower",
+			"dragon-claw",
+			"brick-break",
+			"will-o-wisp"
+		],
+		"habilidad": "blaze",
+		"naturaleza": "Naive"
+	},
+	{
+		"especie": "squirtle",
+		"movimientos": ["surf", "ice-beam", "aura-sphere", "rapid-spin"],
+		"habilidad": "torrent",
+		"naturaleza": "Modest"
+	},
+	{
+		"especie": "pikachu",
+		"movimientos": ["thunderbolt", "quick-attack", "thunder-wave", "surf"],
+		"habilidad": "static",
+		"naturaleza": "Timid"
+	},
+	{
+		"especie": "zubat",
+		"movimientos": ["brave-bird", "poison-fang", "u-turn", "roost"],
+		"habilidad": "infiltrator",
+		"naturaleza": "Jolly"
+	},
+	{
+		"especie": "abra",
+		"movimientos": ["psychic", "shadow-ball", "dazzling-gleam", "thunder-wave"],
+		"habilidad": "magic-guard",
+		"naturaleza": "Timid"
+	},
+	{
+		"especie": "machop",
+		"movimientos": ["close-combat", "knock-off", "bullet-punch", "earthquake"],
+		"habilidad": "guts",
+		"naturaleza": "Adamant"
+	},
+	{
+		"especie": "geodude",
+		"movimientos": [
+			"rock-slide",
+			"earthquake",
+			"thunder-punch",
+			"stealth-rock"
+		],
+		"habilidad": "sturdy",
+		"naturaleza": "Adamant"
+	},
+	{
+		"especie": "gastly",
+		"movimientos": ["shadow-ball", "sludge-bomb", "thunderbolt", "hypnosis"],
+		"habilidad": "levitate",
+		"naturaleza": "Timid"
+	},
+	{
+		"especie": "eevee",
+		"movimientos": ["body-slam", "shadow-ball", "quick-attack", "protect"],
+		"habilidad": "adaptability",
+		"naturaleza": "Jolly"
+	}
+]

@@ -16,15 +16,18 @@ const raiz = fileURLToPath(new URL("../", import.meta.url));
 
 describe("construir", () => {
 	it("es determinista y verificable, usando solo la caché", async () => {
-		const trabajos = join(raiz, "../../packs/kanto/trabajos.json");
+		const dirKanto = join(raiz, "../../packs/kanto");
+		const trabajos = join(dirKanto, "trabajos.json");
 		const salida = () => {
 			const d = mkdtempSync(join(tmpdir(), "salida-"));
 			cpSync(trabajos, join(d, "trabajos.json"));
+			cpSync(join(dirKanto, "sets.json"), join(d, "sets.json"));
 			return d;
 		};
 		const red = vi.fn();
 		const opciones = {
 			especies: join(raiz, "especies.json"),
+			movimientos: join(raiz, "movimientos.json"),
 			dirCache: join(raiz, "cache"),
 			red,
 		};
@@ -32,10 +35,15 @@ describe("construir", () => {
 		const b = salida();
 		await construir({ ...opciones, dirPack: a });
 		await construir({ ...opciones, dirPack: b });
-		for (const f of ["especies.json", "manifest.json"]) {
+		for (const f of [
+			"especies.json",
+			"movimientos.json",
+			"sets.json",
+			"manifest.json",
+		]) {
 			expect(readFileSync(join(a, f))).toEqual(readFileSync(join(b, f)));
 		}
-		expect(verificar(a)).toEqual([]);
+		expect(await verificar(a)).toEqual([]);
 		expect(red).not.toHaveBeenCalled();
 	});
 });
