@@ -6,7 +6,14 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!tools/pipeline/cache",
+			"!tools/pipeline/test/fixtures",
+			"!packs/kanto/especies.json",
+			"!packs/kanto/manifest.json"
+		]
 	},
 	"formatter": {
 		"enabled": true,

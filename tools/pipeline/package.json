@@ -2,5 +2,19 @@
 	"name": "@santuario/pipeline",
 	"version": "0.0.0",
 	"private": true,
-	"type": "module"
+	"type": "module",
+	"scripts": {
+		"data:build": "tsx src/cli.ts build",
+		"data:verify": "tsx src/cli.ts verify"
+	},
+	"dependencies": {
+		"@pkmn/data": "0.10.11",
+		"@pkmn/dex": "0.10.11",
+		"@santuario/data": "workspace:*",
+		"zod": "4.6.7"
+	},
+	"devDependencies": {
+		"@types/node": "26.6.5",
+		"tsx": "4.23.15"
+	}
 }

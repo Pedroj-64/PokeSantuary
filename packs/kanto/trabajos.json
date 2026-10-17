@@ -1,0 +1,20 @@
+{
+	"normal": ["transportar"],
+	"fire": ["cocinar"],
+	"water": ["regar"],
+	"electric": ["generar-energia"],
+	"grass": ["cultivar"],
+	"ice": ["conservar"],
+	"fighting": ["entrenar"],
+	"poison": ["compost"],
+	"ground": ["minar"],
+	"flying": ["transportar"],
+	"psychic": ["investigar"],
+	"bug": ["seda"],
+	"rock": ["minar"],
+	"ghost": ["vigilar"],
+	"dragon": ["proteger-arbol"],
+	"dark": ["vigilar"],
+	"steel": ["forjar"],
+	"fairy": ["investigar"]
+}

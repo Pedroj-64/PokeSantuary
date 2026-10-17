@@ -1,0 +1,233 @@
+[
+	{
+		"id": "bulbasaur",
+		"dex": 1,
+		"tipos": [
+			"grass",
+			"poison"
+		],
+		"nombre": {
+			"es": "Bulbasaur",
+			"en": "Bulbasaur"
+		},
+		"descripcion": {
+			"es": "Desde que nace, crece alimentándose de los nutrientes que contiene la semilla de su lomo.",
+			"en": "While it is young, it uses the nutrients that are stored in the seed on its back in order to grow."
+		},
+		"trabajos": [
+			"cultivar",
+			"compost"
+		],
+		"gruposHuevo": [
+			"monster",
+			"plant"
+		],
+		"tasaCaptura": 45
+	},
+	{
+		"id": "charmander",
+		"dex": 4,
+		"tipos": [
+			"fire"
+		],
+		"nombre": {
+			"es": "Charmander",
+			"en": "Charmander"
+		},
+		"descripcion": {
+			"es": "Este Pokémon nace con una llama en la punta de la cola. Si se le apagara, fallecería.",
+			"en": "From the time it is born, a flame burns at the tip of its tail. Its life would end if the flame were to go out."
+		},
+		"trabajos": [
+			"cocinar"
+		],
+		"gruposHuevo": [
+			"monster",
+			"dragon"
+		],
+		"tasaCaptura": 45
+	},
+	{
+		"id": "squirtle",
+		"dex": 7,
+		"tipos": [
+			"water"
+		],
+		"nombre": {
+			"es": "Squirtle",
+			"en": "Squirtle"
+		},
+		"descripcion": {
+			"es": "Cuando se siente en peligro, se esconde en su caparazón y escupe chorros de agua por la boca.",
+			"en": "When it feels threatened, it draws its limbs inside its shell and sprays water from its mouth."
+		},
+		"trabajos": [
+			"regar"
+		],
+		"gruposHuevo": [
+			"monster",
+			"water1"
+		],
+		"tasaCaptura": 45
+	},
+	{
+		"id": "pikachu",
+		"dex": 25,
+		"tipos": [
+			"electric"
+		],
+		"nombre": {
+			"es": "Pikachu",
+			"en": "Pikachu"
+		},
+		"descripcion": {
+			"es": "Los miembros de esta especie se saludan entre sí uniendo sus colas y transmitiéndose corriente eléctrica.",
+			"en": "Possesses cheek sacs in which it stores electricity. This clever forest-dweller roasts tough berries with an electric shock before consuming them."
+		},
+		"trabajos": [
+			"generar-energia"
+		],
+		"gruposHuevo": [
+			"ground",
+			"fairy"
+		],
+		"tasaCaptura": 190
+	},
+	{
+		"id": "zubat",
+		"dex": 41,
+		"tipos": [
+			"poison",
+			"flying"
+		],
+		"nombre": {
+			"es": "Zubat",
+			"en": "Zubat"
+		},
+		"descripcion": {
+			"es": "Habitan en cuevas donde no llegan los rayos del sol. De día, se acurrucan unos junto a otros para entrar en calor mientras duermen.",
+			"en": "Makes its home in gloomy caves. Atrophied eyes have left this Pokémon blind, so it scans its surroundings via sound waves that it emits from its mouth as it flies."
+		},
+		"trabajos": [
+			"compost",
+			"transportar"
+		],
+		"gruposHuevo": [
+			"flying"
+		],
+		"tasaCaptura": 255
+	},
+	{
+		"id": "abra",
+		"dex": 63,
+		"tipos": [
+			"psychic"
+		],
+		"nombre": {
+			"es": "Abra",
+			"en": "Abra"
+		},
+		"descripcion": {
+			"es": "Puede teletransportarse mientras duerme. Se dice que, cuanto más profundo sea su sueño, mayor será la distancia a la que se desplace.",
+			"en": "Spends 18 hours of the day sleeping. Even while asleep, Abra can control its psychic powers—should danger approach, the Pokémon will simply teleport away."
+		},
+		"trabajos": [
+			"investigar"
+		],
+		"gruposHuevo": [
+			"humanshape"
+		],
+		"tasaCaptura": 200
+	},
+	{
+		"id": "machop",
+		"dex": 66,
+		"tipos": [
+			"fighting"
+		],
+		"nombre": {
+			"es": "Machop",
+			"en": "Machop"
+		},
+		"descripcion": {
+			"es": "Siempre rebosante de energía, pasa el tiempo levantando piedras para hacerse aún más fuerte.",
+			"en": "Though as small as a child, it has strength enough to easily throw a well-built adult. Striving to become ever stronger, Machop trains by carrying a Graveler on its shoulders."
+		},
+		"trabajos": [
+			"entrenar"
+		],
+		"gruposHuevo": [
+			"humanshape"
+		],
+		"tasaCaptura": 180
+	},
+	{
+		"id": "geodude",
+		"dex": 74,
+		"tipos": [
+			"rock",
+			"ground"
+		],
+		"nombre": {
+			"es": "Geodude",
+			"en": "Geodude"
+		},
+		"descripcion": {
+			"es": "Se suele encontrar en senderos de montaña y sitios parecidos. Conviene andar con cuidado para no pisarlo sin querer y provocar su enfado.",
+			"en": "Makes its home in mountainous regions, using its arms to climb along harsh mountain roads. Can be troublesome—carelessly kicking one will cause it to fly into a rage and chase after you."
+		},
+		"trabajos": [
+			"minar"
+		],
+		"gruposHuevo": [
+			"mineral"
+		],
+		"tasaCaptura": 255
+	},
+	{
+		"id": "gastly",
+		"dex": 92,
+		"tipos": [
+			"ghost",
+			"poison"
+		],
+		"nombre": {
+			"es": "Gastly",
+			"en": "Gastly"
+		},
+		"descripcion": {
+			"es": "Con su cuerpo gaseoso puede colarse por donde quiera, aunque con un golpe de viento sale despedido.",
+			"en": "Gaseous and completely impalpable. Also highly dangerous— inhaling part of its poisonous body will cause one to faint instantly."
+		},
+		"trabajos": [
+			"vigilar",
+			"compost"
+		],
+		"gruposHuevo": [
+			"indeterminate"
+		],
+		"tasaCaptura": 190
+	},
+	{
+		"id": "eevee",
+		"dex": 133,
+		"tipos": [
+			"normal"
+		],
+		"nombre": {
+			"es": "Eevee",
+			"en": "Eevee"
+		},
+		"descripcion": {
+			"es": "Su irregular estructura genética alberga el secreto de la capacidad que posee este Pokémon tan especial para adoptar evoluciones muy variadas.",
+			"en": "Harbors the potential to evolve into manifold forms. Within Eevee lies the key to the mysteries of Pokémon evolution—I'm certain of it."
+		},
+		"trabajos": [
+			"transportar"
+		],
+		"gruposHuevo": [
+			"ground"
+		],
+		"tasaCaptura": 45
+	}
+]
