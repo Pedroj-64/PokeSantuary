@@ -138,6 +138,7 @@ export class Combate {
 	};
 	private readonly hpMax = new Map<string, number>();
 	private ganador: Lado | "empate" | null = null;
+	private escriturasEnviadas = 0;
 	private readonly activos: Record<Lado, ActivoPublico | null> = {
 		jugador: null,
 		rival: null,
@@ -233,6 +234,11 @@ export class Combate {
 	}
 
 	/** Ganador (`empate` incluido) o null si el combate sigue. */
+	/** Escrituras enviadas al simulador; si cambia durante una elección fallida, el combate ya avanzó. */
+	get escrituras(): number {
+		return this.escriturasEnviadas;
+	}
+
 	terminado(): Lado | "empate" | null {
 		return this.ganador;
 	}
@@ -258,6 +264,8 @@ export class Combate {
 	async elegir(lado: Lado, e: Eleccion): Promise<EventoCombate[]> {
 		this.validar(lado, e);
 		const orden = `>${SLOT[lado]} ${e.tipo === "movimiento" ? "move" : "switch"} ${e.indice + 1}`;
+		// Se cuenta antes de escribir: aunque la escritura falle, el estado es dudoso.
+		this.escriturasEnviadas++;
 		await this.flujo.write(orden);
 		this.pendientes[lado] = null;
 		return this.procesar();
@@ -410,7 +418,7 @@ export class Combate {
 					pp: m.pp ?? 0,
 					ppMax: m.maxpp ?? 0,
 					// Struggle llega sin datos de PP: sigue siendo elegible.
-					deshabilitado: m.disabled || m.pp === 0,
+					deshabilitado: !!m.disabled || m.pp === 0,
 				}));
 		return {
 			lado,

@@ -359,8 +359,15 @@ describe("SesionCombate: tope de cambios de la IA", () => {
 				{ especie: "b", hp: 10, hpMax: 10, activo: false, debilitado: false },
 			],
 		};
+		let escrituras = 0;
 		const falso = {
-			resolver: async () => [],
+			resolver: async () => {
+				escrituras++;
+				return [];
+			},
+			get escrituras() {
+				return escrituras;
+			},
 			terminado: () => null,
 			activo: () => null,
 			peticion: (l: string) => (l === "rival" ? forzada : null),
@@ -374,6 +381,46 @@ describe("SesionCombate: tope de cambios de la IA", () => {
 		await expect(
 			s.elegirJugador({ tipo: "movimiento", indice: 0 }),
 		).rejects.toThrow(/inconsistente/);
+	});
+});
+
+describe("SesionCombate: errores del simulador a mitad de turno", () => {
+	type Flujo = { write(texto: string): Promise<void> };
+	const flujoDe = (s: SesionCombate): Flujo =>
+		(s as unknown as { combate: { flujo: Flujo } }).combate.flujo;
+
+	it("queda inconsistente si el simulador falla en la segunda escritura del turno", async () => {
+		const s = new SesionCombate();
+		await s.abrir({ semilla: "s1", jugador: JUGADOR, rival: RIVAL });
+		const flujo = flujoDe(s);
+		const real = flujo.write.bind(flujo);
+		let n = 0;
+		flujo.write = async (texto) => {
+			if (++n === 2) throw new Error("simulador caído");
+			return real(texto);
+		};
+		await expect(
+			s.elegirJugador({ tipo: "movimiento", indice: 0 }),
+		).rejects.toThrow(/caído/);
+		// La primera escritura ya se aplicó: no se puede seguir como si nada.
+		await expect(
+			s.elegirJugador({ tipo: "movimiento", indice: 0 }),
+		).rejects.toThrow(/inconsistente/);
+	});
+
+	it("una elección ilegal no consume aleatoriedad de la IA", async () => {
+		const jugar = async (conIlegal: boolean) => {
+			const s = new SesionCombate();
+			await s.abrir({ semilla: "s4", jugador: JUGADOR, rival: RIVAL });
+			if (conIlegal) {
+				await expect(
+					s.elegirJugador({ tipo: "movimiento", indice: 99 }),
+				).rejects.toSatisfy(esEleccionIlegal);
+			}
+			await s.elegirJugador({ tipo: "movimiento", indice: 0 });
+			return s.registro();
+		};
+		expect(await jugar(true)).toBe(await jugar(false));
 	});
 });
 

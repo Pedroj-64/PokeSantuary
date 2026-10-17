@@ -73,10 +73,9 @@ export class SesionCombate {
 			);
 		}
 		const estadoRng = this.rng.estado();
-		let mutado = false;
+		const escrituras = c.escrituras;
 		try {
 			const eventos = await c.resolver(e, this.elegirRival(c));
-			mutado = true;
 			// El rival se quedó solo con un cambio forzado: lo resuelve la IA.
 			// Hay a lo sumo un cambio forzado seguido; el tope evita un bucle infinito.
 			for (
@@ -91,11 +90,12 @@ export class SesionCombate {
 			}
 			return this.resultado(eventos);
 		} catch (error) {
-			// Antes de aplicar nada (elección ilegal, IA sin jugada) el combate no
+			// Antes de escribir nada (elección ilegal, IA sin jugada) el combate no
 			// cambió: se devuelve el Rng de la IA y la sesión sigue usable. Si ya se
-			// aplicó la elección y falla un cambio forzado posterior, el combate sí
-			// avanzó y no hay vuelta atrás: la sesión queda marcada como inconsistente.
-			if (mutado) this.inconsistente = true;
+			// escribió algo en el simulador (la elección de un lado, un cambio forzado
+			// posterior o un `|error|` del simulador), el combate avanzó y no hay
+			// vuelta atrás: la sesión queda marcada como inconsistente.
+			if (c.escrituras !== escrituras) this.inconsistente = true;
 			else this.rng = crearRng(this.semillaIA, estadoRng);
 			throw error;
 		}
