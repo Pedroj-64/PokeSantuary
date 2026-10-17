@@ -4,6 +4,11 @@
 
 Fan game roguelike de gestión: expediciones por turnos y un santuario que cuidar. Hecho con Phaser 4 y TypeScript.
 
+## Documentación
+
+- `docs/estado.md`: dónde estamos, qué sigue, decisiones y deuda técnica.
+- `docs/flujo-de-trabajo.md`: reglas del proyecto y rutina para cada cambio.
+
 ## Aviso
 
 Este es un proyecto de fans, **no oficial**, sin fines de lucro y sin afiliación con los titulares de la propiedad intelectual. Pokémon y sus personajes, nombres y demás elementos pertenecen a Nintendo, Creatures Inc., GAME FREAK inc. y The Pokémon Company. No se usan logotipos ni música oficiales, y el proyecto no recibe dinero de ninguna forma.
