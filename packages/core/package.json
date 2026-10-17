@@ -2,5 +2,12 @@
 	"name": "@santuario/core",
 	"version": "0.0.0",
 	"private": true,
-	"type": "module"
+	"type": "module",
+	"devDependencies": {
+		"fast-check": "^4.10.2"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"types": "./src/index.ts"
 }
