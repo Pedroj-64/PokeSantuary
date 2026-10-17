@@ -198,6 +198,25 @@ importers:
         specifier: 8.3.4
         version: 8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15)
 
+  packages/battle:
+    dependencies:
+      '@pkmn/sim':
+        specifier: 0.10.11
+        version: 0.10.11
+      '@santuario/core':
+        specifier: workspace:*
+        version: link:../core
+      '@santuario/data':
+        specifier: workspace:*
+        version: link:../data
+    devDependencies:
+      '@types/node':
+        specifier: 26.6.5
+        version: 26.6.5
+      fast-check:
+        specifier: 4.10.2
+        version: 4.10.2
+
   packages/core:
     devDependencies:
       fast-check:
@@ -468,6 +487,15 @@ packages:
 
   '@pkmn/dex@0.10.11':
     resolution: {integrity: sha512-htR2Etf3WCiu4k4ukmyYD94do97sTm9LfmxJ8tg2uuPGJsZ98ZZGlJFUZNltfXU0pO61ItiU6obRXTw05qipDQ==}
+
+  '@pkmn/sets@5.2.0':
+    resolution: {integrity: sha512-WHAW6bZu0WCo/3b+LTW7BE0fBhYZnWH1lCXIu2an8/wTiZ/+s1eTcQYj7W/YQKxWT5dm/La03AZ6CeqdJip9CQ==}
+
+  '@pkmn/sim@0.10.11':
+    resolution: {integrity: sha512-v45jqIgFnEB3hc7e97QlWDnfkIef6mfZ0WjWHWw+f21cYyksGVLzxIEulR9xuOazeszA+ycDx6O6B3JOJAS5Xg==}
+
+  '@pkmn/streams@1.1.0':
+    resolution: {integrity: sha512-Pp9k7gt4xd76DqTU+LQEUyzuaauM4bV1MlehVtX1NS7o9zMFtjw50MfaEQ62dIMZyzxNjsJGoLGBeY1iSYLsRA==}
 
   '@pkmn/types@4.0.0':
     resolution: {integrity: sha512-gR2s/pxJYEegek1TtsYCQupNR3d5hMlcJFsiD+2LyfKr4tc+gETTql47tWLX5mFSbPcbXh7f4+7txlMIDoZx/g==}
@@ -907,6 +935,9 @@ packages:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
 
+  ts-chacha20@1.2.0:
+    resolution: {integrity: sha512-PTyPoWYHc2we8P2NTn5hpYG211popWbkjiw+k63xqjeMrx9pPtXSclz9F3fu0Tpr+vfR1xxcQFwsEkh1cXMLqw==}
+
   tsx@4.23.15:
     resolution: {integrity: sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==}
     engines: {node: '>=18.0.0'}
@@ -1149,6 +1180,18 @@ snapshots:
   '@pkmn/dex@0.10.11':
     dependencies:
       '@pkmn/dex-types': 0.10.11
+
+  '@pkmn/sets@5.2.0':
+    dependencies:
+      '@pkmn/types': 4.0.0
+
+  '@pkmn/sim@0.10.11':
+    dependencies:
+      '@pkmn/sets': 5.2.0
+      '@pkmn/streams': 1.1.0
+      ts-chacha20: 1.2.0
+
+  '@pkmn/streams@1.1.0': {}
 
   '@pkmn/types@4.0.0': {}
 
@@ -1455,6 +1498,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.7)
       picomatch: 4.0.7
+
+  ts-chacha20@1.2.0: {}
 
   tsx@4.23.15:
     dependencies:

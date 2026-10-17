@@ -1,0 +1,93 @@
+{
+	"semilla": "victoria-1",
+	"equipoJugador": ["machop", "geodude", "abra"],
+	"equipoRival": ["eevee", "zubat", "pikachu"],
+	"elecciones": [
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		},
+		{
+			"jugador": null,
+			"rival": {
+				"tipo": "cambio",
+				"indice": 1
+			}
+		},
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		},
+		{
+			"jugador": {
+				"tipo": "cambio",
+				"indice": 1
+			},
+			"rival": null
+		},
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		},
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		},
+		{
+			"jugador": null,
+			"rival": {
+				"tipo": "cambio",
+				"indice": 2
+			}
+		},
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		},
+		{
+			"jugador": {
+				"tipo": "movimiento",
+				"indice": 0
+			},
+			"rival": {
+				"tipo": "movimiento",
+				"indice": 0
+			}
+		}
+	],
+	"esperado": {
+		"ganador": "jugador",
+		"turnos": 6,
+		"hashRegistro": "10e0e041ce83d1f3372498fdbfa6d48b3f3fee4651656331974c7d1906c17d85"
+	}
+}
