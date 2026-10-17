@@ -2,7 +2,9 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { PNG } from "pngjs";
 import { describe, expect, it } from "vitest";
+import { sha256 } from "./manifiesto.js";
 import { verificar } from "./verificar.js";
 
 const PACK_REAL = fileURLToPath(
@@ -15,6 +17,8 @@ const copia = () => {
 	return dir;
 };
 
+type Marco = { frame: { x: number; y: number; w: number; h: number } };
+type AtlasJson = { frames: Record<string, Marco> };
 type Fila = { especie: string; movimientos: string[] };
 
 describe("verificar", () => {
@@ -136,6 +140,130 @@ describe("verificar", () => {
 			writeFileSync(lista, "[]");
 			expect((await verificar(copia(), lista)).join("\n")).toMatch(
 				/no está en tools\/pipeline\/movimientos\.json/,
+			);
+		});
+	});
+
+	describe("atlas de combate", () => {
+		// Reescribe el manifiesto para que solo falle lo que se manipuló.
+		const resellar = (dir: string) => {
+			const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
+			for (const f of Object.keys(m.archivos))
+				m.archivos[f] = sha256(join(dir, f));
+			writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
+		};
+		const editarJson = (dir: string, f: (a: AtlasJson) => void) => {
+			const ruta = join(dir, "atlas-combate.json");
+			const a = JSON.parse(readFileSync(ruta, "utf8"));
+			f(a);
+			writeFileSync(ruta, JSON.stringify(a));
+			resellar(dir);
+		};
+
+		it("contiene los 20 marcos esperados", () => {
+			const a = JSON.parse(
+				readFileSync(join(PACK_REAL, "atlas-combate.json"), "utf8"),
+			);
+			expect(Object.keys(a.frames)).toHaveLength(20);
+			expect(a.frames["combate/pikachu/frente"]).toBeDefined();
+			expect(a.frames["combate/zubat/espalda"]).toBeDefined();
+			expect(a.meta.size.w).toBeLessThanOrEqual(2048);
+			expect(a.meta.size.h).toBeLessThanOrEqual(2048);
+		});
+
+		it("falla si el JSON del atlas no es válido", async () => {
+			const dir = copia();
+			writeFileSync(join(dir, "atlas-combate.json"), '{"frames":1}');
+			resellar(dir);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/expected record, received number/,
+			);
+		});
+
+		it("falla si falta un marco", async () => {
+			const dir = copia();
+			editarJson(dir, (a) => delete a.frames["combate/eevee/espalda"]);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/falta el marco combate\/eevee\/espalda/,
+			);
+		});
+
+		it("falla con tamaño cero, negativo o fuera del PNG", async () => {
+			for (const cambio of [
+				(f: Marco) => {
+					f.frame.w = 0;
+				},
+				(f: Marco) => {
+					f.frame.h = -3;
+				},
+				(f: Marco) => {
+					f.frame.x = 5000;
+				},
+			]) {
+				const dir = copia();
+				editarJson(dir, (a) =>
+					cambio(a.frames["combate/abra/frente"] as Marco),
+				);
+				expect((await verificar(dir)).join("\n")).toMatch(
+					/combate\/abra\/frente/,
+				);
+			}
+		});
+
+		it("falla si los píxeles del atlas difieren del sprite fuente", async () => {
+			const dir = copia();
+			const ruta = join(dir, "atlas-combate.png");
+			const png = PNG.sync.read(readFileSync(ruta));
+			const a = JSON.parse(
+				readFileSync(join(dir, "atlas-combate.json"), "utf8"),
+			);
+			const { x, y } = a.frames["combate/abra/frente"].frame;
+			const i = (y * png.width + x) * 4;
+			png.data[i] = (png.data[i] ?? 0) ^ 0xff;
+			writeFileSync(ruta, PNG.sync.write(png));
+			resellar(dir);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/combate\/abra\/frente difiere/,
+			);
+		});
+
+		it("falla con mensaje legible si un PNG de la caché es corrupto o hostil", async () => {
+			const cache = mkdtempSync(join(tmpdir(), "cache-"));
+			cpSync(
+				join(PACK_REAL, "../../tools/pipeline/cache/sprites"),
+				join(cache, "sprites"),
+				{ recursive: true },
+			);
+			const ruta = join(cache, "sprites", "abra-frente.png");
+			// firma incorrecta
+			writeFileSync(
+				ruta,
+				Buffer.from("no soy un png, ni de lejos, de verdad que no lo soy"),
+			);
+			expect((await verificar(copia(), undefined, cache)).join("\n")).toMatch(
+				/abra-frente\.png: no es un PNG/,
+			);
+			// IHDR falsificado de 100000x100000
+			const real = readFileSync(
+				join(PACK_REAL, "../../tools/pipeline/cache/sprites/abra-espalda.png"),
+			);
+			real.writeUInt32BE(100000, 16);
+			real.writeUInt32BE(100000, 20);
+			writeFileSync(ruta, real);
+			expect((await verificar(copia(), undefined, cache)).join("\n")).toMatch(
+				/abra-frente\.png: dimensiones del PNG fuera de rango \(100000x100000/,
+			);
+		});
+
+		it("falla si el hash del PNG cambia", async () => {
+			const dir = copia();
+			const ruta = join(dir, "atlas-combate.png");
+			writeFileSync(
+				ruta,
+				Buffer.concat([readFileSync(ruta), Buffer.from([0])]),
+			);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/atlas-combate\.png.*hash/,
 			);
 		});
 	});

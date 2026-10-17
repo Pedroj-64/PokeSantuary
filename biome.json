@@ -12,6 +12,8 @@
 			"!tools/pipeline/cache",
 			"!tools/pipeline/test/fixtures",
 			"!packs/kanto/especies.json",
+			"!packs/kanto/atlas-combate.json",
+			"!packs/kanto/atlas-combate.png",
 			"!packs/kanto/manifest.json"
 		]
 	},

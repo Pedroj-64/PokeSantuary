@@ -1,3 +1,4 @@
+export * from "./atlas.js";
 export * from "./especie.js";
 export * from "./manifiesto.js";
 export * from "./movimiento.js";

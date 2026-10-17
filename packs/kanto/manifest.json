@@ -1,5 +1,7 @@
 {
 	"archivos": {
+		"atlas-combate.json": "4ad13cdcf7631785f66e1aeac60e15fb3392dd2db89ded6aa244f202b1133654",
+		"atlas-combate.png": "b1fbfd96bb8590e30f442b31917667fefd87cd1d4386629d652fb7ae25aa5472",
 		"especies.json": "802ced20c54964640bb78b44c95f98403406ba1dba6265f465260a64e71b647c",
 		"movimientos.json": "357b1f65f0b315d5b38a652ce94e84dfd3cee1d643ca42a74673db6414775afe",
 		"sets.json": "975d174b54643d86bf93340363cff5226195fe2161515d59b0fb8ac8d0e75aa2",

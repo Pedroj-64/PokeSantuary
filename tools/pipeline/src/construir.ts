@@ -15,6 +15,7 @@ import {
 	unirMovimiento,
 } from "./movimientos.js";
 import { type EspecieApi, type PokemonApi, recortar } from "./recortar.js";
+import { atlasDeCombate } from "./sprites.js";
 import { unir } from "./unir.js";
 
 export type OpcionesConstruir = {
@@ -39,8 +40,10 @@ export async function construir(o: OpcionesConstruir): Promise<number> {
 		JSON.parse(readFileSync(join(o.dirPack, "trabajos.json"), "utf8")),
 	);
 	const lista = [];
+	const fuentes = [];
 	for (const slug of slugs) {
 		const { pokemon, especie } = await descargar(slug, o);
+		fuentes.push({ slug, pokemon });
 		lista.push(
 			unir(recortar(pokemon as PokemonApi, especie as EspecieApi), trabajos),
 		);
@@ -66,6 +69,9 @@ export async function construir(o: OpcionesConstruir): Promise<number> {
 		aJson(z.array(MovimientoSchema).parse(movs)),
 	);
 	writeFileSync(join(o.dirPack, "especies.json"), aJson(lista));
+	const atlas = await atlasDeCombate(fuentes, o);
+	writeFileSync(join(o.dirPack, "atlas-combate.png"), atlas.png);
+	writeFileSync(join(o.dirPack, "atlas-combate.json"), aJson(atlas.json));
 	const archivos = Object.fromEntries(
 		archivosDelPack(o.dirPack).map((f) => [f, sha256(join(o.dirPack, f))]),
 	);

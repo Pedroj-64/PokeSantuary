@@ -3,11 +3,12 @@ import { join } from "node:path";
 import { setTimeout as esperar } from "node:timers/promises";
 
 const BASE = "https://pokeapi.co/api/v2";
-const USER_AGENT = "santuario-pipeline (datos de desarrollo, con caché local)";
+export const USER_AGENT =
+	"santuario-pipeline (datos de desarrollo, con caché local)";
 
 export type Red = (
 	url: string,
-	init: { headers: Record<string, string> },
+	init: { headers: Record<string, string>; redirect?: "error" },
 ) => Promise<Response>;
 export type OpcionesDescarga = {
 	dirCache: string;
@@ -17,6 +18,13 @@ export type OpcionesDescarga = {
 
 let ultimaPeticion = 0;
 
+// Pausa entre peticiones reales, para no cargar al servidor.
+export async function pausar(pausaMs = 1000) {
+	const falta = ultimaPeticion + pausaMs - Date.now();
+	if (falta > 0) await esperar(falta);
+	ultimaPeticion = Date.now();
+}
+
 async function obtener(
 	endpoint: string,
 	slug: string,
@@ -24,11 +32,7 @@ async function obtener(
 ): Promise<unknown> {
 	const archivo = join(o.dirCache, `${endpoint}-${slug}.json`);
 	if (existsSync(archivo)) return JSON.parse(readFileSync(archivo, "utf8"));
-	// Pausa entre peticiones reales, para no cargar a PokeAPI.
-	const pausa = o.pausaMs ?? 1000;
-	const falta = ultimaPeticion + pausa - Date.now();
-	if (falta > 0) await esperar(falta);
-	ultimaPeticion = Date.now();
+	await pausar(o.pausaMs);
 	const url = `${BASE}/${endpoint}/${slug}`;
 	const r = await (o.red ?? fetch)(url, {
 		headers: { "User-Agent": USER_AGENT },
@@ -41,7 +45,7 @@ async function obtener(
 	return datos;
 }
 
-const validarSlug = (slug: string) => {
+export const validarSlug = (slug: string) => {
 	if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug))
 		throw new Error(`slug no válido: ${slug}`);
 };
