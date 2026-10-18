@@ -13,8 +13,17 @@ export const SFX = {
 	aceptar: "menu-aceptar",
 	volver: "menu-volver",
 	golpe: "golpe",
+	golpeSuper: "golpe-superefectivo",
+	golpePoco: "golpe-poco-eficaz",
+	golpeNulo: "golpe-sin-efecto",
+	golpeCritico: "golpe-critico",
+	golpeFallo: "golpe-fallo",
+	debilitado: "debilitado",
 	golpeFuerte: "golpe-fuerte",
 	capturaExito: "captura-exito",
 	capturaFallo: "captura-fallo",
 	curar: "curar",
 } as const;
+
+/** Sonido de lanzar un movimiento según su tipo (`mov-fire`, `mov-water`…). */
+export const sonidoDeMovimiento = (tipo: string): string => `mov-${tipo}`;

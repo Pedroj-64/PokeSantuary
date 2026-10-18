@@ -23,7 +23,7 @@ import {
 import { cuantos, gastar, intentarCaptura } from "@santuario/core";
 import Phaser from "phaser";
 import { efecto, musica, pararMusica } from "../audio/gestor.js";
-import { MUSICA, SFX } from "../audio/sonidos.js";
+import { MUSICA, SFX, sonidoDeMovimiento } from "../audio/sonidos.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
@@ -445,7 +445,28 @@ export class Combate extends Phaser.Scene {
 				await this.animar({ targets: l.sprite, alpha: 1, duration: 200 });
 				return;
 			}
+			case "movimiento":
+				void efecto(
+					sonidoDeMovimiento(this.datos.tipoDeMovimiento(e.movimiento)),
+				);
+				return;
+			case "efectividad":
+				void efecto(
+					e.valor === "super"
+						? SFX.golpeSuper
+						: e.valor === "poco"
+							? SFX.golpePoco
+							: SFX.golpeNulo,
+				);
+				return;
+			case "critico":
+				void efecto(SFX.golpeCritico);
+				return;
+			case "fallo":
+				void efecto(SFX.golpeFallo);
+				return;
 			case "debilitado": {
+				void efecto(SFX.debilitado);
 				const l = this.campo[e.lado];
 				await this.animar({
 					targets: l.sprite,

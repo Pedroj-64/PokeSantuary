@@ -65,3 +65,27 @@ test("elegir un nodo dispara el efecto de aceptar", async ({ page }) => {
 		.poll(async () => (await audio(page))?.efectos)
 		.toContain("menu-aceptar");
 });
+
+test("un movimiento suena según su tipo y el daño dispara el golpe", async ({
+	page,
+}) => {
+	await page.goto("/?test=1&semilla=x4");
+	await page.locator('[data-estado="listo"]').waitFor();
+	await page.keyboard.press("e");
+	await expect.poll(async () => (await audio(page))?.musica).toBe("mapa");
+	await page.keyboard.press("1");
+	await expect
+		.poll(() =>
+			page.evaluate("window.__santuario.combate?.estado().fase ?? null"),
+		)
+		.toBe("menu");
+	await page.evaluate(
+		`window.__santuario.combate.elegir({ tipo: "movimiento", indice: 0 })`,
+	);
+	await expect
+		.poll(async () => (await audio(page))?.efectos.join(","))
+		.toMatch(/mov-[a-z]+/);
+	await expect
+		.poll(async () => (await audio(page))?.efectos)
+		.toContain("golpe");
+});
