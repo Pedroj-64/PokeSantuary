@@ -1,0 +1,16 @@
+{
+	"name": "@santuario/audio",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "vitest run src"
+	},
+	"dependencies": {
+		"zod": "4.6.7"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"types": "./src/index.ts"
+}

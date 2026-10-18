@@ -4,6 +4,7 @@
 		{ "path": "packages/core" },
 		{ "path": "packages/data" },
 		{ "path": "packages/battle" },
+		{ "path": "packages/audio" },
 		{ "path": "tools/pipeline" },
 		{ "path": "tools/balance" },
 		{ "path": "apps/game" },
