@@ -54,6 +54,7 @@ export class ListaEspecies extends Phaser.Scene {
 			if (tecla === "l") alternarIdioma();
 			else if (tecla === "b") this.scene.start("Combate");
 			else if (tecla === "e") this.iniciarExpedicion();
+			else if (tecla === "s") this.scene.start("Santuario");
 		});
 
 		// A propósito también en la compilación de producción (la prueba e2e usa
@@ -178,6 +179,19 @@ export class ListaEspecies extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true });
 		expedicion.on("pointerdown", () => this.iniciarExpedicion());
 		this.dibujados.push(expedicion);
+
+		const santuario = this.add
+			.text(150, 262, t("botonSantuario"), {
+				fontFamily: FUENTE,
+				fontSize: "10px",
+				color: "#1b1b2f",
+				backgroundColor: "#ffd866",
+				padding: { x: 4, y: 3 },
+			})
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true });
+		santuario.on("pointerdown", () => this.scene.start("Santuario"));
+		this.dibujados.push(santuario);
 	}
 }
 

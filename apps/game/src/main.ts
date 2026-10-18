@@ -6,6 +6,7 @@ import { Eleccion } from "./escenas/Eleccion.js";
 import { FinExpedicion } from "./escenas/FinExpedicion.js";
 import { ListaEspecies } from "./escenas/ListaEspecies.js";
 import { Mapa } from "./escenas/Mapa.js";
+import { Santuario } from "./escenas/Santuario.js";
 import { Tienda } from "./escenas/Tienda.js";
 import { alCambiarIdioma, idiomaActual, t } from "./i18n/index.js";
 
@@ -39,6 +40,7 @@ const juego = new Phaser.Game({
 		Eleccion,
 		Tienda,
 		Captura,
+		Santuario,
 		FinExpedicion,
 	],
 });

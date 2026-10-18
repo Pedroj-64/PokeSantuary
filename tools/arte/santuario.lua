@@ -205,6 +205,57 @@ local function almacen()
   i:saveAs(OUT .. "almacen.png")
 end
 
+
+-- ------------------------------------------------------------ protagonista
+-- Guardián de la Fisura: capa azul noche con capucha y un farol. Hoja de 16x16:
+-- 3 filas (abajo, arriba, de lado) x 3 columnas (quieto, paso 1, paso 2).
+-- La dirección izquierda es la de lado volteada en el juego.
+local PIEL = hex("#e6b98c")
+local SOMBRA = hex("#0a0a1a")
+
+local function guardian(img, ox, oy, dir, f)
+  local rebote = (f == 2) and -1 or 0
+  elipse(img, ox + 8, oy + 14, 4, 1, SOMBRA)
+  -- piernas
+  local paso = (f == 1) and 1 or ((f == 2) and -1 or 0)
+  rect(img, ox + 5, oy + 12 + (paso > 0 and 1 or 0), 2, 3 - (paso > 0 and 1 or 0), P.noche)
+  rect(img, ox + 9, oy + 12 + (paso < 0 and 1 or 0), 2, 3 - (paso < 0 and 1 or 0), P.noche)
+  -- capa
+  rect(img, ox + 4, oy + 6 + rebote, 8, 7, P.noche3)
+  rect(img, ox + 4, oy + 6 + rebote, 1, 7, P.noche2)
+  rect(img, ox + 11, oy + 6 + rebote, 1, 7, P.noche2)
+  px(img, ox + 4, oy + 13 + rebote, P.noche3); px(img, ox + 11, oy + 13 + rebote, P.noche3)
+  rect(img, ox + 6, oy + 7 + rebote, 4, 1, P.gris2)   -- broche
+  -- cabeza y capucha
+  rect(img, ox + 5, oy + 2 + rebote, 6, 5, dir == "arriba" and P.noche3 or PIEL)
+  rect(img, ox + 4, oy + 1 + rebote, 8, 3, P.noche3)
+  rect(img, ox + 4, oy + 3 + rebote, 1, 4, P.noche3)
+  rect(img, ox + 11, oy + 3 + rebote, 1, 4, P.noche3)
+  rect(img, ox + 6, oy + 1 + rebote, 3, 1, P.noche2)
+  if dir == "abajo" then
+    px(img, ox + 6, oy + 5 + rebote, P.noche); px(img, ox + 9, oy + 5 + rebote, P.noche)
+  elseif dir == "lado" then
+    rect(img, ox + 3, oy + 3 + rebote, 3, 4, P.noche3)
+    px(img, ox + 9, oy + 5 + rebote, P.noche)
+  end
+  -- farol
+  local fx = (dir == "arriba") and ox + 2 or ox + 12
+  rect(img, fx, oy + 9 + rebote, 2, 3, P.luz)
+  px(img, fx, oy + 8 + rebote, P.gris2); px(img, fx + 1, oy + 8 + rebote, P.gris2)
+  px(img, fx + 1, oy + 12 + rebote, P.crema2)
+end
+
+local function protagonista()
+  local img = Image(48, 48)
+  img:clear(CLARO)
+  local dirs = { "abajo", "arriba", "lado" }
+  for r, d in ipairs(dirs) do
+    for f = 0, 2 do guardian(img, f * 16, (r - 1) * 16, d, f) end
+  end
+  img:saveAs(OUT .. "protagonista.png")
+end
+
 hacerLosetas()
+protagonista()
 arbolCenit(); lechoHojas(); huertoBayas(); aserradero(); cantera(); almacen()
 print("arte del Santuario escrito en " .. OUT)

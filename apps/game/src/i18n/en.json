@@ -136,5 +136,8 @@
 	"captura.soltar": "[{n}] Release {especie}  ({ps}%)",
 	"captura.dejar": "Let {especie} go  [Esc]",
 	"fin.sombrios": "Shadow Pokémon rescued: {n}",
-	"articulo.ultra-ball": "Ultra Ball"
+	"articulo.ultra-ball": "Ultra Ball",
+	"santuario.titulo": "Sanctuary (prototype)  ·  Arrows or WASD  ·  Esc: exit",
+	"santuario.salir": "E: head into the Rift from the Heart Tree",
+	"botonSantuario": "Sanctuary  [S]"
 }

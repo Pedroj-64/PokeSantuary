@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 
 /** Ancho y alto de un PNG leídos de su cabecera IHDR (sin dependencias). */
 function dimensiones(nombre: string): { w: number; h: number } {
-	const b = readFileSync(new URL(nombre, import.meta.url));
+	const b = readFileSync(
+		new URL(
+			`../../../apps/game/src/assets/santuario/${nombre}`,
+			import.meta.url,
+		),
+	);
 	if (b.readUInt32BE(0) !== 0x89504e47) throw new Error(`${nombre}: no es PNG`);
 	return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
 }
@@ -11,6 +16,7 @@ function dimensiones(nombre: string): { w: number; h: number } {
 // Tamaños que espera la escena del Santuario (losetas de 16 px, 8 tipos × 4 variantes).
 const ESPERADAS: Record<string, [number, number]> = {
 	"losetas.png": [64, 128],
+	"protagonista.png": [48, 48],
 	"arbol-cenit.png": [48, 48],
 	"lecho-hojas.png": [16, 16],
 	"huerto-bayas.png": [32, 32],
