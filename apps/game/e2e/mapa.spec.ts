@@ -76,16 +76,20 @@ test("el teclado recorre el piso hasta el jefe, que no tiene salidas", async ({
 	page,
 }) => {
 	await abrirMapa(page, "m2");
+	// una pulsación por capa: cada una entra en un nodo más, hasta el jefe (capa 5)
 	for (let capa = 0; capa <= 5; capa++) {
 		await expect
 			.poll(async () => (await estado(page))?.visitados.length)
 			.toBe(capa);
-		if (capa < 5) await page.keyboard.press("1");
+		await page.keyboard.press("1");
 	}
-	await page.keyboard.press("1"); // sin salidas: no hace nada
+	await expect.poll(async () => (await estado(page))?.visitados.length).toBe(6);
 	const s = (await estado(page)) as EstadoMapa;
 	expect(s.actual).toBe("5-0");
 	expect(s.elegibles).toEqual([]);
+	await page.keyboard.press("1"); // sin salidas: no hace nada
+	await page.waitForTimeout(150);
+	expect(await estado(page)).toEqual(s);
 });
 
 test("el mismo seed da el mismo mapa y Esc vuelve a la lista", async ({

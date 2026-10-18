@@ -17,6 +17,7 @@ import { crearEquipos } from "../combate/equipos.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { t } from "../i18n/index.js";
 import { obtenerSemilla } from "../semilla.js";
+import { alPulsarTecla } from "../teclado.js";
 
 const FUENTE = "monospace";
 const ATLAS = "combate";
@@ -124,9 +125,7 @@ export class Combate extends Phaser.Scene {
 		// Esc vuelve a la lista aunque el combate aún se esté abriendo (cierra su Worker).
 		this.teclas.set("escape", () => this.volverALista());
 
-		this.input.keyboard?.on("keydown", (ev: KeyboardEvent) =>
-			this.tecla(ev.key, ev.repeat),
-		);
+		alPulsarTecla(this, (ev) => this.tecla(ev.key, ev.repeat));
 		this.input.on("pointerdown", () => this.saltarMensaje());
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 			++this.generacion;

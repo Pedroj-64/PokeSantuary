@@ -9,6 +9,7 @@ import iconosPng from "../assets/iconos-nodo.png?url";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
+import { alPulsarTecla } from "../teclado.js";
 
 const FUENTE = "monospace";
 const ICONOS = "iconos-nodo";
@@ -107,14 +108,11 @@ export class Mapa extends Phaser.Scene {
 			.setOrigin(0.5, 1);
 
 		const ids = elegibles(e);
-		for (const [i, tecla] of ["ONE", "TWO", "THREE"].entries()) {
-			const id = ids[i];
-			if (id !== undefined)
-				this.input.keyboard?.on(`keydown-${tecla}`, () => this.elegir(id));
-		}
-		this.input.keyboard?.on("keydown-ESC", () =>
-			this.scene.start("ListaEspecies"),
-		);
+		alPulsarTecla(this, (ev) => {
+			const id = ids[Number(ev.key) - 1];
+			if (id !== undefined) this.elegir(id);
+			else if (ev.key === "Escape") this.scene.start("ListaEspecies");
+		});
 		this.exponerGancho();
 	}
 

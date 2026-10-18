@@ -12,6 +12,7 @@ import {
 	t,
 } from "../i18n/index.js";
 import { obtenerSemilla } from "../semilla.js";
+import { alPulsarTecla } from "../teclado.js";
 
 type Especie = z.infer<typeof EspecieSchema>;
 
@@ -45,9 +46,12 @@ export class ListaEspecies extends Phaser.Scene {
 
 		const quitar = alCambiarIdioma(dibujar);
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, quitar);
-		this.input.keyboard?.on("keydown-L", alternarIdioma);
-		this.input.keyboard?.on("keydown-B", () => this.scene.start("Combate"));
-		this.input.keyboard?.on("keydown-E", () => this.iniciarExpedicion());
+		alPulsarTecla(this, (ev) => {
+			const tecla = ev.key.toLowerCase();
+			if (tecla === "l") alternarIdioma();
+			else if (tecla === "b") this.scene.start("Combate");
+			else if (tecla === "e") this.iniciarExpedicion();
+		});
 
 		// A propósito también en la compilación de producción (la prueba e2e usa
 		// vite preview); es inerte sin el parámetro ?test=1.
