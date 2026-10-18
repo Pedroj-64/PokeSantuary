@@ -4,6 +4,7 @@ import {
 	type EstadoExpedicion,
 	elegibles,
 	entrar,
+	esNodoDeCombate,
 	iniciarExpedicion,
 	liquidar,
 	type ResultadoCombate,
@@ -491,5 +492,22 @@ describe("expediciones completas", () => {
 		expect(liquidar(perdido)).toEqual({
 			dineroConservado: Math.floor((combates * 10) / 2),
 		});
+	});
+});
+
+describe("esNodoDeCombate", () => {
+	it("es cierto para los cinco tipos con combate y falso para el resto", () => {
+		const todos: TipoNodo[] = [
+			"salvaje",
+			"entrenador",
+			"alfa",
+			"sombrio",
+			"jefe",
+			"tienda",
+			"manantial",
+			"evento",
+			"cofre",
+		];
+		expect(todos.filter(esNodoDeCombate)).toEqual(TIPOS_COMBATE);
 	});
 });

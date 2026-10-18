@@ -68,5 +68,11 @@
 	"nodo.manantial": "Manantial",
 	"nodo.evento": "Evento",
 	"nodo.cofre": "Cofre de la Fisura",
-	"nodo.jefe": "Jefe"
+	"nodo.jefe": "Jefe",
+	"combate.continuar": "Continuar  [Enter]",
+	"fin.victoria": "¡Expedición completada!",
+	"fin.derrota": "La expedición ha terminado",
+	"fin.dinero": "Monedas conservadas: {n}",
+	"fin.debilitado": "debilitado",
+	"fin.volver": "Volver a la lista  [Enter]"
 }

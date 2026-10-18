@@ -1,4 +1,4 @@
-import type { SetCombate } from "@santuario/data";
+import type { ExpedicionBalance, SetCombate } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import { expedicionInicial } from "./inicio.js";
 
@@ -8,13 +8,15 @@ const set = (especie: string): SetCombate => ({
 	habilidad: "static",
 	naturaleza: "Hardy",
 });
+const BALANCE = { dineroInicial: 30 } as ExpedicionBalance;
 const SETS = ["a", "b", "c", "d", "e", "f"].map(set);
 
 describe("expedicionInicial", () => {
 	it("arranca en el piso 1 con tres especies distintas del catálogo, a plena salud", () => {
-		const e = expedicionInicial("s1", SETS);
+		const e = expedicionInicial("s1", SETS, BALANCE);
 		expect(e.piso).toBe(1);
 		expect(e.actual).toBeNull();
+		expect(e.dinero).toBe(30);
 		expect(e.equipo).toHaveLength(3);
 		expect(new Set(e.equipo.map((m) => m.especie)).size).toBe(3);
 		for (const m of e.equipo) {
@@ -24,12 +26,12 @@ describe("expedicionInicial", () => {
 	});
 
 	it("es función pura de la semilla", () => {
-		expect(expedicionInicial("s1", SETS)).toEqual(
-			expedicionInicial("s1", SETS),
+		expect(expedicionInicial("s1", SETS, BALANCE)).toEqual(
+			expedicionInicial("s1", SETS, BALANCE),
 		);
 		const equipos = new Set(
 			Array.from({ length: 30 }, (_, i) =>
-				expedicionInicial(`s${i}`, SETS)
+				expedicionInicial(`s${i}`, SETS, BALANCE)
 					.equipo.map((m) => m.especie)
 					.join(),
 			),

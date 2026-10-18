@@ -3,6 +3,7 @@ import { EspecieSchema } from "@santuario/data";
 import Phaser from "phaser";
 import { z } from "zod";
 import { cargarDatosCombate } from "../combate/datosPack.js";
+import { cargarBalance } from "../expedicion/balancePack.js";
 import { expedicionInicial } from "../expedicion/inicio.js";
 import {
 	alCambiarIdioma,
@@ -79,7 +80,7 @@ export class ListaEspecies extends Phaser.Scene {
 	private iniciarExpedicion(): void {
 		const { sets } = cargarDatosCombate();
 		this.scene.start("Mapa", {
-			estado: expedicionInicial(obtenerSemilla(), sets),
+			estado: expedicionInicial(obtenerSemilla(), sets, cargarBalance()),
 		});
 	}
 

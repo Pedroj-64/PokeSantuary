@@ -8,13 +8,23 @@ import {
 	eleccionIlegal,
 	esEleccionIlegal,
 	type Lado,
+	type MiembroEquipo,
 	type Peticion,
 	type ResultadoTurno,
 } from "@santuario/battle";
+import { resolverCombate } from "@santuario/core";
 import Phaser from "phaser";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { crearEquipos } from "../combate/equipos.js";
 import { mensajeDe } from "../combate/mensajes.js";
+import { cargarBalance } from "../expedicion/balancePack.js";
+import {
+	type DatosCombate,
+	destinoTrasCombate,
+	dineroDeNodo,
+	prepararCombate,
+	resultadoDeCombate,
+} from "../expedicion/combateNodo.js";
 import { t } from "../i18n/index.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
@@ -71,7 +81,7 @@ export class Combate extends Phaser.Scene {
 	} | null = null;
 	private fase: Fase = "cargando";
 	private peticion: Peticion | null = null;
-	private terminado: string | null = null;
+	private terminado: Lado | "empate" | null = null;
 	/** Título del panel final o de error visible (solo para las pruebas e2e). */
 	private tituloPanel: string | null = null;
 	private readonly mensajes: string[] = [];
@@ -84,11 +94,24 @@ export class Combate extends Phaser.Scene {
 	private pausaMensajeMs = PAUSA_MENSAJE_MS;
 	private pausaBarraMs = PAUSA_BARRA_MS;
 	private datos!: ReturnType<typeof cargarDatosCombate>;
+	/** Presente cuando el combate es el de un nodo de la expedición; si no, es el combate de prueba. */
+	private expedicion?: DatosCombate & { vivos: number[] };
+	private equipoFinal?: { especie: string; psPct: number }[];
+	private datosExpedicion?: DatosCombate;
 	/** Acciones por tecla de la vista actual (menú o lista de cambio). */
 	private teclas = new Map<string, () => void>();
 
 	constructor() {
 		super("Combate");
+	}
+
+	init(datos?: Partial<DatosCombate>): void {
+		this.datosExpedicion =
+			datos?.estado && datos.nodoId
+				? { estado: datos.estado, nodoId: datos.nodoId }
+				: undefined;
+		this.expedicion = undefined;
+		this.equipoFinal = undefined;
 	}
 
 	preload(): void {
@@ -152,8 +175,21 @@ export class Combate extends Phaser.Scene {
 		try {
 			// Se carga aquí (no al construir la escena) para que un pack roto muestre el panel de error.
 			this.datos = cargarDatosCombate();
-			const semilla = obtenerSemilla();
-			const { jugador, rival } = crearEquipos(semilla, this.datos.sets);
+			let semilla: string;
+			let jugador: MiembroEquipo[];
+			let rival: MiembroEquipo[];
+			if (this.datosExpedicion) {
+				const p = prepararCombate(
+					this.datosExpedicion.estado,
+					this.datosExpedicion.nodoId,
+					this.datos.sets,
+				);
+				({ semilla, jugador, rival } = p);
+				this.expedicion = { ...this.datosExpedicion, vivos: p.vivos };
+			} else {
+				semilla = obtenerSemilla();
+				({ jugador, rival } = crearEquipos(semilla, this.datos.sets));
+			}
 			const abierto = await abrirCombate({ semilla, jugador, rival });
 			remoto = abierto.remoto;
 			if (!this.vigente(gen)) return remoto.cerrar();
@@ -172,6 +208,7 @@ export class Combate extends Phaser.Scene {
 		if (!this.vigente(gen)) return;
 		this.peticion = r.peticion;
 		this.terminado = r.terminado;
+		if (r.equipoFinal) this.equipoFinal = r.equipoFinal;
 		this.siguienteVista();
 	}
 
@@ -580,6 +617,7 @@ export class Combate extends Phaser.Scene {
 		cuerpo: string,
 		colorTitulo: string,
 		detalle = "",
+		etiquetaBoton = t("combate.salir"),
 	): void {
 		this.cajaTexto.setText("");
 		this.limpiarMenu();
@@ -631,7 +669,7 @@ export class Combate extends Phaser.Scene {
 					.setDepth(12),
 			);
 		}
-		const volver = (): void => this.volverALista();
+		const volver = (): void => this.salirDelPanel();
 		const fondo = this.add
 			.rectangle(240, y0 + alto - 32, 220, 24, BOTON)
 			.setStrokeStyle(1, ACENTO)
@@ -643,7 +681,7 @@ export class Combate extends Phaser.Scene {
 		objetos.push(
 			fondo,
 			this.add
-				.text(240, y0 + alto - 32, t("combate.salir"), {
+				.text(240, y0 + alto - 32, etiquetaBoton, {
 					fontFamily: FUENTE,
 					fontSize: "11px",
 					color: "#ffffff",
@@ -663,7 +701,13 @@ export class Combate extends Phaser.Scene {
 				: g === "rival"
 					? [t("combate.derrota"), "#ff8b8b"]
 					: [t("combate.empate"), "#ffd866"];
-		this.panel(titulo, "", color);
+		this.panel(
+			titulo,
+			"",
+			color,
+			"",
+			this.expedicion ? t("combate.continuar") : undefined,
+		);
 	}
 
 	private mostrarError(error: unknown): void {
@@ -686,6 +730,32 @@ export class Combate extends Phaser.Scene {
 
 	private volverALista(): void {
 		this.scene.start("ListaEspecies");
+	}
+
+	/** Botón del panel: en la expedición, un combate terminado sigue su camino; lo demás vuelve a la lista. */
+	private salirDelPanel(): void {
+		if (this.fase === "fin" && this.expedicion) this.continuarExpedicion();
+		else this.volverALista();
+	}
+
+	/** Devuelve el resultado al estado de la expedición y pasa al mapa o a la pantalla final. */
+	private continuarExpedicion(): void {
+		const x = this.expedicion;
+		const ganador = this.terminado;
+		if (!x || !ganador) return;
+		try {
+			const resultado = resultadoDeCombate(
+				x.estado,
+				x.vivos,
+				ganador,
+				this.equipoFinal ?? [],
+				dineroDeNodo(cargarBalance(), x.estado, x.nodoId),
+			);
+			const estado = resolverCombate(x.estado, resultado);
+			this.scene.start(destinoTrasCombate(estado), { estado });
+		} catch (e) {
+			this.mostrarError(e);
+		}
 	}
 
 	private tecla(clave: string, repetida: boolean): void {

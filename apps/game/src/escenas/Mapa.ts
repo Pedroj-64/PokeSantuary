@@ -2,11 +2,13 @@ import {
 	type EstadoExpedicion,
 	elegibles,
 	entrar,
+	esNodoDeCombate,
 	type TipoNodo,
 } from "@santuario/core";
 import Phaser from "phaser";
 import iconosPng from "../assets/iconos-nodo.png?url";
 import { cargarDatosCombate } from "../combate/datosPack.js";
+import type { DatosCombate } from "../expedicion/combateNodo.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
@@ -153,7 +155,16 @@ export class Mapa extends Phaser.Scene {
 	}
 
 	private elegir(id: string): void {
-		this.scene.restart({ estado: entrar(this.estado, id) } satisfies DatosMapa);
+		const estado = entrar(this.estado, id);
+		const nodo = estado.mapa.capas.flat().find((n) => n.id === id);
+		if (nodo && esNodoDeCombate(nodo.tipo)) {
+			this.scene.start("Combate", {
+				estado,
+				nodoId: id,
+			} satisfies DatosCombate);
+		} else {
+			this.scene.restart({ estado } satisfies DatosMapa);
+		}
 	}
 
 	/** Solo con `?test=1`: mismos caminos que la interfaz. */
@@ -168,7 +179,11 @@ export class Mapa extends Phaser.Scene {
 				visitados: [...this.estado.visitados],
 				elegibles: elegibles(this.estado),
 				dinero: this.estado.dinero,
+				equipo: this.estado.equipo.map((m) => m.psPct),
 			}),
+			/** Tipo de un nodo del mapa (para que las pruebas elijan uno de combate). */
+			tipoDe: (id: string) =>
+				this.estado.mapa.capas.flat().find((n) => n.id === id)?.tipo,
 			elegir: (id: string) => this.elegir(id),
 			/** Centro de un nodo en coordenadas de página. */
 			centro: (id: string) => {

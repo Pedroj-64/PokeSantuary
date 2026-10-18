@@ -52,7 +52,7 @@ test("E abre el mapa del piso 1 y solo los nodos de entrada son elegibles", asyn
 	for (const id of s.elegibles) expect(id).toMatch(/^0-/);
 });
 
-test("pulsar un nodo elegible entra en él; uno no elegible no hace nada", async ({
+test("pulsar un nodo elegible abre su combate; uno no elegible no hace nada", async ({
 	page,
 }) => {
 	await abrirMapa(page, "m1");
@@ -65,31 +65,12 @@ test("pulsar un nodo elegible entra en él; uno no elegible no hace nada", async
 	const id = inicial.elegibles[0] as string;
 	const { x, y } = await centro(page, id);
 	await page.mouse.click(x, y);
-	await expect.poll(async () => (await estado(page))?.actual).toBe(id);
-	const s = (await estado(page)) as EstadoMapa;
-	expect(s.visitados).toEqual([id]);
-	expect(s.elegibles.length).toBeGreaterThanOrEqual(1);
-	for (const sig of s.elegibles) expect(sig).toMatch(/^1-/);
-});
-
-test("el teclado recorre el piso hasta el jefe, que no tiene salidas", async ({
-	page,
-}) => {
-	await abrirMapa(page, "m2");
-	// una pulsación por capa: cada una entra en un nodo más, hasta el jefe (capa 5)
-	for (let capa = 0; capa <= 5; capa++) {
-		await expect
-			.poll(async () => (await estado(page))?.visitados.length)
-			.toBe(capa);
-		await page.keyboard.press("1");
-	}
-	await expect.poll(async () => (await estado(page))?.visitados.length).toBe(6);
-	const s = (await estado(page)) as EstadoMapa;
-	expect(s.actual).toBe("5-0");
-	expect(s.elegibles).toEqual([]);
-	await page.keyboard.press("1"); // sin salidas: no hace nada
-	await page.waitForTimeout(150);
-	expect(await estado(page)).toEqual(s);
+	// los nodos de la capa 0 son siempre combates salvajes o de entrenador
+	await expect
+		.poll(() =>
+			page.evaluate("window.__santuario.combate?.estado().fase ?? null"),
+		)
+		.toBe("menu");
 });
 
 test("el mismo seed da el mismo mapa y Esc vuelve a la lista", async ({

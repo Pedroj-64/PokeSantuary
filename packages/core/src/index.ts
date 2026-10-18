@@ -8,6 +8,7 @@ export {
 	type EstadoExpedicion,
 	elegibles,
 	entrar,
+	esNodoDeCombate,
 	iniciarExpedicion,
 	liquidar,
 	type MiembroExp,

@@ -68,5 +68,11 @@
 	"nodo.manantial": "Spring",
 	"nodo.evento": "Event",
 	"nodo.cofre": "Rift chest",
-	"nodo.jefe": "Boss"
+	"nodo.jefe": "Boss",
+	"combate.continuar": "Continue  [Enter]",
+	"fin.victoria": "Expedition complete!",
+	"fin.derrota": "The expedition is over",
+	"fin.dinero": "Coins kept: {n}",
+	"fin.debilitado": "fainted",
+	"fin.volver": "Back to the list  [Enter]"
 }

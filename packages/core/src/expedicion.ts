@@ -47,6 +47,11 @@ const TIPOS_COMBATE: readonly TipoNodo[] = [
 	"jefe",
 ];
 
+/** ¿El tipo de nodo se resuelve con un combate? */
+export function esNodoDeCombate(tipo: TipoNodo): boolean {
+	return TIPOS_COMBATE.includes(tipo);
+}
+
 /** Busca un nodo por id en el mapa; undefined si no existe. */
 function buscarNodo(mapa: MapaPiso, id: string): NodoMapa | undefined {
 	for (const capa of mapa.capas) {
@@ -143,7 +148,7 @@ export function resolverCombate(
 		);
 	}
 	const nodo = e.actual === null ? undefined : buscarNodo(e.mapa, e.actual);
-	if (nodo === undefined || !TIPOS_COMBATE.includes(nodo.tipo)) {
+	if (nodo === undefined || !esNodoDeCombate(nodo.tipo)) {
 		throw new RangeError(
 			`resolverCombate(): el nodo actual (${e.actual ?? "ninguno"}) no es de combate`,
 		);

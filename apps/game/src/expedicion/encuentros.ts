@@ -1,15 +1,11 @@
 import type { MiembroEquipo } from "@santuario/battle";
-import { crearRng, type Rng, type TipoNodo } from "@santuario/core";
+import {
+	crearRng,
+	esNodoDeCombate,
+	type Rng,
+	type TipoNodo,
+} from "@santuario/core";
 import type { SetCombate } from "@santuario/data";
-
-/** Tipos de nodo que admiten un combate; el resto lanza RangeError. */
-const TIPOS_COMBATE: readonly TipoNodo[] = [
-	"salvaje",
-	"entrenador",
-	"alfa",
-	"sombrio",
-	"jefe",
-];
 
 /** Especie repetida en el catálogo: se queda la primera aparición. */
 function sinDuplicados(sets: readonly SetCombate[]): SetCombate[] {
@@ -74,7 +70,7 @@ export function crearRival(
 			`crearRival(): 'piso' debe ser 1, 2 o 3 (recibido ${String(piso)})`,
 		);
 	}
-	if (!TIPOS_COMBATE.includes(nodo.tipo)) {
+	if (!esNodoDeCombate(nodo.tipo)) {
 		throw new RangeError(
 			`crearRival(): el nodo ${nodo.id} es '${nodo.tipo}' y no admite combate`,
 		);
