@@ -4,6 +4,7 @@ import {
 	type NodoMapa,
 	type TipoNodo,
 } from "./mapa.js";
+import type { Mochila } from "./mochila.js";
 import type { IdRuna } from "./runas.js";
 
 /** Miembro del equipo durante la expedición; `psPct` 0 significa debilitado. */
@@ -27,6 +28,8 @@ export interface EstadoExpedicion {
 	dinero: number;
 	/** Runas de la mochila, sin repetir (máximo `MAX_RUNAS`). */
 	runas: IdRuna[];
+	/** Bolas, bayas y demás artículos comprados, por id. */
+	mochila: Mochila;
 	estado: "en-curso" | "victoria" | "derrota";
 }
 
@@ -99,6 +102,7 @@ export function iniciarExpedicion(
 		equipo: especies.map((especie) => ({ especie, psPct: PS_MAX })),
 		dinero: 0,
 		runas: [],
+		mochila: {},
 		estado: "en-curso",
 	};
 }
@@ -222,6 +226,36 @@ export function curar(e: EstadoExpedicion, pct: number): EstadoExpedicion {
 					? Math.min(PS_MAX, miembro.psPct + pct)
 					: miembro.psPct,
 		})),
+	};
+}
+
+/**
+ * Cura `pct` puntos al miembro vivo con menos PS (el primero si empatan), sin
+ * pasar de 100; si no queda nadie vivo no cambia nada.
+ *
+ * @throws {RangeError} Si `pct` no es un entero de 0 a 100.
+ */
+export function curarAlMasHerido(
+	e: EstadoExpedicion,
+	pct: number,
+): EstadoExpedicion {
+	if (!Number.isInteger(pct) || pct < 0 || pct > PS_MAX) {
+		throw new RangeError(
+			`curarAlMasHerido(${pct}): 'pct' debe ser un entero entre 0 y ${PS_MAX}`,
+		);
+	}
+	let objetivo = -1;
+	e.equipo.forEach((m, i) => {
+		const actual = e.equipo[objetivo];
+		if (m.psPct > 0 && (actual === undefined || m.psPct < actual.psPct))
+			objetivo = i;
+	});
+	if (objetivo === -1 || pct === 0) return e;
+	return {
+		...e,
+		equipo: e.equipo.map((m, i) =>
+			i === objetivo ? { ...m, psPct: Math.min(PS_MAX, m.psPct + pct) } : m,
+		),
 	};
 }
 

@@ -7,6 +7,7 @@ import {
 import type { ExpedicionBalance, SetCombate } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import {
+	cerrarCombate,
 	destinoTrasCombate,
 	dineroDeNodo,
 	prepararCombate,
@@ -171,6 +172,27 @@ describe("dineroDeNodo", () => {
 			expect(d).toBeLessThanOrEqual(rango.max);
 			expect(dineroDeNodo(BALANCE, e, id)).toBe(d);
 		}
+	});
+});
+
+describe("runas en el combate", () => {
+	it("la runa F sube el dinero un 25 %", () => {
+		const [e, id] = dentroDe("s3");
+		const base = dineroDeNodo(BALANCE, e, id);
+		const con = dineroDeNodo(BALANCE, { ...e, runas: ["F"] }, id);
+		expect(con).toBe(Math.round(base * 1.25));
+		expect(con).toBeGreaterThan(base);
+	});
+
+	it("la runa C cura al más herido al ganar, pero no al perder", () => {
+		const [e] = dentroDe("s3");
+		const equipo = e.equipo.map((m, i) => ({ ...m, psPct: i === 0 ? 40 : 90 }));
+		const con = { ...e, equipo, runas: ["C" as const] };
+		const gana = { victoria: true, psPct: [40, 90, 90], dinero: 0 };
+		expect(cerrarCombate(con, gana).equipo[0]?.psPct).toBe(55);
+		expect(cerrarCombate(e, gana).equipo[0]?.psPct).toBe(40);
+		const pierde = { victoria: false, psPct: [0, 0, 0], dinero: 0 };
+		expect(cerrarCombate(con, pierde).estado).toBe("derrota");
 	});
 });
 

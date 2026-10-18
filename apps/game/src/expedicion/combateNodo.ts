@@ -1,11 +1,14 @@
 import type { MiembroEquipo } from "@santuario/battle";
 import {
 	crearRng,
+	curarAlMasHerido,
 	type EstadoExpedicion,
 	esNodoDeCombate,
+	modificadores,
 	type NodoMapa,
 	type ResultadoCombate,
 	recompensa,
+	resolverCombate,
 } from "@santuario/core";
 import type { ExpedicionBalance, SetCombate } from "@santuario/data";
 import { crearRival } from "./encuentros.js";
@@ -105,12 +108,27 @@ export function dineroDeNodo(
 	nodoId: string,
 ): number {
 	const nodo = buscarNodo(e, nodoId);
-	return recompensa(
+	const base = recompensa(
 		balance.recompensa,
 		nodo.tipo,
 		e.piso,
 		crearRng(`${e.semilla}:p${e.piso}:${nodoId}:dinero`),
 	);
+	return Math.round(base * modificadores(e.runas).multDinero);
+}
+
+/**
+ * Aplica `resolverCombate` y, si se ganó y la expedición sigue, la cura de las
+ * runas (la del más herido).
+ */
+export function cerrarCombate(
+	e: EstadoExpedicion,
+	resultado: ResultadoCombate,
+): EstadoExpedicion {
+	const siguiente = resolverCombate(e, resultado);
+	return resultado.victoria && siguiente.estado === "en-curso"
+		? curarAlMasHerido(siguiente, modificadores(e.runas).curaPostCombatePct)
+		: siguiente;
 }
 
 /** Pantalla que sigue a un combate resuelto. */

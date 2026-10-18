@@ -12,6 +12,7 @@ export {
 } from "./eventos.js";
 export {
 	curar,
+	curarAlMasHerido,
 	type EstadoExpedicion,
 	elegibles,
 	entrar,
@@ -29,6 +30,15 @@ export {
 	type TipoNodo,
 	validarMapa,
 } from "./mapa.js";
+export {
+	comprarArticulo,
+	cuantos,
+	gastar,
+	type Mochila,
+	totalBayas,
+	usarBaya,
+	usarBayaAlMasHerido,
+} from "./mochila.js";
 export { type Accion, type Estado, type Evento, paso } from "./paso.js";
 export {
 	type RangoDinero,

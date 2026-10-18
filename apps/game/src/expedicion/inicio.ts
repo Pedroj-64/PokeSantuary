@@ -19,5 +19,16 @@ export function expedicionInicial(
 			jugador.map((m) => m.especie),
 		),
 		dinero: balance.dineroInicial,
+		mochila: bolasIniciales(balance),
 	};
+}
+
+/** Las bolas con las que se sale: del tipo más barato del catálogo. */
+function bolasIniciales(balance: ExpedicionBalance): Record<string, number> {
+	const bola = balance.catalogoTienda
+		.filter((a) => a.tipo === "ball")
+		.sort((a, b) => a.precio - b.precio)[0];
+	return bola === undefined || balance.bolasIniciales === 0
+		? {}
+		: { [bola.id]: balance.bolasIniciales };
 }

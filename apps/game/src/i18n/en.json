@@ -113,5 +113,18 @@
 	"evento.niebla.titulo": "The Fog",
 	"evento.niebla.texto": "Thick fog covers the shortcut. Something glints on the other side.",
 	"evento.niebla.op1": "Cross the fog",
-	"evento.niebla.op2": "Wait for it to clear"
+	"evento.niebla.op2": "Wait for it to clear",
+	"tienda.tienes": "you have {n}",
+	"tienda.salir": "Leave  [Enter]",
+	"articulo.poke-ball": "Poké Ball",
+	"articulo.super-ball": "Great Ball",
+	"articulo.baya-aranja": "Oran Berry (+25% HP)",
+	"articulo.baya-zidra": "Sitrus Berry (+50% HP)",
+	"articulo.mt-rayo": "TM Thunderbolt",
+	"articulo.mt-terremoto": "TM Earthquake",
+	"articulo.banda-focus": "Focus Sash",
+	"articulo.restos": "Leftovers",
+	"mapa.runas": "Runes: {lista}",
+	"mapa.mochila": "Balls: {bolas}  ·  Berries: {bayas}  [B]",
+	"mapa.sinRunas": "none"
 }

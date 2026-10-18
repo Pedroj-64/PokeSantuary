@@ -4,6 +4,7 @@ import { Eleccion } from "./escenas/Eleccion.js";
 import { FinExpedicion } from "./escenas/FinExpedicion.js";
 import { ListaEspecies } from "./escenas/ListaEspecies.js";
 import { Mapa } from "./escenas/Mapa.js";
+import { Tienda } from "./escenas/Tienda.js";
 import { alCambiarIdioma, idiomaActual, t } from "./i18n/index.js";
 
 export const ANCHO = 480;
@@ -29,7 +30,7 @@ const juego = new Phaser.Game({
 		mode: Phaser.Scale.NONE,
 		zoom: zoomEntero(window.innerWidth, window.innerHeight),
 	},
-	scene: [ListaEspecies, Combate, Mapa, Eleccion, FinExpedicion],
+	scene: [ListaEspecies, Combate, Mapa, Eleccion, Tienda, FinExpedicion],
 });
 
 window.addEventListener("resize", () =>

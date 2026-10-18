@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	curar,
+	curarAlMasHerido,
 	type EstadoExpedicion,
 	elegibles,
 	entrar,
@@ -509,5 +510,30 @@ describe("esNodoDeCombate", () => {
 			"cofre",
 		];
 		expect(todos.filter(esNodoDeCombate)).toEqual(TIPOS_COMBATE);
+	});
+});
+
+describe("curarAlMasHerido", () => {
+	const equipo = (...ps: number[]) => ({
+		...iniciarExpedicion("m", ["a", "b", "c"].slice(0, ps.length)),
+		equipo: ps.map((psPct, i) => ({ especie: `e${i}`, psPct })),
+	});
+
+	it("cura solo al vivo con menos PS y no pasa de 100", () => {
+		const e = curarAlMasHerido(equipo(80, 30, 0), 15);
+		expect(e.equipo.map((m) => m.psPct)).toEqual([80, 45, 0]);
+		expect(curarAlMasHerido(equipo(98, 99), 15).equipo[0]?.psPct).toBe(100);
+	});
+
+	it("si todos están debilitados o pct es 0 no cambia nada", () => {
+		const caidos = equipo(0, 0);
+		expect(curarAlMasHerido(caidos, 15)).toBe(caidos);
+		const vivos = equipo(50);
+		expect(curarAlMasHerido(vivos, 0)).toBe(vivos);
+	});
+
+	it("rechaza un pct fuera de rango", () => {
+		expect(() => curarAlMasHerido(equipo(50), 101)).toThrow(RangeError);
+		expect(() => curarAlMasHerido(equipo(50), 1.5)).toThrow(RangeError);
 	});
 });

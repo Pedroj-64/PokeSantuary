@@ -113,5 +113,18 @@
 	"evento.niebla.titulo": "La niebla",
 	"evento.niebla.texto": "Una niebla espesa cubre el atajo. Algo brilla al otro lado.",
 	"evento.niebla.op1": "Cruzar la niebla",
-	"evento.niebla.op2": "Esperar a que se despeje"
+	"evento.niebla.op2": "Esperar a que se despeje",
+	"tienda.tienes": "tienes {n}",
+	"tienda.salir": "Salir  [Enter]",
+	"articulo.poke-ball": "Poké Ball",
+	"articulo.super-ball": "Super Ball",
+	"articulo.baya-aranja": "Baya Aranja (+25 % PS)",
+	"articulo.baya-zidra": "Baya Zidra (+50 % PS)",
+	"articulo.mt-rayo": "MT Rayo",
+	"articulo.mt-terremoto": "MT Terremoto",
+	"articulo.banda-focus": "Banda Focus",
+	"articulo.restos": "Restos",
+	"mapa.runas": "Runas: {lista}",
+	"mapa.mochila": "Bolas: {bolas}  ·  Bayas: {bayas}  [B]",
+	"mapa.sinRunas": "ninguna"
 }

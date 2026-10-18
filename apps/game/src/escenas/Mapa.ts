@@ -4,6 +4,8 @@ import {
 	entrar,
 	esNodoDeCombate,
 	type TipoNodo,
+	totalBayas,
+	usarBayaAlMasHerido,
 } from "@santuario/core";
 import Phaser from "phaser";
 import iconosPng from "../assets/iconos-nodo.png?url";
@@ -13,6 +15,7 @@ import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
 import type { DatosEleccion } from "./Eleccion.js";
+import type { DatosTienda } from "./Tienda.js";
 
 const FUENTE = "monospace";
 const ICONOS = "iconos-nodo";
@@ -114,6 +117,7 @@ export class Mapa extends Phaser.Scene {
 		alPulsarTecla(this, (ev) => {
 			const id = ids[Number(ev.key) - 1];
 			if (id !== undefined) this.elegir(id);
+			else if (ev.key.toLowerCase() === "b") this.darBaya();
 			else if (ev.key === "Escape") this.scene.start("ListaEspecies");
 		});
 		this.exponerGancho();
@@ -144,6 +148,23 @@ export class Mapa extends Phaser.Scene {
 			color: "#ffd866",
 		});
 		this.add.text(8, 20, t("mapa.dinero", { n: e.dinero }), estilo);
+		const bolas = Object.entries(e.mochila)
+			.filter(([id]) => id.endsWith("-ball"))
+			.reduce((n, [, c]) => n + c, 0);
+		this.add.text(
+			8,
+			34,
+			t("mapa.mochila", { bolas, bayas: totalBayas(e) }),
+			estilo,
+		);
+		this.add.text(
+			8,
+			48,
+			t("mapa.runas", {
+				lista: e.runas.length > 0 ? e.runas.join(" ") : t("mapa.sinRunas"),
+			}),
+			estilo,
+		);
 		const nombres = cargarDatosCombate().nombres;
 		e.equipo.forEach((m, i) => {
 			this.add.text(
@@ -153,6 +174,13 @@ export class Mapa extends Phaser.Scene {
 				{ ...estilo, color: m.psPct === 0 ? "#ff8b8b" : "#7dff9a" },
 			);
 		});
+	}
+
+	/** Tecla B: una baya al miembro más herido. */
+	private darBaya(): void {
+		const siguiente = usarBayaAlMasHerido(this.estado);
+		if (siguiente !== this.estado)
+			this.scene.restart({ estado: siguiente } satisfies DatosMapa);
 	}
 
 	private elegir(id: string): void {
@@ -173,6 +201,11 @@ export class Mapa extends Phaser.Scene {
 				estado,
 				nodoId: id,
 			} satisfies DatosEleccion);
+		} else if (nodo?.tipo === "tienda") {
+			this.scene.start("Tienda", {
+				estado,
+				nodoId: id,
+			} satisfies DatosTienda);
 		} else {
 			this.scene.restart({ estado } satisfies DatosMapa);
 		}
@@ -190,6 +223,8 @@ export class Mapa extends Phaser.Scene {
 				visitados: [...this.estado.visitados],
 				elegibles: elegibles(this.estado),
 				dinero: this.estado.dinero,
+				mochila: { ...this.estado.mochila },
+				runas: [...this.estado.runas],
 				equipo: this.estado.equipo.map((m) => m.psPct),
 			}),
 			/** Tipo de un nodo del mapa (para que las pruebas elijan uno de combate). */
@@ -201,14 +236,25 @@ export class Mapa extends Phaser.Scene {
 				this.estado.mapa.capas.flat().map((n) => ({ id: n.id, tipo: n.tipo })),
 			/** Salta a un nodo de elección sin pasar por las capas anteriores. */
 			irA: (id: string) =>
-				this.scene.start("Eleccion", {
-					estado: {
-						...this.estado,
-						actual: id,
-						visitados: [...this.estado.visitados, id],
+				this.scene.start(
+					this.estado.mapa.capas.flat().find((n) => n.id === id)?.tipo ===
+						"tienda"
+						? "Tienda"
+						: "Eleccion",
+					{
+						estado: {
+							...this.estado,
+							actual: id,
+							visitados: [...this.estado.visitados, id],
+						},
+						nodoId: id,
 					},
-					nodoId: id,
-				} satisfies DatosEleccion),
+				),
+			/** Solo para pruebas: cambia dinero y runas del estado y repinta el mapa. */
+			preparar: (cambios: { dinero?: number; runas?: string[] }) =>
+				this.scene.restart({
+					estado: { ...this.estado, ...cambios },
+				}),
 			/** Centro de un nodo en coordenadas de página. */
 			centro: (id: string) => {
 				const c = this.game.canvas.getBoundingClientRect();

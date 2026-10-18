@@ -8,7 +8,15 @@ const set = (especie: string): SetCombate => ({
 	habilidad: "static",
 	naturaleza: "Hardy",
 });
-const BALANCE = { dineroInicial: 30 } as ExpedicionBalance;
+const BALANCE = {
+	dineroInicial: 30,
+	bolasIniciales: 5,
+	catalogoTienda: [
+		{ id: "super-ball", tipo: "ball", precio: 45 },
+		{ id: "poke-ball", tipo: "ball", precio: 20 },
+		{ id: "baya", tipo: "baya", precio: 5 },
+	],
+} as ExpedicionBalance;
 const SETS = ["a", "b", "c", "d", "e", "f"].map(set);
 
 describe("expedicionInicial", () => {
@@ -23,6 +31,15 @@ describe("expedicionInicial", () => {
 			expect(SETS.map((s) => s.especie)).toContain(m.especie);
 			expect(m.psPct).toBe(100);
 		}
+	});
+
+	it("sale con las bolas iniciales de la ball más barata", () => {
+		expect(expedicionInicial("s1", SETS, BALANCE).mochila).toEqual({
+			"poke-ball": 5,
+		});
+		expect(
+			expedicionInicial("s1", SETS, { ...BALANCE, bolasIniciales: 0 }).mochila,
+		).toEqual({});
 	});
 
 	it("es función pura de la semilla", () => {

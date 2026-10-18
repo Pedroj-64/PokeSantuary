@@ -12,13 +12,13 @@ import {
 	type Peticion,
 	type ResultadoTurno,
 } from "@santuario/battle";
-import { resolverCombate } from "@santuario/core";
 import Phaser from "phaser";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { crearEquipos } from "../combate/equipos.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import {
+	cerrarCombate,
 	type DatosCombate,
 	destinoTrasCombate,
 	dineroDeNodo,
@@ -751,7 +751,7 @@ export class Combate extends Phaser.Scene {
 				this.equipoFinal ?? [],
 				dineroDeNodo(cargarBalance(), x.estado, x.nodoId),
 			);
-			const estado = resolverCombate(x.estado, resultado);
+			const estado = cerrarCombate(x.estado, resultado);
 			this.scene.start(destinoTrasCombate(estado), { estado });
 		} catch (e) {
 			this.mostrarError(e);
