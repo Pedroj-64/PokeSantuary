@@ -23,6 +23,17 @@ export const SFX = {
 	capturaExito: "captura-exito",
 	capturaFallo: "captura-fallo",
 	curar: "curar",
+	comprar: "comprar",
+	sinDinero: "sin-dinero",
+	bolaLanzar: "bola-lanzar",
+	bolaAgitar: "bola-agitar",
+	entradaCampo: "entrada-campo",
+	cofreAbrir: "cofre-abrir",
+	evento: "evento",
+	runaObtenida: "runa-obtenida",
+	alfaAparece: "alfa-aparece",
+	sombrioAparece: "sombrio-aparece",
+	jefeAparece: "jefe-aparece",
 } as const;
 
 /** Sonido de lanzar un movimiento según su tipo (`mov-fire`, `mov-water`…). */

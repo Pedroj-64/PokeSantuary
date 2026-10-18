@@ -124,7 +124,7 @@ export class Eleccion extends Phaser.Scene {
 
 	/** Aplica los efectos de la opción en orden; si no caben runas, pregunta cuál sustituir. */
 	private resolver(indice: number): void {
-		void efecto(SFX.aceptar);
+		void efecto(this.evento.nodo === "cofre" ? SFX.cofreAbrir : SFX.aceptar);
 		const antes = this.estado;
 		const efectos = this.evento.opciones[indice]?.efectos ?? [];
 		const rng = crearRng(
@@ -176,8 +176,10 @@ export class Eleccion extends Phaser.Scene {
 		if (despues.equipo.some((m, i) => m.psPct !== antes.equipo[i]?.psPct))
 			lineas.push(t("eleccion.ps"));
 		for (const r of despues.runas)
-			if (!antes.runas.includes(r))
+			if (!antes.runas.includes(r)) {
 				lineas.push(t("eleccion.runaNueva", { runa: t(`runa.${r}`) }));
+				void efecto(SFX.runaObtenida);
+			}
 		if (lineas.length === 0) lineas.push(t("eleccion.nada"));
 		this.texto(20, 20, t(this.evento.titulo), {
 			fontSize: "16px",

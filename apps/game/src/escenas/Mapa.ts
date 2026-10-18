@@ -187,9 +187,17 @@ export class Mapa extends Phaser.Scene {
 	}
 
 	private elegir(id: string): void {
-		void efecto(SFX.aceptar);
 		const estado = entrar(this.estado, id);
 		const nodo = estado.mapa.capas.flat().find((n) => n.id === id);
+		void efecto(
+			nodo?.tipo === "alfa"
+				? SFX.alfaAparece
+				: nodo?.tipo === "sombrio"
+					? SFX.sombrioAparece
+					: nodo?.tipo === "jefe"
+						? SFX.jefeAparece
+						: SFX.aceptar,
+		);
 		if (nodo && esNodoDeCombate(nodo.tipo)) {
 			this.scene.start("Combate", {
 				estado,

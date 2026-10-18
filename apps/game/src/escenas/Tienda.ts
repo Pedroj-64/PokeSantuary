@@ -88,7 +88,12 @@ export class Tienda extends Phaser.Scene {
 					fixedWidth: 440,
 				},
 			);
-			if (!alcanza) return;
+			if (!alcanza) {
+				fila
+					.setInteractive({ useHandCursor: false })
+					.on("pointerdown", () => void efecto(SFX.sinDinero));
+				return;
+			}
 			const comprar = (): void => this.comprar(a.id);
 			fila.setInteractive({ useHandCursor: true }).on("pointerdown", comprar);
 			this.teclas.set(String(i + 1), comprar);
@@ -107,7 +112,7 @@ export class Tienda extends Phaser.Scene {
 	private comprar(id: string): void {
 		const base = this.catalogo.find((a) => a.id === id);
 		if (base === undefined) return;
-		void efecto(SFX.aceptar);
+		void efecto(SFX.comprar);
 		this.estado = comprarArticulo(this.estado, base);
 		this.dibujar();
 	}

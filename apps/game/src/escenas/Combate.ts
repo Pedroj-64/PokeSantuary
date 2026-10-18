@@ -420,6 +420,7 @@ export class Combate extends Phaser.Scene {
 			}
 			case "cambio": {
 				const l = this.campo[e.lado];
+				void efecto(SFX.entradaCampo);
 				if (e.lado === "rival") this.rivalEspecie = e.especie;
 				l.hp = e.hp;
 				l.hpMax = e.hpMax;
@@ -685,8 +686,14 @@ export class Combate extends Phaser.Scene {
 		this.cajaTexto.setText(
 			t(entra ? "captura.exito" : "captura.fallo", { especie: nombre }),
 		);
+		void efecto(SFX.bolaLanzar);
+		await this.esperar(this.pausaMensajeMs);
+		if (!this.vigente(gen)) return;
+		void efecto(SFX.bolaAgitar);
+		await this.esperar(this.pausaMensajeMs);
+		if (!this.vigente(gen)) return;
 		void efecto(entra ? SFX.capturaExito : SFX.capturaFallo);
-		await this.esperar(this.pausaMensajeMs * 2);
+		await this.esperar(this.pausaMensajeMs);
 		if (!this.vigente(gen)) return;
 		if (!entra) return this.mostrarMenu();
 		const resultado = resultadoDeCombate(
