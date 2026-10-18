@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { Captura } from "./escenas/Captura.js";
 import { Combate } from "./escenas/Combate.js";
 import { Eleccion } from "./escenas/Eleccion.js";
 import { FinExpedicion } from "./escenas/FinExpedicion.js";
@@ -30,7 +31,15 @@ const juego = new Phaser.Game({
 		mode: Phaser.Scale.NONE,
 		zoom: zoomEntero(window.innerWidth, window.innerHeight),
 	},
-	scene: [ListaEspecies, Combate, Mapa, Eleccion, Tienda, FinExpedicion],
+	scene: [
+		ListaEspecies,
+		Combate,
+		Mapa,
+		Eleccion,
+		Tienda,
+		Captura,
+		FinExpedicion,
+	],
 });
 
 window.addEventListener("resize", () =>

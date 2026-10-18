@@ -175,6 +175,30 @@ describe("dineroDeNodo", () => {
 	});
 });
 
+describe("equipo de más de 3", () => {
+	it("solo entran los 3 primeros vivos y el banquillo conserva sus PS", () => {
+		const [base, id] = dentroDe("s5");
+		const e = {
+			...base,
+			equipo: ["a", "b", "c", "d", "e", "f"].map((especie, i) => ({
+				especie,
+				psPct: i === 0 ? 0 : 50 + i,
+			})),
+		};
+		const p = prepararCombate(e, id, SETS);
+		expect(p.vivos).toEqual([1, 2, 3]);
+		expect(p.jugador.map((m) => m.especie)).toEqual(["b", "c", "d"]);
+		const r = resultadoDeCombate(
+			e,
+			p.vivos,
+			"jugador",
+			[{ psPct: 10 }, { psPct: 20 }, { psPct: 30 }],
+			0,
+		);
+		expect(r.psPct).toEqual([0, 10, 20, 30, 54, 55]);
+	});
+});
+
 describe("runas en el combate", () => {
 	it("la runa F sube el dinero un 25 %", () => {
 		const [e, id] = dentroDe("s3");

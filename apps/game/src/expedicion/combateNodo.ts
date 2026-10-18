@@ -28,6 +28,9 @@ export interface PreparacionCombate {
 	vivos: number[];
 }
 
+/** El motor de combate admite hasta 3 por bando: entran los 3 primeros vivos del equipo. */
+const MAX_EN_COMBATE = 3;
+
 function buscarNodo(e: EstadoExpedicion, id: string): NodoMapa {
 	const nodo = e.mapa.capas.flat().find((n) => n.id === id);
 	if (nodo === undefined || !esNodoDeCombate(nodo.tipo)) {
@@ -49,7 +52,9 @@ export function prepararCombate(
 	sets: readonly SetCombate[],
 ): PreparacionCombate {
 	const nodo = buscarNodo(e, nodoId);
-	const vivos = e.equipo.flatMap((m, i) => (m.psPct > 0 ? [i] : []));
+	const vivos = e.equipo
+		.flatMap((m, i) => (m.psPct > 0 ? [i] : []))
+		.slice(0, MAX_EN_COMBATE);
 	if (vivos.length === 0) throw new RangeError("no queda ningún miembro vivo");
 	const jugador = vivos.map((i): MiembroEquipo => {
 		const { especie, psPct } = e.equipo[i] as {
@@ -77,7 +82,7 @@ export function prepararCombate(
 /**
  * Traduce el final de un combate al resultado que espera `resolverCombate`:
  * los PS finales vuelven a su sitio del equipo completo (los que no entraron
- * quedan a 0) y solo una victoria da dinero.
+ * conservan los suyos) y solo una victoria da dinero.
  *
  * @throws {RangeError} Si los PS finales no son uno por cada miembro que entró.
  */
@@ -93,7 +98,8 @@ export function resultadoDeCombate(
 			`se esperaban ${vivos.length} valores de PS finales y llegaron ${equipoFinal.length}`,
 		);
 	}
-	const psPct = e.equipo.map(() => 0);
+	// Los que no entran (debilitados o en el banquillo) conservan sus PS.
+	const psPct = e.equipo.map((m) => m.psPct);
 	vivos.forEach((posicion, k) => {
 		psPct[posicion] = (equipoFinal[k] as { psPct: number }).psPct;
 	});

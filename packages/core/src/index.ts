@@ -3,6 +3,7 @@ export {
 	intentarCaptura,
 	probCaptura,
 } from "./captura.js";
+export { capturar, equipoLleno, sustituirMiembro } from "./equipo.js";
 export {
 	aplicarEfecto,
 	elegirEvento,

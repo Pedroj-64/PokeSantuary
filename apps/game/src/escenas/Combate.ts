@@ -12,6 +12,7 @@ import {
 	type Peticion,
 	type ResultadoTurno,
 } from "@santuario/battle";
+import { cuantos, gastar, intentarCaptura } from "@santuario/core";
 import Phaser from "phaser";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { crearEquipos } from "../combate/equipos.js";
@@ -96,6 +97,9 @@ export class Combate extends Phaser.Scene {
 	private datos!: ReturnType<typeof cargarDatosCombate>;
 	/** Presente cuando el combate es el de un nodo de la expedición; si no, es el combate de prueba. */
 	private expedicion?: DatosCombate & { vivos: number[] };
+	/** Especie del rival que está en el campo ahora mismo (la que se intenta capturar). */
+	private rivalEspecie = "";
+	private intentosCaptura = 0;
 	private equipoFinal?: { especie: string; psPct: number }[];
 	private datosExpedicion?: DatosCombate;
 	/** Acciones por tecla de la vista actual (menú o lista de cambio). */
@@ -112,6 +116,8 @@ export class Combate extends Phaser.Scene {
 				: undefined;
 		this.expedicion = undefined;
 		this.equipoFinal = undefined;
+		this.rivalEspecie = "";
+		this.intentosCaptura = 0;
 	}
 
 	preload(): void {
@@ -397,6 +403,7 @@ export class Combate extends Phaser.Scene {
 			}
 			case "cambio": {
 				const l = this.campo[e.lado];
+				if (e.lado === "rival") this.rivalEspecie = e.especie;
 				l.hp = e.hp;
 				l.hpMax = e.hpMax;
 				l.ratio = e.hpMax > 0 ? e.hp / e.hpMax : 0;
@@ -563,15 +570,98 @@ export class Combate extends Phaser.Scene {
 			() => this.mostrarCambio(),
 			"c",
 		);
-		this.textoPregunta(
-			error ??
-				t("combate.elige", {
-					especie: this.datos.nombres.especie(activo?.especie ?? ""),
-				}),
-			error ? "#ff8b8b" : "#ffffff",
-		);
+		const bola = this.mejorBola();
+		if (bola !== undefined && !error) {
+			this.boton(
+				326,
+				208,
+				144,
+				[t("captura.boton"), t("captura.restantes", { n: bola.cuantas })],
+				true,
+				() => void this.lanzarBola(),
+				"k",
+			);
+		} else {
+			this.textoPregunta(
+				error ??
+					t("combate.elige", {
+						especie: this.datos.nombres.especie(activo?.especie ?? ""),
+					}),
+				error ? "#ff8b8b" : "#ffffff",
+			);
+		}
 		// Esc abandona el combate desde el menú principal (cierra el Worker al salir de la escena)
 		this.teclas.set("escape", () => this.volverALista());
+	}
+
+	// ---------------------------------------------------------------- captura
+
+	/** Mejor bola que queda, si el combate es un encuentro salvaje de la expedición. */
+	private mejorBola():
+		| { id: string; mult: number; cuantas: number }
+		| undefined {
+		const x = this.expedicion;
+		if (!x || this.rivalEspecie === "") return undefined;
+		const nodo = x.estado.mapa.capas.flat().find((n) => n.id === x.nodoId);
+		if (nodo?.tipo !== "salvaje") return undefined;
+		return Object.entries(cargarBalance().multBola)
+			.filter(([id]) => cuantos(x.estado, id) > 0)
+			.map(([id, mult]) => ({ id, mult, cuantas: cuantos(x.estado, id) }))
+			.sort((a, b) => b.mult - a.mult)[0];
+	}
+
+	/** Gasta una bola y la lanza contra el rival; si entra, el combate acaba y empieza la escena de captura. */
+	private async lanzarBola(): Promise<void> {
+		const x = this.expedicion;
+		const bola = this.mejorBola();
+		const p = this.peticion;
+		if (this.fase !== "menu" || !x || !bola || !p) return;
+		const gen = this.generacion;
+		const rival = this.campo.rival;
+		const psPct =
+			rival.hpMax > 0 ? Math.round((100 * rival.hp) / rival.hpMax) : 100;
+		const balance = cargarBalance();
+		const entra = intentarCaptura(
+			`${x.estado.semilla}:p${x.estado.piso}:${x.nodoId}`,
+			this.intentosCaptura++,
+			{
+				psPct,
+				tasaBase:
+					balance.tasaCaptura[this.rivalEspecie] ??
+					balance.tasaCapturaPorDefecto,
+				multBola: bola.mult,
+			},
+		);
+		this.expedicion = { ...x, estado: gastar(x.estado, bola.id) };
+		this.limpiarMenu();
+		this.fase = "reproduciendo";
+		const nombre = this.datos.nombres.especie(this.rivalEspecie);
+		this.cajaTexto.setText(
+			t(entra ? "captura.exito" : "captura.fallo", { especie: nombre }),
+		);
+		await this.esperar(this.pausaMensajeMs * 2);
+		if (!this.vigente(gen)) return;
+		if (!entra) return this.mostrarMenu();
+		const resultado = resultadoDeCombate(
+			this.expedicion.estado,
+			x.vivos,
+			"jugador",
+			p.equipo.map((m) => ({
+				especie: m.especie,
+				psPct: m.hpMax > 0 ? Math.round((100 * m.hp) / m.hpMax) : 0,
+			})),
+			0,
+		);
+		try {
+			const estado = cerrarCombate(this.expedicion.estado, resultado);
+			this.scene.start("Captura", {
+				estado,
+				especie: this.rivalEspecie,
+				psPct,
+			});
+		} catch (e) {
+			this.mostrarError(e);
+		}
 	}
 
 	private mostrarCambio(error?: string): void {
@@ -775,6 +865,8 @@ export class Combate extends Phaser.Scene {
 				fase: this.fase,
 				peticion: this.peticion,
 				terminado: this.terminado,
+				bolas: this.expedicion ? { ...this.expedicion.estado.mochila } : {},
+				rival: this.rivalEspecie,
 				panel: this.tituloPanel,
 				mensajes: [...this.mensajes],
 				hpJugador: this.campo.jugador.hp,
@@ -786,6 +878,8 @@ export class Combate extends Phaser.Scene {
 				this.falloForzado = tipo;
 			},
 			elegir: (e: Eleccion) => this.elegir(e),
+			/** Lanza una bola como el botón de capturar. */
+			lanzarBola: () => this.lanzarBola(),
 			registroHash: async () => {
 				const registro = (await this.remoto?.registro()) ?? "";
 				const h = await crypto.subtle.digest(

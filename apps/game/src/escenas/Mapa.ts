@@ -251,10 +251,23 @@ export class Mapa extends Phaser.Scene {
 					},
 				),
 			/** Solo para pruebas: cambia dinero y runas del estado y repinta el mapa. */
-			preparar: (cambios: { dinero?: number; runas?: string[] }) =>
+			preparar: (cambios: {
+				dinero?: number;
+				runas?: string[];
+				mochila?: Record<string, number>;
+				equipo?: string[];
+			}) => {
+				const { equipo, ...resto } = cambios;
 				this.scene.restart({
-					estado: { ...this.estado, ...cambios },
-				}),
+					estado: {
+						...this.estado,
+						...resto,
+						...(equipo && {
+							equipo: equipo.map((especie) => ({ especie, psPct: 100 })),
+						}),
+					},
+				});
+			},
 			/** Centro de un nodo en coordenadas de página. */
 			centro: (id: string) => {
 				const c = this.game.canvas.getBoundingClientRect();

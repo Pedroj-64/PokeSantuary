@@ -126,5 +126,13 @@
 	"articulo.restos": "Restos",
 	"mapa.runas": "Runas: {lista}",
 	"mapa.mochila": "Bolas: {bolas}  ·  Bayas: {bayas}  [B]",
-	"mapa.sinRunas": "ninguna"
+	"mapa.sinRunas": "ninguna",
+	"captura.boton": "Capturar  [K]",
+	"captura.restantes": "Bolas: {n}",
+	"captura.exito": "¡{especie} ha sido capturado!",
+	"captura.fallo": "¡{especie} se ha escapado de la bola!",
+	"captura.seUne": "{especie} se une al equipo.",
+	"captura.lleno": "Equipo completo. ¿A quién sueltas por {especie}?",
+	"captura.soltar": "[{n}] Soltar a {especie}  ({ps} %)",
+	"captura.dejar": "Dejar ir a {especie}  [Esc]"
 }

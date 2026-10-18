@@ -126,5 +126,13 @@
 	"articulo.restos": "Leftovers",
 	"mapa.runas": "Runes: {lista}",
 	"mapa.mochila": "Balls: {bolas}  ·  Berries: {bayas}  [B]",
-	"mapa.sinRunas": "none"
+	"mapa.sinRunas": "none",
+	"captura.boton": "Catch  [K]",
+	"captura.restantes": "Balls: {n}",
+	"captura.exito": "{especie} was caught!",
+	"captura.fallo": "{especie} broke free!",
+	"captura.seUne": "{especie} joins the team.",
+	"captura.lleno": "Team full. Who do you release for {especie}?",
+	"captura.soltar": "[{n}] Release {especie}  ({ps}%)",
+	"captura.dejar": "Let {especie} go  [Esc]"
 }
