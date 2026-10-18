@@ -175,6 +175,21 @@ describe("dineroDeNodo", () => {
 	});
 });
 
+describe("rival en el resultado", () => {
+	it("lleva la especie del rival solo si se conoce", () => {
+		const [e] = dentroDe("s5");
+		const fin = [{ psPct: 50 }, { psPct: 50 }, { psPct: 50 }];
+		const con = resultadoDeCombate(e, [0, 1, 2], "jugador", fin, 7, "gastly");
+		expect(con.rival).toBe("gastly");
+		expect("rival" in resultadoDeCombate(e, [0, 1, 2], "jugador", fin, 7)).toBe(
+			false,
+		);
+		expect(
+			"rival" in resultadoDeCombate(e, [0, 1, 2], "jugador", fin, 7, ""),
+		).toBe(false);
+	});
+});
+
 describe("equipo de más de 3", () => {
 	it("solo entran los 3 primeros vivos y el banquillo conserva sus PS", () => {
 		const [base, id] = dentroDe("s5");

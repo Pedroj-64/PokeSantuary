@@ -92,6 +92,7 @@ export function resultadoDeCombate(
 	ganador: "jugador" | "rival" | "empate",
 	equipoFinal: readonly { psPct: number }[],
 	dinero: number,
+	rival?: string,
 ): ResultadoCombate {
 	if (equipoFinal.length !== vivos.length) {
 		throw new RangeError(
@@ -104,7 +105,12 @@ export function resultadoDeCombate(
 		psPct[posicion] = (equipoFinal[k] as { psPct: number }).psPct;
 	});
 	const victoria = ganador === "jugador";
-	return { victoria, psPct, dinero: victoria ? dinero : 0 };
+	return {
+		victoria,
+		psPct,
+		dinero: victoria ? dinero : 0,
+		...(rival !== undefined && rival !== "" && { rival }),
+	};
 }
 
 /** Dinero que suelta el combate de un nodo; determinista por expedición, piso y nodo. */

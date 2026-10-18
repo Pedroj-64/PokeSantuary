@@ -43,6 +43,20 @@ export class FinExpedicion extends Phaser.Scene {
 				color: "#ffd866",
 			})
 			.setOrigin(0.5, 0);
+		if (e.pendientesPurificar.length > 0) {
+			this.add
+				.text(
+					240,
+					116,
+					t("fin.sombrios", { n: e.pendientesPurificar.length }),
+					{
+						...centro,
+						fontSize: "10px",
+						color: "#c9a0ff",
+					},
+				)
+				.setOrigin(0.5, 0);
+		}
 		e.equipo.forEach((m, i) => {
 			this.add
 				.text(

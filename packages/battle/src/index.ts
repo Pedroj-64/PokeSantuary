@@ -16,6 +16,7 @@ export type {
 	MiembroPeticion,
 	OpcionMovimiento,
 	Peticion,
+	TerrenoFisura,
 } from "./combate.js";
 export { eleccionIlegal, esEleccionIlegal } from "./errores.js";
 export type { DatosMovimiento, Estimador } from "./ia.js";

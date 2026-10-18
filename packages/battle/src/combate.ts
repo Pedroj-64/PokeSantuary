@@ -57,6 +57,13 @@ export interface Peticion {
 }
 
 /** Pokémon en campo de un lado, visible para ambos. */
+/** Terrenos que puede imponer la condición de fisura de un bioma. */
+export type TerrenoFisura =
+	| "grassyterrain"
+	| "electricterrain"
+	| "mistyterrain"
+	| "psychicterrain";
+
 export interface ActivoPublico {
 	especie: string;
 	hp: number;
@@ -174,6 +181,8 @@ export class Combate {
 		semilla: string;
 		jugador: MiembroEquipo[];
 		rival: MiembroEquipo[];
+		/** Terreno permanente desde el primer turno (condición de fisura del bioma). */
+		terreno?: TerrenoFisura;
 	}): Promise<Combate> {
 		validarEquipo("jugador", op.jugador);
 		validarEquipo("rival", op.rival);
@@ -234,6 +243,15 @@ export class Combate {
 			await flujo.write(
 				[`>start ${JSON.stringify(inicio)}`, jugador1, jugador2].join("\n"),
 			);
+		}
+		if (op.terreno !== undefined && flujo.battle) {
+			flujo.battle.field.setTerrain(op.terreno, "debug");
+			// Duración 0: el simulador no la gasta, así que dura todo el combate.
+			if (flujo.battle.field.terrainState) {
+				flujo.battle.field.terrainState.duration = 0;
+			}
+			// El aviso del terreno sale por el flujo solo al enviar la actualización.
+			flujo.battle.sendUpdates();
 		}
 		c.originalesJugador = [...(flujo.battle?.sides[0]?.pokemon ?? [])];
 		c.especiesJugador = op.jugador.map((m) => m.especie);

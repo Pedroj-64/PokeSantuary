@@ -134,5 +134,6 @@
 	"captura.seUne": "{especie} se une al equipo.",
 	"captura.lleno": "Equipo completo. ¿A quién sueltas por {especie}?",
 	"captura.soltar": "[{n}] Soltar a {especie}  ({ps} %)",
-	"captura.dejar": "Dejar ir a {especie}  [Esc]"
+	"captura.dejar": "Dejar ir a {especie}  [Esc]",
+	"fin.sombrios": "Sombríos rescatados: {n}"
 }

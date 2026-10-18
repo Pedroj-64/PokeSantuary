@@ -348,3 +348,34 @@ describe("Combate: PS iniciales y finales por miembro", () => {
 		expect(b.registro()).toBe(a.registro());
 	});
 });
+
+describe("Combate: terreno de fisura", () => {
+	it("el terreno pedido está activo desde el primer turno y dura todo el combate", async () => {
+		const c = await Combate.crear({
+			semilla: "terreno",
+			jugador: equipo("geodude", "squirtle", "bulbasaur"),
+			rival: equipo("geodude", "squirtle", "bulbasaur"),
+			terreno: "grassyterrain",
+		});
+		expect(c.registro()).toContain("-fieldstart|move: Grassy Terrain");
+		// Pasados más de 5 turnos (la duración normal del terreno) no ha terminado.
+		let turnos = 0;
+		for (; turnos < 7 && !c.terminado(); turnos++) {
+			const p = c.peticion("jugador");
+			if (p) await c.elegir("jugador", primera(p));
+			const r = c.peticion("rival");
+			if (r) await c.elegir("rival", primera(r));
+		}
+		expect(turnos).toBeGreaterThanOrEqual(6);
+		expect(c.registro()).not.toContain("-fieldend|move: Grassy Terrain");
+	});
+
+	it("sin terreno no hay ninguno", async () => {
+		const c = await Combate.crear({
+			semilla: "terreno",
+			jugador: equipo("bulbasaur"),
+			rival: equipo("charmander"),
+		});
+		expect(c.registro()).not.toContain("-fieldstart");
+	});
+});

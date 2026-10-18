@@ -5,7 +5,13 @@ import {
 	type TipoNodo,
 } from "./mapa.js";
 import type { Mochila } from "./mochila.js";
-import type { IdRuna } from "./runas.js";
+import { crearRng } from "./rng.js";
+import {
+	type IdRuna,
+	MAX_RUNAS,
+	modificadores,
+	resolverMisterio,
+} from "./runas.js";
 
 /** Miembro del equipo durante la expedición; `psPct` 0 significa debilitado. */
 export interface MiembroExp {
@@ -30,6 +36,8 @@ export interface EstadoExpedicion {
 	runas: IdRuna[];
 	/** Bolas, bayas y demás artículos comprados, por id. */
 	mochila: Mochila;
+	/** Especies de Sombríos vencidos que se rindieron: esperan al Purificador del Santuario. */
+	pendientesPurificar: string[];
 	estado: "en-curso" | "victoria" | "derrota";
 }
 
@@ -38,7 +46,12 @@ export interface ResultadoCombate {
 	victoria: boolean;
 	psPct: number[];
 	dinero: number;
+	/** Especie del rival principal; la necesita el Sombrío vencido para anotarse. */
+	rival?: string;
 }
+
+/** Probabilidad base de que un Sombrío vencido se rinda; la runa S la sube. */
+const RENDICION_BASE = 0.6;
 
 const MIN_EQUIPO = 1;
 const MAX_EQUIPO = 6;
@@ -103,6 +116,7 @@ export function iniciarExpedicion(
 		dinero: 0,
 		runas: [],
 		mochila: {},
+		pendientesPurificar: [],
 		estado: "en-curso",
 	};
 }
@@ -135,6 +149,30 @@ export function entrar(e: EstadoExpedicion, id: string): EstadoExpedicion {
 		);
 	}
 	return { ...e, actual: id, visitados: [...e.visitados, id] };
+}
+
+/**
+ * Lo que deja ganar en un nodo: el Alfa da una runa "?" (si cabe y no hay otra)
+ * y el Sombrío vencido se anota como pendiente si se rinde.
+ */
+function recompensaDeNodo(
+	e: EstadoExpedicion,
+	nodo: NodoMapa,
+	rival: string | undefined,
+): EstadoExpedicion {
+	if (nodo.tipo === "alfa") {
+		return e.runas.length < MAX_RUNAS && !e.runas.includes("?")
+			? { ...e, runas: [...e.runas, "?"] }
+			: e;
+	}
+	if (nodo.tipo === "sombrio" && rival !== undefined) {
+		const prob = RENDICION_BASE + modificadores(e.runas).bonusRendicionSombria;
+		const rng = crearRng(`${e.semilla}:p${e.piso}:${nodo.id}:rendicion`);
+		return rng.siguiente() < prob
+			? { ...e, pendientesPurificar: [...e.pendientesPurificar, rival] }
+			: e;
+	}
+	return e;
 }
 
 /**
@@ -188,7 +226,7 @@ export function resolverCombate(
 		return { ...e, equipo, dinero, estado: "derrota" };
 	}
 	if (nodo.tipo !== "jefe") {
-		return { ...e, equipo, dinero };
+		return { ...recompensaDeNodo(e, nodo, r.rival), equipo, dinero };
 	}
 	if (e.piso === 3) {
 		return { ...e, equipo, dinero, estado: "victoria" };
@@ -196,6 +234,8 @@ export function resolverCombate(
 	const piso: 1 | 2 | 3 = e.piso === 1 ? 2 : 3;
 	return {
 		...e,
+		// Al cambiar de piso se revelan los misterios de la mochila.
+		runas: resolverMisterio(e.runas, e.semilla, e.piso),
 		piso,
 		mapa: generarPiso(e.semilla, piso),
 		actual: null,

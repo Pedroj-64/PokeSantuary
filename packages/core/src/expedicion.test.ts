@@ -17,6 +17,7 @@ import {
 	type NodoMapa,
 	type TipoNodo,
 } from "./mapa.js";
+import type { IdRuna } from "./runas.js";
 
 /** Tipos de nodo en los que se puede librar un combate. */
 const TIPOS_COMBATE: readonly TipoNodo[] = [
@@ -535,5 +536,57 @@ describe("curarAlMasHerido", () => {
 	it("rechaza un pct fuera de rango", () => {
 		expect(() => curarAlMasHerido(equipo(50), 101)).toThrow(RangeError);
 		expect(() => curarAlMasHerido(equipo(50), 1.5)).toThrow(RangeError);
+	});
+});
+
+describe("recompensas de nodo", () => {
+	it("el Alfa da una runa misterio; con la mochila llena o ya con '?' no da otra", () => {
+		const e = estadoHasta("alfa");
+		expect(resolverCombate(e, gana([100, 100])).runas).toEqual(["?"]);
+		const llena = { ...e, runas: ["A", "C", "F", "S", "?"] as IdRuna[] };
+		expect(resolverCombate(llena, gana([100, 100])).runas).toEqual(llena.runas);
+		const conMisterio = { ...e, runas: ["?"] as IdRuna[] };
+		expect(resolverCombate(conMisterio, gana([100, 100])).runas).toEqual(["?"]);
+	});
+
+	it("un salvaje o un entrenador no dan runa", () => {
+		for (const tipo of ["salvaje", "entrenador"] as const) {
+			expect(
+				resolverCombate(estadoHasta(tipo), gana([100, 100])).runas,
+			).toEqual([]);
+		}
+	});
+
+	it("el Sombrío vencido se anota si se rinde: determinista, y la runa S lo favorece", () => {
+		const e = estadoHasta("sombrio");
+		const rinde = (base: EstadoExpedicion, rival: string) =>
+			resolverCombate(base, { ...gana([100, 100]), rival }).pendientesPurificar;
+		expect(rinde(e, "gastly")).toEqual(rinde(e, "gastly"));
+		let sinS = 0;
+		let conS = 0;
+		for (let i = 0; i < 200; i++) {
+			const base = { ...e, semilla: `${e.semilla}${i}` };
+			sinS += rinde(base, "gastly").length;
+			conS += rinde({ ...base, runas: ["S"] }, "gastly").length;
+		}
+		expect(sinS).toBeGreaterThan(0);
+		expect(sinS).toBeLessThan(200);
+		expect(conS).toBeGreaterThan(sinS);
+	});
+
+	it("un Sombrío sin especie de rival o derrotado no se anota", () => {
+		const e = estadoHasta("sombrio");
+		expect(resolverCombate(e, gana([100, 100])).pendientesPurificar).toEqual(
+			[],
+		);
+		expect(resolverCombate(e, pierde([0, 0])).pendientesPurificar).toEqual([]);
+	});
+
+	it("al vencer al jefe del piso se revelan los misterios de la mochila", () => {
+		const e = { ...estadoEnJefe("rev"), runas: ["?"] as IdRuna[] };
+		const siguiente = resolverCombate(e, gana([100, 100]));
+		expect(siguiente.piso).toBe(2);
+		expect(siguiente.runas).toHaveLength(1);
+		expect(siguiente.runas[0]).not.toBe("?");
 	});
 });

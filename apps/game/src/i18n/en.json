@@ -134,5 +134,6 @@
 	"captura.seUne": "{especie} joins the team.",
 	"captura.lleno": "Team full. Who do you release for {especie}?",
 	"captura.soltar": "[{n}] Release {especie}  ({ps}%)",
-	"captura.dejar": "Let {especie} go  [Esc]"
+	"captura.dejar": "Let {especie} go  [Esc]",
+	"fin.sombrios": "Shadow Pokémon rescued: {n}"
 }

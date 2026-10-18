@@ -1,4 +1,5 @@
 import { crearRng, type Rng } from "@santuario/core";
+import type { TerrenoFisura } from "./combate.js";
 import {
 	Combate,
 	type Eleccion,
@@ -17,6 +18,8 @@ export interface OpcionesCombate {
 	semilla: string;
 	jugador: MiembroEquipo[];
 	rival: MiembroEquipo[];
+	/** Terreno permanente del combate (condición de fisura); sin él, campo normal. */
+	terreno?: TerrenoFisura;
 }
 
 /** Lo que recibe la interfaz tras abrir el combate o tras cada elección del jugador. */

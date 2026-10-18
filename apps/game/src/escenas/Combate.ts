@@ -840,6 +840,7 @@ export class Combate extends Phaser.Scene {
 				ganador,
 				this.equipoFinal ?? [],
 				dineroDeNodo(cargarBalance(), x.estado, x.nodoId),
+				this.rivalEspecie,
 			);
 			const estado = cerrarCombate(x.estado, resultado);
 			this.scene.start(destinoTrasCombate(estado), { estado });
