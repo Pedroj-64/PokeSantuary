@@ -245,7 +245,7 @@ describe("mml versionado", () => {
 		const archivos = readdirSync(new URL("../mml/", import.meta.url)).filter(
 			(archivo) => archivo.endsWith(".mml"),
 		);
-		expect(archivos.length).toBe(3);
+		expect(archivos.length).toBe(7);
 		for (const archivo of archivos) {
 			const cancion = compilarMml(
 				readFileSync(new URL(`../mml/${archivo}`, import.meta.url), "utf8"),

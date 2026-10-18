@@ -5,7 +5,11 @@
 export const MUSICA = {
 	mapa: "mapa",
 	combate: "combate",
+	combateSalvaje: "combate-salvaje",
+	combateEntrenador: "combate-entrenador",
 	victoria: "victoria",
+	victoriaSalvaje: "victoria-salvaje",
+	victoriaEntrenador: "victoria-entrenador",
 } as const;
 
 export const SFX = {

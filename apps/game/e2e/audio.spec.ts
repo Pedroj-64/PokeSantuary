@@ -32,7 +32,9 @@ test("la música cambia con la escena: mapa, combate y vuelta a la lista en sile
 	await page.keyboard.press("e");
 	await expect.poll(async () => (await audio(page))?.musica).toBe("mapa");
 	await page.keyboard.press("1");
-	await expect.poll(async () => (await audio(page))?.musica).toBe("combate");
+	await expect
+		.poll(async () => (await audio(page))?.musica)
+		.toMatch(/^combate-/);
 	await page.keyboard.press("Escape");
 	await expect.poll(async () => (await audio(page))?.musica).toBeNull();
 });

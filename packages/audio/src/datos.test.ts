@@ -103,6 +103,8 @@ describe("colección de audio", () => {
 		}
 	});
 
+	// Renderiza tres temas completos dos veces; con la suite en paralelo el
+	// tope por defecto de 5 s se queda corto.
 	it("cada tema se renderiza sin silencio, en rango y de forma determinista", () => {
 		for (const id of Object.keys(ESCALAS)) {
 			const c = cancion(id);
@@ -121,7 +123,7 @@ describe("colección de audio", () => {
 			expect(pico).toBeLessThanOrEqual(1);
 			expect(pico).toBeGreaterThan(0.2);
 		}
-	});
+	}, 20_000);
 });
 
 describe("efectos", () => {

@@ -149,7 +149,9 @@ export class Combate extends Phaser.Scene {
 		this.panelFinal = [];
 		this.teclas = new Map();
 
-		void musica(MUSICA.combate);
+		void musica(
+			this.esSalvaje() ? MUSICA.combateSalvaje : MUSICA.combateEntrenador,
+		);
 		this.dibujarFondo();
 		this.campo = {
 			rival: this.crearLado("rival"),
@@ -641,6 +643,16 @@ export class Combate extends Phaser.Scene {
 		this.teclas.set("escape", () => this.volverALista());
 	}
 
+	/** Salvaje (o combate de prueba) frente a los demás: de momento Alfa, Sombrío y jefe comparten el tema de entrenador. */
+	private esSalvaje(): boolean {
+		const x = this.datosExpedicion;
+		if (!x) return true;
+		return (
+			x.estado.mapa.capas.flat().find((n) => n.id === x.nodoId)?.tipo ===
+			"salvaje"
+		);
+	}
+
 	// ---------------------------------------------------------------- captura
 
 	/** Mejor bola que queda, si el combate es un encuentro salvaje de la expedición. */
@@ -843,7 +855,10 @@ export class Combate extends Phaser.Scene {
 	private mostrarFin(): void {
 		this.fase = "fin";
 		const g = this.terminado;
-		if (g === "jugador") void musica(MUSICA.victoria);
+		if (g === "jugador")
+			void musica(
+				this.esSalvaje() ? MUSICA.victoriaSalvaje : MUSICA.victoriaEntrenador,
+			);
 		else pararMusica();
 		const [titulo, color] =
 			g === "jugador"

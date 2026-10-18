@@ -72,13 +72,17 @@ describe("ColeccionAudioSchema", () => {
 		expect(resultado.success ? [] : resultado.error.issues).toEqual([]);
 	});
 
-	it("el pack trae los tres temas ordenados por id y los 58 efectos", () => {
+	it("el pack trae los siete temas ordenados por id y los 58 efectos", () => {
 		const coleccion = ColeccionAudioSchema.parse(LEIDO);
 		// El generador ordena las canciones por id.
 		expect(coleccion.canciones.map((c) => c.id)).toEqual([
 			"combate",
+			"combate-entrenador",
+			"combate-salvaje",
 			"mapa",
 			"victoria",
+			"victoria-entrenador",
+			"victoria-salvaje",
 		]);
 		expect(coleccion.efectos).toHaveLength(58);
 		expect(new Set(coleccion.efectos.map((e) => e.id)).size).toBe(58);

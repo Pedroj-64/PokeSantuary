@@ -1,0 +1,7 @@
+@cancion id=victoria-salvaje bpm=140 pasosPorNegra=4 repetir=false
+@nombre audio.victoria-salvaje.nombre
+@compas=16
+pulso1 ciclo=50 vol=13 vib=700,5.5,0.35 | o4 c4 o4 e4 o4 g4 o5 c4 | o5 c4. o5 b8 o5 c4 o4 g4 | o4 a4 o4 c4 o5 e4 o5 d4 | o5 c2 o5 b4 o4 a4 | o4 g4 o4 b4 o5 d4 o5 g4 | o5 g4. o5 f8 o5 e4 o5 d4 | o5 e4 o5 d4 o5 c4 o4 g4 | o5 c1
+pulso2 ciclo=25 vol=7 | o4 (c e g)4 o4 (c e g)4 o4 (c e g)4 o4 (c e g)4  | o4 (g b d)4 o4 (g b d)4 o4 (g b d)4 o4 (g b d)4  | o4 (a c e)4 o4 (a c e)4 o4 (a c e)4 o4 (a c e)4  | o4 (f a c)4 o4 (f a c)4 o4 (f a c)4 o4 (f a c)4  | o4 (c e g)4 o4 (c e g)4 o4 (c e g)4 o4 (c e g)4  | o4 (g b d)4 o4 (g b d)4 o4 (g b d)4 o4 (g b d)4  | o4 (f a c)4 o4 (f a c)4 o4 (f a c)4 o4 (f a c)4  | o4 (c e g)4 o4 (c e g)4 o4 (c e g)4 o4 (c e g)4 
+onda vol=13 onda=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0 | o2 c2 o2 g2 | o2 g2 o2 d2 | o2 a2 o2 e2 | o2 f2 o2 c2 | o2 c2 o2 g2 | o2 g2 o2 b2 | o2 f2 o2 c2 | o2 c2 o2 g2
+ruido corto vol=9 | x1 | r1 | r1 | r1 | r1 | r1 | r1 | x1
