@@ -1,4 +1,10 @@
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import {
+	cpSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -141,6 +147,39 @@ describe("verificar", () => {
 			expect((await verificar(copia(), lista)).join("\n")).toMatch(
 				/no está en tools\/pipeline\/movimientos\.json/,
 			);
+		});
+	});
+
+	describe("expedicion.json", () => {
+		const alterar = (cambio: (balance: Record<string, unknown>) => void) => {
+			const dir = copia();
+			const ruta = join(dir, "expedicion.json");
+			const balance = JSON.parse(readFileSync(ruta, "utf8"));
+			cambio(balance);
+			writeFileSync(ruta, JSON.stringify(balance));
+			return dir;
+		};
+
+		it("falla si no cumple el esquema", async () => {
+			const dir = alterar((b) => {
+				b.dineroInicial = -1;
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(/dineroInicial/);
+		});
+
+		it("falla si una tasa de captura es de una especie que no está en especies.json", async () => {
+			const dir = alterar((b) => {
+				(b.tasaCaptura as Record<string, number>).mew = 45;
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/expedicion\.json: tasaCaptura de mew/,
+			);
+		});
+
+		it("falla si falta en el pack", async () => {
+			const dir = copia();
+			rmSync(join(dir, "expedicion.json"));
+			expect((await verificar(dir)).join("\n")).toMatch(/expedicion\.json/);
 		});
 	});
 

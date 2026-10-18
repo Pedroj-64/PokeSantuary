@@ -22,6 +22,11 @@ export {
 	validarMapa,
 } from "./mapa.js";
 export { type Accion, type Estado, type Evento, paso } from "./paso.js";
+export {
+	type RangoDinero,
+	recompensa,
+	type TablaRecompensas,
+} from "./recompensa.js";
 export { reproducir } from "./repeticion.js";
 export { crearRng, type Rng } from "./rng.js";
 export {

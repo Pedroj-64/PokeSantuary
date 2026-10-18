@@ -22,7 +22,7 @@ export type OpcionesConstruir = {
 	especies: string; // ruta a especies.json (lista de slugs)
 	movimientos: string; // ruta a movimientos.json (lista de slugs)
 	dirCache: string;
-	dirPack: string; // debe contener ya trabajos.json y sets.json
+	dirPack: string; // debe contener ya trabajos.json, sets.json y expedicion.json
 	red?: Red;
 };
 

@@ -1,0 +1,58 @@
+{
+	"dineroInicial": 30,
+	"bolasIniciales": 5,
+	"recompensa": {
+		"salvaje": [
+			{ "min": 5, "max": 10 },
+			{ "min": 8, "max": 14 },
+			{ "min": 12, "max": 20 }
+		],
+		"entrenador": [
+			{ "min": 12, "max": 20 },
+			{ "min": 18, "max": 28 },
+			{ "min": 25, "max": 40 }
+		],
+		"alfa": [
+			{ "min": 20, "max": 30 },
+			{ "min": 30, "max": 45 },
+			{ "min": 40, "max": 60 }
+		],
+		"sombrio": [
+			{ "min": 15, "max": 25 },
+			{ "min": 25, "max": 35 },
+			{ "min": 35, "max": 50 }
+		],
+		"jefe": [
+			{ "min": 40, "max": 60 },
+			{ "min": 60, "max": 90 },
+			{ "min": 100, "max": 150 }
+		]
+	},
+	"catalogoTienda": [
+		{ "id": "poke-ball", "tipo": "ball", "precio": 20 },
+		{ "id": "super-ball", "tipo": "ball", "precio": 45 },
+		{ "id": "baya-aranja", "tipo": "baya", "precio": 15 },
+		{ "id": "baya-zidra", "tipo": "baya", "precio": 30 },
+		{ "id": "mt-rayo", "tipo": "mt", "precio": 60 },
+		{ "id": "mt-terremoto", "tipo": "mt", "precio": 80 },
+		{ "id": "banda-focus", "tipo": "objeto", "precio": 70 },
+		{ "id": "restos", "tipo": "objeto", "precio": 90 }
+	],
+	"multBola": {
+		"poke-ball": 1,
+		"super-ball": 1.5
+	},
+	"tasaCaptura": {
+		"bulbasaur": 45,
+		"charmander": 45,
+		"squirtle": 45,
+		"pikachu": 190,
+		"zubat": 255,
+		"abra": 200,
+		"machop": 180,
+		"geodude": 255,
+		"gastly": 190,
+		"eevee": 45
+	},
+	"tasaCapturaPorDefecto": 120
+}

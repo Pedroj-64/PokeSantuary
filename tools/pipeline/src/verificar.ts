@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import {
 	AtlasSchema,
 	EspecieSchema,
+	ExpedicionBalanceSchema,
 	ManifiestoSchema,
 	type Movimiento,
 	MovimientoSchema,
@@ -127,6 +128,16 @@ export async function verificar(
 					errores.push(
 						`set de ${s.especie}: ${m} no está en tools/pipeline/movimientos.json`,
 					);
+	});
+	await intentar(() => {
+		const balance = ExpedicionBalanceSchema.parse(
+			leer(dirPack, "expedicion.json"),
+		);
+		for (const id of Object.keys(balance.tasaCaptura))
+			if (!especies.includes(id))
+				throw new Error(
+					`expedicion.json: tasaCaptura de ${id}, que no está en especies.json`,
+				);
 	});
 	return errores;
 }
