@@ -58,7 +58,6 @@ export interface Peticion {
 	equipo: MiembroPeticion[];
 }
 
-/** Pokémon en campo de un lado, visible para ambos. */
 /** Terrenos que puede imponer la condición de fisura de un bioma. */
 export type TerrenoFisura =
 	| "grassyterrain"
@@ -66,6 +65,7 @@ export type TerrenoFisura =
 	| "mistyterrain"
 	| "psychicterrain";
 
+/** Pokémon en campo de un lado, visible para ambos. */
 export interface ActivoPublico {
 	especie: string;
 	hp: number;

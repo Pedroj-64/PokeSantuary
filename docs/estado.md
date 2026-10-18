@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Actualizado el 17 de octubre de 2026, con la Fase 2 a mitad de camino (10 de 16 tareas).
+Actualizado el 18 de octubre de 2026, con la Fase 2 terminada.
 
 ## Dónde estamos
 
@@ -8,30 +8,31 @@ Actualizado el 17 de octubre de 2026, con la Fase 2 a mitad de camino (10 de 16 
 |---|---|---|
 | 0, cimientos | Terminada | Monorepo, generador aleatorio con semilla, `paso` con repetición dorada, esquemas Zod, canal de datos desde PokeAPI, lista de especies en Phaser 4 con idioma cambiable, e2e y CI |
 | 1, combate | Terminada | Movimientos y sets, adaptador de `@pkmn/sim`, IA rival, combate en Web Worker, sprites con atlas, escena de combate, e2e y presupuesto de carga |
-| 2, expedición | En curso, 10 de 16 tareas | Hecho: mapa de nodos con semilla, estado de la expedición, rivales por nodo, runas, tienda y captura (lógica), balance en datos, escena del mapa y combates encadenados con pantalla final. Falta: nodos sin combate, tienda y runas en pantalla, captura en combate, Alfa/Sombrío/jefe, simulador de balance y cierre |
+| 2, expedición | Terminada | Mapa de nodos con semilla de tres pisos, estado de la expedición, tienda con mochila, runas, manantial, cofre y eventos, captura de salvajes y equipo de seis, Alfa y Sombrío, jefe del primer bioma con terreno de hierba, balance en datos y simulador de balance (44,8 % de victorias en 500 expediciones) |
 | 3 en adelante | Pendiente | Ver `docs/gdd.md` (local) o la hoja de ruta del diseño |
 
-Qué se puede hacer hoy: abrir el juego, ver las 10 especies de Kanto en español o inglés, lanzar un combate de prueba 3 contra 3 (tecla B) o abrir una expedición (tecla E): elegir ruta en el mapa de un piso y pelear los combates encadenados con los PS que arrastra el equipo. Al perder, o al ganar el jefe del piso 3, sale la pantalla final con el dinero conservado. Todo es repetible con `?semilla=`. Los nodos sin combate (tienda, manantial, evento, cofre) todavía se atraviesan sin efecto, y el jefe de los pisos 1 y 2 aún no tiene set propio.
+Qué se puede hacer hoy: abrir el juego, ver las 10 especies de Kanto en español o inglés, lanzar un combate de prueba 3 contra 3 (tecla B) o abrir una expedición (tecla E): elegir ruta en el mapa de tres pisos, pelear (entran los tres primeros del equipo), capturar salvajes con las bolas que quedan (tecla K en combate), comprar bolas y bayas en la tienda, usar bayas en el mapa (tecla B), elegir en manantiales, cofres y eventos, y vencer a los Alfa (dan una runa) y al jefe del piso 3. Al perder, o al ganar el jefe del piso 3, sale la pantalla final con el dinero conservado y los Sombríos rescatados. Todo es repetible con `?semilla=`.
 
-## Siguiente paso: terminar la Fase 2
+## Siguiente paso
 
-Objetivo del diseño (secciones 5 y 10): una expedición de tres pisos con mapa de nodos generado con semilla, nueve tipos de nodo, Runas Unown, tienda, captura de Pokémon salvajes y el jefe del primer bioma. Criterio de aceptación: expedición completa y una tasa de victoria entre 40 y 60 % en el simulador de balance.
+Audio mínimo (motor, de 6 a 8 efectos y 3 canciones originales; ver decisiones vigentes) y después la Fase 3, el Santuario.
 
-Tareas que faltan, en orden:
-1. Manantial, cofre y evento: datos de eventos con esquema, efectos puros y una escena de elección.
-2. Tienda Kecleon y runas en pantalla (la lógica ya existe en `packages/core`).
-3. Captura en combate y equipo de hasta seis.
-4. Alfa (runa garantizada), Sombrío (se anota para purificar en la Fase 4) y jefe del primer bioma con su condición de fisura.
-5. `tools/balance`: simulador de expediciones completas y ajuste de los números de `packs/kanto/expedicion.json` hasta el 40 a 60 % de victorias. Dato de partida: con una política fija de "primer movimiento", los combates contra entrenadores (3 contra 3) se pierden casi siempre y los salvajes casi siempre se ganan, así que el simulador necesita una política más razonable.
-6. Cierre: revisión de toda la rama, esta página al día y la cadena completa en verde.
+## Decisiones tomadas al cerrar la Fase 2
 
-Después de la Fase 2 va un audio mínimo (ver decisiones vigentes) antes de empezar el Santuario.
+- **Perder un combate acaba la expedición**, aunque haya Pokémon sanos en el banquillo. Al combate entran los tres primeros vivos (el motor admite tres por bando); el banquillo conserva sus PS. Cambiarlo (encadenar el banquillo o elegir quién entra) queda para la Fase 3.
+- **Lanzar una bola no gasta turno** y siempre se usa la mejor que queda. El simulador no captura, así que el 44,8 % no refleja la captura.
+- **Runas.** Solo cinco de las 28 (A, C, F, S, ?). La A (daño del primer movimiento) todavía no actúa en combate. El Alfa da una runa misterio que se revela al pasar de piso; si la mochila está llena o ya hay una, no da nada.
+- **Tienda.** Solo vende bolas y bayas (25 % y 50 % de PS). Las MT y los objetos esperan a la Fase 3.
+- **Eventos.** El efecto `combate` está en el esquema y se prueba, pero ningún evento lo usa porque la escena de elección aún no sabe lanzarlo.
+- **Balance.** El nivel del rival escala por tipo de nodo y piso (`nivelRival` en `expedicion.json`: 22, 26 y 30; Alfa y jefe, 4 más). También hay `tamanoRival` y `curaTrasVictoriaPct`, sin uso por ahora (valores neutros). El simulador usa una política de ruta que busca manantial y tienda con el equipo herido, compra bayas y las usa; en combate, el primer movimiento con PP.
+- **Semillas de e2e.** `x4` gana el primer combate con el primero a 91 %, `x17` lo gana dejando a dos debilitados y la derrota se fuerza con un Geodude solo a 1 %. Mismo procedimiento de siempre si cambian motor, sets, IA o balance: simular `x1`…`x80` con `prepararCombate` y la política fija.
 
 ## Mapa del repositorio
 
-- `packages/core`: reglas puras y deterministas (`crearRng`, `paso`, `reproducir`) y las de la expedición: `generarPiso` (mapa de nodos), estado inmutable de la expedición (`iniciarExpedicion`, `entrar`, `resolverCombate`, `curar`, `liquidar`), `runas`, `tienda`, `captura` y `recompensa`. Sin dependencias de motor.
-- `packages/data`: esquemas Zod (especie, movimiento, set, balance de la expedición, manifiesto, atlas) y sus tipos.
-- `packages/battle`: `Combate` sobre `@pkmn/sim`, IA rival, sesión de combate y cliente del Worker. Dos entradas: la del cliente (`@santuario/battle`, sin el simulador) y la del servidor (`@santuario/battle/servidor`).
+- `packages/core`: reglas puras y deterministas (`crearRng`, `paso`, `reproducir`) y las de la expedición: `generarPiso` (mapa de nodos), estado inmutable de la expedición (`iniciarExpedicion`, `entrar`, `resolverCombate`, `curar`, `liquidar`), `runas`, `tienda`, `mochila` (compras y bayas), `equipo` (captura), `eventos` (efectos de manantial, cofre y eventos), `captura` y `recompensa`. Sin dependencias de motor.
+- `packages/data`: esquemas Zod (especie, movimiento, set, balance de la expedición, eventos, élites, manifiesto, atlas) y sus tipos.
+- `packages/battle`: `Combate` sobre `@pkmn/sim`, IA rival, sesión de combate y cliente del Worker. También lleva la lógica de rivales y combates de nodo (`expedicion/`: `crearRival`, `prepararCombate`, `resultadoDeCombate`, `cerrarCombate`, `expedicionInicial`). Dos entradas: la del cliente (`@santuario/battle`, sin el simulador) y la del servidor (`@santuario/battle/servidor`).
+- `tools/balance`: simulador de expediciones completas con `@pkmn/sim` en Node (`pnpm balance --n 500`).
 - `tools/pipeline`: descarga con caché y pausa, recorte, unión con `@pkmn/data`, atlas de sprites, verificación sin red y presupuesto de carga.
 - `packs/kanto`: datos del paquete. `trabajos.json`, `sets.json` y `expedicion.json` (recompensas, catálogo de la tienda, tasas de captura) se escriben a mano (entradas de diseño, validadas por esquema y por `pnpm data:verify`); `especies.json`, `movimientos.json`, `atlas-combate.*` y `manifest.json` (con hashes) los genera `pnpm data:build` y no se editan a mano.
 - `apps/game`: juego con Phaser 4 y Vite; escenas `ListaEspecies`, `Combate`, `Mapa` y `FinExpedicion`, lógica de la expedición en `src/expedicion`, textos en `src/i18n`. El arte original (iconos de nodo) tiene su fuente de Aseprite en `apps/game/arte/`.
@@ -53,7 +54,7 @@ Después de la Fase 2 va un audio mínimo (ver decisiones vigentes) antes de emp
 ## Pruebas que fijan valores a propósito
 
 - `packages/battle/test/repeticiones/victoria.json` y `derrota.json`: repeticiones doradas con el hash del registro.
-- `apps/game/e2e/expedicion.spec.ts`: semillas `x4` (primer combate ganado con el primer miembro a 66 %), `x1` (perdido) y `x7` (ganado con dos miembros debilitados), con la misma política. Mismo procedimiento si cambian motor, sets, IA o balance: recorrer `x1`…`x40` en un bucle e2e desechable (el rival debe jugar con su IA real, no con la política fija).
+- `apps/game/e2e/expedicion.spec.ts`: semillas `x4` (primer combate ganado con el primer miembro a 91 %) y `x17` (ganado con dos miembros debilitados), con la misma política; la derrota se fuerza con un Geodude solo a 1 % de PS. Mismo procedimiento si cambian motor, sets, IA o balance (ver decisiones de cierre de la Fase 2).
 - `packages/core/src/mapa.test.ts`: JSON congelado de `generarPiso("dorada", 1)`; cambia si cambia el generador.
 - `apps/game/e2e/combate.spec.ts`: semillas `s4` (victoria) y `s1` (derrota) con la política "primer movimiento con PP; primer compañero vivo al cambiar a la fuerza", y la constante `HASH_VICTORIA`. Si cambian el motor, los datos o la IA, estas pruebas fallan a propósito. Hay que revisar el cambio y, si es deliberado, volver a buscar semillas (recorrer `s1`…`s40` con la misma política) y actualizar el hash.
 
@@ -61,13 +62,23 @@ Después de la Fase 2 va un audio mínimo (ver decisiones vigentes) antes de emp
 
 Resuelta en esta fase: la sesión de combate queda marcada como inconsistente si el simulador falla tras escribir (se cuentan las escrituras enviadas), `deshabilitado` siempre es booleano y hay prueba de que una elección ilegal no consume aleatoriedad de la IA.
 
-Pendiente de la Fase 2:
+Pendiente de la Fase 2 (heredada):
 - Prueba de la rama de movimiento sin PP y de la propiedad de combates con equipos variados.
 - IA: el mensaje del error "ningún movimiento utilizable" es engañoso si falta el Pokémon activo; la aserción del cambio forzado en `combate.test.ts` es floja.
 - Datos: `aSlug` no cubre apóstrofes ni acentos cuando crezca el plantel; mensaje redundante de "sin movimiento dañino".
 - Cliente del Worker: `inconsistente` no se reinicia en `abrir()` (la ruta pública no lo necesita), `registro()` sigue disponible tras una inconsistencia.
 - `precioEnPiso` y `comprar` no rechazan precios negativos: hoy los cubre la validación del catálogo con Zod.
 - Las aristas del mapa pueden cruzarse mucho; es cosmético y se puede afinar al pulir la escena.
+
+Detectada al cerrar la Fase 2:
+- El efecto `combate` de los eventos no se puede lanzar desde la escena; `verificar` debería rechazarlo mientras tanto.
+- Esc abandona la expedición sin confirmar (importará con partidas guardadas); las escenas de elección, tienda y captura no tienen panel de error si falla un pack.
+- El simulador no captura, no sustituye runas ni anota Sombríos: añadir una política más completa y volver a comprobar el 40 a 60 %.
+- Validar `terreno` contra una lista en `Combate.crear` y dejarlo en el registro de entradas del simulador.
+- Prueba automática de que cada evento y cada artículo tiene su clave i18n en es y en.
+- Los e2e usan esperas fijas tras `preparar`; sustituirlas por esperas a un estado.
+- Un clic más una tecla en el mismo fotograma puede encolar dos cambios de escena en el mapa (cerrojo en `elegir`).
+- El jefe de los pisos 1 y 2 sale del catálogo corriente; si debe tener set propio, va en `elites.json`.
 
 Fase 5:
 - Control de presupuesto: la exención por prefijo `worker-*`, etiquetas `<link>` solo con comillas dobles y solo se comprueba el primer chunk de Worker.

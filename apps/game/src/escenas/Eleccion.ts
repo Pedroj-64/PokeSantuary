@@ -193,6 +193,9 @@ export class Eleccion extends Phaser.Scene {
 		if (new URLSearchParams(location.search).get("test") !== "1") return;
 		const g = window as unknown as { __santuario?: Record<string, unknown> };
 		g.__santuario ??= {};
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			delete g.__santuario?.eleccion;
+		});
 		g.__santuario.eleccion = {
 			estado: () => ({
 				fase: this.fase,

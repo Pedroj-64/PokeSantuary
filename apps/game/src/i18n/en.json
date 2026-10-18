@@ -135,5 +135,6 @@
 	"captura.lleno": "Team full. Who do you release for {especie}?",
 	"captura.soltar": "[{n}] Release {especie}  ({ps}%)",
 	"captura.dejar": "Let {especie} go  [Esc]",
-	"fin.sombrios": "Shadow Pokémon rescued: {n}"
+	"fin.sombrios": "Shadow Pokémon rescued: {n}",
+	"articulo.ultra-ball": "Ultra Ball"
 }

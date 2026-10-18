@@ -88,12 +88,17 @@ describe("ExpedicionBalanceSchema", () => {
 			{ id: "mt-terremoto", tipo: "mt", precio: 80 },
 			{ id: "banda-focus", tipo: "objeto", precio: 70 },
 			{ id: "restos", tipo: "objeto", precio: 90 },
+			{ id: "ultra-ball", tipo: "ball", precio: 70 },
 		]);
-		expect(new Set(datos.catalogoTienda.map((a) => a.id)).size).toBe(8);
+		expect(new Set(datos.catalogoTienda.map((a) => a.id)).size).toBe(9);
 		expect(datos.catalogoTienda.filter((a) => a.tipo === "ball")).toHaveLength(
-			2,
+			3,
 		);
-		expect(datos.multBola).toEqual({ "poke-ball": 1, "super-ball": 1.5 });
+		expect(datos.multBola).toEqual({
+			"poke-ball": 1,
+			"super-ball": 1.5,
+			"ultra-ball": 2,
+		});
 		expect(datos.tasaCaptura).toEqual({
 			bulbasaur: 45,
 			charmander: 45,

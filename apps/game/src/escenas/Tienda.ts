@@ -43,7 +43,8 @@ export class Tienda extends Phaser.Scene {
 			e.semilla,
 			e.piso,
 			this.nodoId,
-			this.catalogo,
+			// MT y objetos aún no tienen uso (Fase 3): solo se venden bolas y bayas.
+			this.catalogo.filter((a) => a.tipo === "ball" || a.tipo === "baya"),
 			modificadores(e.runas).opcionesTiendaExtra,
 		);
 		alPulsarTecla(this, (ev) => this.teclas.get(ev.key)?.());
@@ -113,6 +114,9 @@ export class Tienda extends Phaser.Scene {
 		if (new URLSearchParams(location.search).get("test") !== "1") return;
 		const g = window as unknown as { __santuario?: Record<string, unknown> };
 		g.__santuario ??= {};
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			delete g.__santuario?.tienda;
+		});
 		g.__santuario.tienda = {
 			estado: () => ({
 				dinero: this.estado.dinero,

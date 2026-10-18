@@ -135,5 +135,6 @@
 	"captura.lleno": "Equipo completo. ¿A quién sueltas por {especie}?",
 	"captura.soltar": "[{n}] Soltar a {especie}  ({ps} %)",
 	"captura.dejar": "Dejar ir a {especie}  [Esc]",
-	"fin.sombrios": "Sombríos rescatados: {n}"
+	"fin.sombrios": "Sombríos rescatados: {n}",
+	"articulo.ultra-ball": "Ultra Ball"
 }

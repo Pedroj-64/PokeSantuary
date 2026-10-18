@@ -128,11 +128,17 @@
 			"id": "restos",
 			"tipo": "objeto",
 			"precio": 90
+		},
+		{
+			"id": "ultra-ball",
+			"tipo": "ball",
+			"precio": 70
 		}
 	],
 	"multBola": {
 		"poke-ball": 1,
-		"super-ball": 1.5
+		"super-ball": 1.5,
+		"ultra-ball": 2
 	},
 	"tasaCaptura": {
 		"bulbasaur": 45,

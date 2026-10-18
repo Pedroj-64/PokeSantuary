@@ -168,8 +168,8 @@ export class Mapa extends Phaser.Scene {
 		const nombres = cargarDatosCombate().nombres;
 		e.equipo.forEach((m, i) => {
 			this.add.text(
-				150 + i * 112,
-				6,
+				170 + (i % 3) * 100,
+				6 + Math.floor(i / 3) * 26,
 				`${nombres.especie(m.especie)}\n${m.psPct}%`,
 				{ ...estilo, color: m.psPct === 0 ? "#ff8b8b" : "#7dff9a" },
 			);
@@ -216,6 +216,9 @@ export class Mapa extends Phaser.Scene {
 		if (new URLSearchParams(location.search).get("test") !== "1") return;
 		const g = window as unknown as { __santuario?: Record<string, unknown> };
 		g.__santuario ??= {};
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			delete g.__santuario?.mapa;
+		});
 		g.__santuario.mapa = {
 			estado: () => ({
 				piso: this.estado.piso,
@@ -226,6 +229,7 @@ export class Mapa extends Phaser.Scene {
 				mochila: { ...this.estado.mochila },
 				runas: [...this.estado.runas],
 				equipo: this.estado.equipo.map((m) => m.psPct),
+				especies: this.estado.equipo.map((m) => m.especie),
 			}),
 			/** Tipo de un nodo del mapa (para que las pruebas elijan uno de combate). */
 			tipoDe: (id: string) =>

@@ -99,6 +99,8 @@ export class Combate extends Phaser.Scene {
 	private expedicion?: DatosCombate & { vivos: number[] };
 	/** Especie del rival que está en el campo ahora mismo (la que se intenta capturar). */
 	private rivalEspecie = "";
+	/** Nivel de cada especie rival de este combate (para la placa de nombre). */
+	private nivelesRival = new Map<string, number>();
 	private intentosCaptura = 0;
 	private equipoFinal?: { especie: string; psPct: number }[];
 	private datosExpedicion?: DatosCombate;
@@ -117,6 +119,7 @@ export class Combate extends Phaser.Scene {
 		this.expedicion = undefined;
 		this.equipoFinal = undefined;
 		this.rivalEspecie = "";
+		this.nivelesRival = new Map();
 		this.intentosCaptura = 0;
 	}
 
@@ -197,6 +200,9 @@ export class Combate extends Phaser.Scene {
 					},
 				);
 				({ semilla, jugador, rival } = p);
+				this.nivelesRival = new Map(
+					rival.map((m) => [m.especie, m.nivel ?? NIVEL]),
+				);
 				terreno = p.terreno;
 				this.expedicion = { ...this.datosExpedicion, vivos: p.vivos };
 			} else {
@@ -422,6 +428,14 @@ export class Combate extends Phaser.Scene {
 					.setVisible(true);
 				for (const o of l.placa) o.setVisible(true);
 				l.nombre.setText(this.datos.nombres.especie(e.especie));
+				l.nivel.setText(
+					t("combate.nivel", {
+						n:
+							e.lado === "rival"
+								? (this.nivelesRival.get(e.especie) ?? NIVEL)
+								: NIVEL,
+					}),
+				);
 				this.pintarBarra(l);
 				this.pintarTextoPs(l);
 				await this.animar({ targets: l.sprite, alpha: 1, duration: 200 });

@@ -35,14 +35,6 @@ async function abrirSalvaje(page: Page, cambios: string) {
 async function capturarHastaQueEntre(page: Page) {
 	for (let i = 0; i < 40; i++) {
 		if (await page.evaluate("window.__santuario.captura !== undefined")) return;
-		await expect
-			.poll(() =>
-				page.evaluate(
-					"window.__santuario.combate?.estado().fase ?? window.__santuario.captura ? 'listo' : null",
-				),
-			)
-			.not.toBeNull();
-		if (await page.evaluate("window.__santuario.captura !== undefined")) return;
 		const fase = await page.evaluate(
 			"window.__santuario.combate?.estado().fase",
 		);
@@ -107,12 +99,12 @@ test("con el equipo lleno hay que elegir a quién soltar", async ({ page }) => {
 	await page.keyboard.press("2");
 	await expect
 		.poll(() =>
-			page.evaluate("window.__santuario.mapa?.estado().equipo.length ?? 0"),
+			page.evaluate("window.__santuario.mapa?.estado().especies ?? null"),
 		)
-		.toBe(6);
-	const equipo = (await page.evaluate(
-		"window.__santuario.mapa.estado().equipo",
-	)) as number[];
-	expect(equipo).toHaveLength(6);
-	void rival;
+		.not.toBeNull();
+	const especies = (await page.evaluate(
+		"window.__santuario.mapa.estado().especies",
+	)) as string[];
+	// el capturado ocupa el sitio del segundo y ese ya no está
+	expect(especies).toEqual([SEIS[0], rival, ...SEIS.slice(2)]);
 });
