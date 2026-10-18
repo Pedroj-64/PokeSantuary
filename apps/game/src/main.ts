@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { alternarSilencio } from "./audio/gestor.js";
 import { Captura } from "./escenas/Captura.js";
 import { Combate } from "./escenas/Combate.js";
 import { Eleccion } from "./escenas/Eleccion.js";
@@ -54,3 +55,8 @@ function aplicarIdiomaALaPagina(idioma: string): void {
 
 aplicarIdiomaALaPagina(idiomaActual());
 alCambiarIdioma(aplicarIdiomaALaPagina);
+
+// M silencia o devuelve el sonido en cualquier escena.
+window.addEventListener("keydown", (ev) => {
+	if (ev.key.toLowerCase() === "m" && !ev.repeat) alternarSilencio();
+});

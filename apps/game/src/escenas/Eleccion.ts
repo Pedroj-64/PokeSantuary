@@ -8,6 +8,8 @@ import {
 } from "@santuario/core";
 import type { Efecto, Evento } from "@santuario/data";
 import Phaser from "phaser";
+import { efecto } from "../audio/gestor.js";
+import { SFX } from "../audio/sonidos.js";
 import { cargarEventos } from "../expedicion/eventosPack.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
@@ -122,6 +124,7 @@ export class Eleccion extends Phaser.Scene {
 
 	/** Aplica los efectos de la opción en orden; si no caben runas, pregunta cuál sustituir. */
 	private resolver(indice: number): void {
+		void efecto(SFX.aceptar);
 		const antes = this.estado;
 		const efectos = this.evento.opciones[indice]?.efectos ?? [];
 		const rng = crearRng(

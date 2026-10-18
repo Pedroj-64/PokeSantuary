@@ -10,6 +10,8 @@ import {
 } from "@santuario/core";
 import Phaser from "phaser";
 import iconosPng from "../assets/iconos-nodo.png?url";
+import { efecto, musica } from "../audio/gestor.js";
+import { MUSICA, SFX } from "../audio/sonidos.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
@@ -120,6 +122,7 @@ export class Mapa extends Phaser.Scene {
 			else if (ev.key.toLowerCase() === "b") this.darBaya();
 			else if (ev.key === "Escape") this.scene.start("ListaEspecies");
 		});
+		void musica(MUSICA.mapa);
 		this.exponerGancho();
 	}
 
@@ -184,6 +187,7 @@ export class Mapa extends Phaser.Scene {
 	}
 
 	private elegir(id: string): void {
+		void efecto(SFX.aceptar);
 		const estado = entrar(this.estado, id);
 		const nodo = estado.mapa.capas.flat().find((n) => n.id === id);
 		if (nodo && esNodoDeCombate(nodo.tipo)) {

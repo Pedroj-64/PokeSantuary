@@ -6,11 +6,15 @@
 		"resolveJsonModule": true,
 		"types": ["vite/client"],
 		"paths": {
-			"@packs/*": ["../../packs/*"]
+			"@packs/*": ["../../packs/*"],
+			"@audio/*": ["../../packages/audio/*"]
 		}
 	},
 	"include": ["src", "src/**/*.json"],
 	"references": [
+		{
+			"path": "../../packages/audio"
+		},
 		{
 			"path": "../../packages/core"
 		},

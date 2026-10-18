@@ -22,6 +22,8 @@ import {
 } from "@santuario/battle";
 import { cuantos, gastar, intentarCaptura } from "@santuario/core";
 import Phaser from "phaser";
+import { efecto, musica, pararMusica } from "../audio/gestor.js";
+import { MUSICA, SFX } from "../audio/sonidos.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
@@ -147,6 +149,7 @@ export class Combate extends Phaser.Scene {
 		this.panelFinal = [];
 		this.teclas = new Map();
 
+		void musica(MUSICA.combate);
 		this.dibujarFondo();
 		this.campo = {
 			rival: this.crearLado("rival"),
@@ -401,6 +404,7 @@ export class Combate extends Phaser.Scene {
 		switch (e.tipo) {
 			case "dano":
 			case "curacion": {
+				void efecto(e.tipo === "dano" ? SFX.golpe : SFX.curar);
 				const l = this.campo[e.lado];
 				l.hp = e.hp;
 				l.hpMax = e.hpMax;
@@ -660,6 +664,7 @@ export class Combate extends Phaser.Scene {
 		this.cajaTexto.setText(
 			t(entra ? "captura.exito" : "captura.fallo", { especie: nombre }),
 		);
+		void efecto(entra ? SFX.capturaExito : SFX.capturaFallo);
 		await this.esperar(this.pausaMensajeMs * 2);
 		if (!this.vigente(gen)) return;
 		if (!entra) return this.mostrarMenu();
@@ -810,6 +815,8 @@ export class Combate extends Phaser.Scene {
 	private mostrarFin(): void {
 		this.fase = "fin";
 		const g = this.terminado;
+		if (g === "jugador") void musica(MUSICA.victoria);
+		else pararMusica();
 		const [titulo, color] =
 			g === "jugador"
 				? [t("combate.victoria"), "#7dff9a"]

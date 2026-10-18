@@ -3,6 +3,7 @@ import { expedicionInicial } from "@santuario/battle";
 import { EspecieSchema } from "@santuario/data";
 import Phaser from "phaser";
 import { z } from "zod";
+import { pararMusica } from "../audio/gestor.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import {
@@ -41,6 +42,7 @@ export class ListaEspecies extends Phaser.Scene {
 	}
 
 	create(): void {
+		pararMusica();
 		const datos = cargarEspecies();
 		const dibujar = () => this.dibujar(datos);
 		dibujar();
@@ -57,7 +59,10 @@ export class ListaEspecies extends Phaser.Scene {
 		// A propósito también en la compilación de producción (la prueba e2e usa
 		// vite preview); es inerte sin el parámetro ?test=1.
 		if (new URLSearchParams(location.search).get("test") === "1") {
-			(window as unknown as { __santuario: unknown }).__santuario = {
+			const g = window as unknown as { __santuario?: Record<string, unknown> };
+			// Se conserva lo que ya publicó otro módulo (p. ej. el registro de audio).
+			g.__santuario = {
+				...g.__santuario,
 				idioma: () => idiomaActual(),
 				especies: () => [...this.nombres],
 				tipos: () => [...this.tipos],

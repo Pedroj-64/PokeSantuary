@@ -178,6 +178,9 @@ importers:
 
   apps/game:
     dependencies:
+      '@santuario/audio':
+        specifier: workspace:*
+        version: link:../../packages/audio
       '@santuario/battle':
         specifier: workspace:*
         version: link:../../packages/battle

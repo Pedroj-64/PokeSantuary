@@ -1,6 +1,9 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
+const raizAudio = fileURLToPath(
+	new URL("../../packages/audio", import.meta.url),
+);
 const raizPacks = fileURLToPath(new URL("../../packs", import.meta.url));
 
 // `eval` directo de @pkmn/sim (battle-stream): conocido y ajeno; solo se calla ese aviso
@@ -14,7 +17,7 @@ function callarEvalDePkmn(
 }
 
 export default defineConfig({
-	resolve: { alias: { "@packs": raizPacks } },
+	resolve: { alias: { "@packs": raizPacks, "@audio": raizAudio } },
 	// Phaser va en un solo chunk grande: se sube el límite del aviso
 	build: {
 		outDir: "dist/web", // aparte de la salida de tsc

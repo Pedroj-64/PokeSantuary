@@ -7,6 +7,8 @@ import {
 	ofertaTienda,
 } from "@santuario/core";
 import Phaser from "phaser";
+import { efecto } from "../audio/gestor.js";
+import { SFX } from "../audio/sonidos.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
@@ -105,6 +107,7 @@ export class Tienda extends Phaser.Scene {
 	private comprar(id: string): void {
 		const base = this.catalogo.find((a) => a.id === id);
 		if (base === undefined) return;
+		void efecto(SFX.aceptar);
 		this.estado = comprarArticulo(this.estado, base);
 		this.dibujar();
 	}

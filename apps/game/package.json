@@ -9,6 +9,7 @@
 		"e2e": "playwright test"
 	},
 	"dependencies": {
+		"@santuario/audio": "workspace:*",
 		"@santuario/battle": "workspace:*",
 		"@santuario/core": "workspace:*",
 		"@santuario/data": "workspace:*",
