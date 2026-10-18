@@ -55,5 +55,18 @@
 	"msg.fin.empate": "The battle ended in a draw.",
 	"combate.ps": "HP",
 	"combate.errorCuerpo": "The battle could not continue. Go back to the list and try again.",
-	"combate.avisoIlegal": "Invalid choice. Pick another."
+	"combate.avisoIlegal": "Invalid choice. Pick another.",
+	"botonExpedicion": "Expedition  [E]",
+	"mapa.piso": "Floor {n}/3",
+	"mapa.dinero": "Coins: {n}",
+	"mapa.ayuda": "Choose your route [1-3]  ·  Esc: leave",
+	"nodo.salvaje": "Wild encounter",
+	"nodo.entrenador": "Echo trainer",
+	"nodo.alfa": "Alpha Pokémon",
+	"nodo.sombrio": "Shadow Pokémon",
+	"nodo.tienda": "Kecleon shop",
+	"nodo.manantial": "Spring",
+	"nodo.evento": "Event",
+	"nodo.cofre": "Rift chest",
+	"nodo.jefe": "Boss"
 }

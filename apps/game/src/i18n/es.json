@@ -55,5 +55,18 @@
 	"msg.fin.empate": "El combate acabó en empate.",
 	"combate.ps": "PS",
 	"combate.errorCuerpo": "No se pudo continuar el combate. Vuelve a la lista e inténtalo de nuevo.",
-	"combate.avisoIlegal": "Elección no válida. Elige otra."
+	"combate.avisoIlegal": "Elección no válida. Elige otra.",
+	"botonExpedicion": "Expedición  [E]",
+	"mapa.piso": "Piso {n}/3",
+	"mapa.dinero": "Monedas: {n}",
+	"mapa.ayuda": "Elige tu ruta [1-3]  ·  Esc: salir",
+	"nodo.salvaje": "Encuentro salvaje",
+	"nodo.entrenador": "Entrenador del Eco",
+	"nodo.alfa": "Pokémon Alfa",
+	"nodo.sombrio": "Pokémon Sombrío",
+	"nodo.tienda": "Tienda Kecleon",
+	"nodo.manantial": "Manantial",
+	"nodo.evento": "Evento",
+	"nodo.cofre": "Cofre de la Fisura",
+	"nodo.jefe": "Jefe"
 }

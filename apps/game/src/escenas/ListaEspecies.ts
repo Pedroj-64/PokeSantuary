@@ -2,6 +2,8 @@ import especiesCrudo from "@packs/kanto/especies.json?raw";
 import { EspecieSchema } from "@santuario/data";
 import Phaser from "phaser";
 import { z } from "zod";
+import { cargarDatosCombate } from "../combate/datosPack.js";
+import { expedicionInicial } from "../expedicion/inicio.js";
 import {
 	alCambiarIdioma,
 	cambiarIdioma,
@@ -9,6 +11,7 @@ import {
 	idiomaActual,
 	t,
 } from "../i18n/index.js";
+import { obtenerSemilla } from "../semilla.js";
 
 type Especie = z.infer<typeof EspecieSchema>;
 
@@ -44,6 +47,7 @@ export class ListaEspecies extends Phaser.Scene {
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, quitar);
 		this.input.keyboard?.on("keydown-L", alternarIdioma);
 		this.input.keyboard?.on("keydown-B", () => this.scene.start("Combate"));
+		this.input.keyboard?.on("keydown-E", () => this.iniciarExpedicion());
 
 		// A propósito también en la compilación de producción (la prueba e2e usa
 		// vite preview); es inerte sin el parámetro ?test=1.
@@ -66,6 +70,13 @@ export class ListaEspecies extends Phaser.Scene {
 			};
 		}
 		this.game.canvas.parentElement?.setAttribute("data-estado", "listo");
+	}
+
+	private iniciarExpedicion(): void {
+		const { sets } = cargarDatosCombate();
+		this.scene.start("Mapa", {
+			estado: expedicionInicial(obtenerSemilla(), sets),
+		});
 	}
 
 	private dibujar(datos: ReturnType<typeof cargarEspecies>): void {
@@ -144,6 +155,19 @@ export class ListaEspecies extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true });
 		combate.on("pointerdown", () => this.scene.start("Combate"));
 		this.dibujados.push(combate);
+
+		const expedicion = this.add
+			.text(12, 262, t("botonExpedicion"), {
+				fontFamily: FUENTE,
+				fontSize: "10px",
+				color: "#1b1b2f",
+				backgroundColor: "#7dff9a",
+				padding: { x: 4, y: 3 },
+			})
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true });
+		expedicion.on("pointerdown", () => this.iniciarExpedicion());
+		this.dibujados.push(expedicion);
 	}
 }
 

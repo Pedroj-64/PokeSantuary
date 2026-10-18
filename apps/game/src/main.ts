@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Combate } from "./escenas/Combate.js";
 import { ListaEspecies } from "./escenas/ListaEspecies.js";
+import { Mapa } from "./escenas/Mapa.js";
 import { alCambiarIdioma, idiomaActual, t } from "./i18n/index.js";
 
 export const ANCHO = 480;
@@ -26,7 +27,7 @@ const juego = new Phaser.Game({
 		mode: Phaser.Scale.NONE,
 		zoom: zoomEntero(window.innerWidth, window.innerHeight),
 	},
-	scene: [ListaEspecies, Combate],
+	scene: [ListaEspecies, Combate, Mapa],
 });
 
 window.addEventListener("resize", () =>
