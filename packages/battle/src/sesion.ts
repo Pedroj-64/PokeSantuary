@@ -25,6 +25,8 @@ export interface ResultadoTurno {
 	/** Lo que debe elegir el jugador ahora; null si el combate terminó. */
 	peticion: Peticion | null;
 	terminado: Lado | "empate" | null;
+	/** PS finales del equipo del jugador, en el orden de entrada; solo cuando el combate terminó. */
+	equipoFinal?: { especie: string; psPct: number }[];
 }
 
 /**
@@ -116,10 +118,12 @@ export class SesionCombate {
 
 	private resultado(eventos: EventoCombate[]): ResultadoTurno {
 		const c = this.combate as Combate;
+		const terminado = c.terminado();
 		return {
 			eventos,
 			peticion: c.peticion("jugador"),
-			terminado: c.terminado(),
+			terminado,
+			...(terminado !== null && { equipoFinal: c.equipoJugador() }),
 		};
 	}
 }

@@ -277,3 +277,74 @@ describe("Combate: activo", () => {
 		);
 	});
 });
+
+describe("Combate: PS iniciales y finales por miembro", () => {
+	const conPs = (ps: (number | undefined)[]): MiembroEquipo[] =>
+		A().map((m, i) => (ps[i] === undefined ? m : { ...m, psPct: ps[i] }));
+
+	it("un miembro con psPct 40 arranca con el 40 % de sus PS máximos (redondeo hacia arriba)", async () => {
+		const c = await Combate.crear({
+			semilla: "s1",
+			jugador: conPs([40]),
+			rival: B(),
+		});
+		const activo = c.activo("jugador");
+		expect(activo?.hp).toBe(Math.ceil((activo?.hpMax ?? 0) * 0.4));
+		expect(c.activo("rival")?.hp).toBe(c.activo("rival")?.hpMax);
+	});
+
+	it("el miembro herido también llega herido al resto del equipo", async () => {
+		const c = await Combate.crear({
+			semilla: "s1",
+			jugador: conPs([100, 25]),
+			rival: B(),
+		});
+		const equipoInicial = c.equipoJugador();
+		expect(equipoInicial.map((m) => m.psPct)).toEqual([100, 25, 100]);
+	});
+
+	it.each([0, 101, 50.5, Number.NaN])(
+		"rechaza psPct %j con un error claro",
+		async (ps) => {
+			await expect(
+				Combate.crear({ semilla: "s1", jugador: conPs([ps]), rival: B() }),
+			).rejects.toThrow(/psPct/);
+		},
+	);
+
+	it("rechaza psPct en el rival: solo el jugador arrastra PS entre combates", async () => {
+		const rival = B().map((m, i) => (i === 0 ? { ...m, psPct: 50 } : m));
+		await expect(
+			Combate.crear({ semilla: "s1", jugador: A(), rival }),
+		).rejects.toThrow(/psPct/);
+	});
+
+	it("equipoJugador() devuelve un porcentaje por miembro, en el orden de entrada, con 0 para los debilitados", async () => {
+		const c = await crear("s4");
+		await jugar(c);
+		const final = c.equipoJugador();
+		expect(final.map((m) => m.especie)).toEqual(A().map((m) => m.especie));
+		for (const m of final) {
+			expect(Number.isInteger(m.psPct)).toBe(true);
+			expect(m.psPct).toBeGreaterThanOrEqual(0);
+			expect(m.psPct).toBeLessThanOrEqual(100);
+		}
+		// Perder = todo el equipo a 0; ganar = al menos un superviviente con PS.
+		const vivos = final.filter((m) => m.psPct > 0).length;
+		expect(c.terminado() === "jugador" ? vivos > 0 : vivos === 0).toBe(true);
+	});
+
+	it("sin psPct el registro no cambia respecto a un equipo a plena salud", async () => {
+		const [a, b] = [
+			await Combate.crear({ semilla: "s1", jugador: A(), rival: B() }),
+			await Combate.crear({
+				semilla: "s1",
+				jugador: conPs([100, 100, 100]),
+				rival: B(),
+			}),
+		];
+		await jugar(a);
+		await jugar(b);
+		expect(b.registro()).toBe(a.registro());
+	});
+});

@@ -16,6 +16,8 @@ export type { EventoCombate, Lado } from "./protocolo.js";
 export interface MiembroEquipo {
 	especie: string;
 	set: SetCombate;
+	/** PS iniciales en porcentaje entero de 1 a 100 (por defecto 100). Solo el jugador los arrastra. */
+	psPct?: number;
 }
 
 /**
@@ -100,7 +102,17 @@ function validarEquipo(lado: Lado, equipo: MiembroEquipo[]): void {
 			`El equipo del ${lado} debe tener entre 1 y ${MAX_EQUIPO} Pokémon`,
 		);
 	}
-	for (const { especie, set } of equipo) {
+	for (const { especie, set, psPct } of equipo) {
+		if (psPct !== undefined) {
+			if (lado === "rival") {
+				throw new Error("psPct solo se admite en el equipo del jugador");
+			}
+			if (!Number.isInteger(psPct) || psPct < 1 || psPct > 100) {
+				throw new Error(
+					`psPct debe ser un entero entre 1 y 100 (recibido ${psPct}) en ${especie}`,
+				);
+			}
+		}
 		if (!Dex.species.get(especie).exists) {
 			throw new Error(`Especie inexistente en el simulador: ${especie}`);
 		}
@@ -139,6 +151,9 @@ export class Combate {
 	private readonly hpMax = new Map<string, number>();
 	private ganador: Lado | "empate" | null = null;
 	private escriturasEnviadas = 0;
+	/** Pokémon del jugador en el orden de entrada; el simulador reordena `side.pokemon` al cambiar. */
+	private originalesJugador: { hp: number; maxhp: number }[] = [];
+	private especiesJugador: string[] = [];
 	private readonly activos: Record<Lado, ActivoPublico | null> = {
 		jugador: null,
 		rival: null,
@@ -199,13 +214,29 @@ export class Combate {
 			formatid: "gen9customgame@@@!Team Preview",
 			seed: semillaSimulador(op.semilla),
 		};
-		await flujo.write(
-			[
-				`>start ${JSON.stringify(inicio)}`,
-				`>player p1 ${JSON.stringify({ name: NOMBRE.jugador, team: empaquetar(op.jugador) })}`,
-				`>player p2 ${JSON.stringify({ name: NOMBRE.rival, team: empaquetar(op.rival) })}`,
-			].join("\n"),
-		);
+		const jugador1 = `>player p1 ${JSON.stringify({ name: NOMBRE.jugador, team: empaquetar(op.jugador) })}`;
+		const jugador2 = `>player p2 ${JSON.stringify({ name: NOMBRE.rival, team: empaquetar(op.rival) })}`;
+		if (op.jugador.some((m) => m.psPct !== undefined)) {
+			// El combate arranca al llegar el segundo jugador: se fijan los PS antes,
+			// para que el primer `|switch|` y la petición ya los lleven.
+			await flujo.write(
+				[`>start ${JSON.stringify(inicio)}`, jugador1].join("\n"),
+			);
+			const lado = flujo.battle?.sides[0]?.pokemon ?? [];
+			op.jugador.forEach((m, i) => {
+				const p = lado[i];
+				if (p && m.psPct !== undefined) {
+					p.sethp(Math.max(1, Math.ceil((p.maxhp * m.psPct) / 100)));
+				}
+			});
+			await flujo.write(jugador2);
+		} else {
+			await flujo.write(
+				[`>start ${JSON.stringify(inicio)}`, jugador1, jugador2].join("\n"),
+			);
+		}
+		c.originalesJugador = [...(flujo.battle?.sides[0]?.pokemon ?? [])];
+		c.especiesJugador = op.jugador.map((m) => m.especie);
 		const eventos = c.procesar();
 		const tam = (l: Lado) => (l === "jugador" ? op.jugador : op.rival).length;
 		c.inicio.push(
@@ -233,12 +264,23 @@ export class Combate {
 		return a && { ...a };
 	}
 
-	/** Ganador (`empate` incluido) o null si el combate sigue. */
 	/** Escrituras enviadas al simulador; si cambia durante una elección fallida, el combate ya avanzó. */
 	get escrituras(): number {
 		return this.escriturasEnviadas;
 	}
 
+	/**
+	 * PS del equipo del jugador en porcentaje entero, en el orden de entrada
+	 * (0 = debilitado; un superviviente nunca baja de 1). Es la inversa del redondeo de entrada.
+	 */
+	equipoJugador(): { especie: string; psPct: number }[] {
+		return this.originalesJugador.map((p, i) => ({
+			especie: this.especiesJugador[i] ?? "",
+			psPct: p.hp <= 0 ? 0 : Math.max(1, Math.floor((100 * p.hp) / p.maxhp)),
+		}));
+	}
+
+	/** Ganador (`empate` incluido) o null si el combate sigue. */
 	terminado(): Lado | "empate" | null {
 		return this.ganador;
 	}

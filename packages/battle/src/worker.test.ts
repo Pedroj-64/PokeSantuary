@@ -424,6 +424,33 @@ describe("SesionCombate: errores del simulador a mitad de turno", () => {
 	});
 });
 
+describe("SesionCombate: equipo final", () => {
+	it("entrega el equipo final del jugador solo cuando el combate termina", async () => {
+		const s = new SesionCombate();
+		let r = await s.abrir({ semilla: "s4", jugador: JUGADOR, rival: RIVAL });
+		expect(r.equipoFinal).toBeUndefined();
+		for (let i = 0; r.terminado === null && i < 100; i++) {
+			const p = r.peticion as Peticion;
+			const eleccion: Eleccion =
+				p.tipo === "movimiento"
+					? {
+							tipo: "movimiento",
+							indice: p.movimientos.findIndex((m) => !m.deshabilitado),
+						}
+					: {
+							tipo: "cambio",
+							indice: p.equipo.findIndex((m) => !m.activo && !m.debilitado),
+						};
+			r = await s.elegirJugador(eleccion);
+			if (r.terminado === null) expect(r.equipoFinal).toBeUndefined();
+		}
+		expect(r.terminado).not.toBeNull();
+		expect(r.equipoFinal?.map((m) => m.especie)).toEqual(
+			JUGADOR.map((m) => m.especie),
+		);
+	});
+});
+
 describe("módulo del cliente", () => {
 	it("no importa ni reexporta en tiempo de ejecución el simulador, Combate ni la IA", () => {
 		const src = readFileSync(new URL("./cliente.ts", import.meta.url), "utf8");
