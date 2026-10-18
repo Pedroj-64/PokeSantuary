@@ -1,0 +1,2660 @@
+[
+	{
+		"id": "mov-normal",
+		"canal": "pulso1",
+		"duracionMs": 300,
+		"volumen": 11,
+		"frecInicial": 330,
+		"deslizamiento": 6,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 300
+		},
+		"capas": [
+			{
+				"desdeMs": 20,
+				"efecto": {
+					"id": "mov-normal-golpe",
+					"canal": "ruido",
+					"duracionMs": 120,
+					"volumen": 8,
+					"frecInicial": 900,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 120
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-normal-cuerpo",
+					"canal": "pulso2",
+					"duracionMs": 220,
+					"volumen": 5,
+					"frecInicial": 165,
+					"deslizamiento": 3,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 220
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-fire",
+		"canal": "pulso1",
+		"duracionMs": 450,
+		"volumen": 12,
+		"frecInicial": 150,
+		"deslizamiento": 18,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 450
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-fire-ruido",
+					"canal": "ruido",
+					"duracionMs": 440,
+					"volumen": 11,
+					"frecInicial": 600,
+					"deslizamiento": 30,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 440
+					}
+				}
+			},
+			{
+				"desdeMs": 90,
+				"efecto": {
+					"id": "mov-fire-crujido-1",
+					"canal": "ruido",
+					"duracionMs": 70,
+					"volumen": 7,
+					"frecInicial": 1400,
+					"deslizamiento": -10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 70
+					}
+				}
+			},
+			{
+				"desdeMs": 180,
+				"efecto": {
+					"id": "mov-fire-crujido-2",
+					"canal": "ruido",
+					"duracionMs": 60,
+					"volumen": 6,
+					"frecInicial": 1600,
+					"deslizamiento": -12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 60
+					}
+				}
+			},
+			{
+				"desdeMs": 270,
+				"efecto": {
+					"id": "mov-fire-crujido-3",
+					"canal": "ruido",
+					"duracionMs": 55,
+					"volumen": 5,
+					"frecInicial": 1800,
+					"deslizamiento": -14,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 55
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-water",
+		"canal": "pulso1",
+		"duracionMs": 500,
+		"volumen": 12,
+		"frecInicial": 700,
+		"deslizamiento": -34,
+		"vibrato": {
+			"hz": 7,
+			"profundidad": 1.5
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 500
+		},
+		"capas": [
+			{
+				"desdeMs": 80,
+				"efecto": {
+					"id": "mov-water-burbuja",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 5,
+					"frecInicial": 800,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 220,
+				"efecto": {
+					"id": "mov-water-gota",
+					"canal": "pulso2",
+					"duracionMs": 240,
+					"volumen": 7,
+					"frecInicial": 520,
+					"deslizamiento": -24,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 240
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-grass",
+		"canal": "pulso2",
+		"duracionMs": 550,
+		"volumen": 10,
+		"frecInicial": 440,
+		"deslizamiento": 4,
+		"vibrato": {
+			"hz": 5,
+			"profundidad": 0.8
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 550
+		},
+		"capas": [
+			{
+				"desdeMs": 60,
+				"efecto": {
+					"id": "mov-grass-hoja-1",
+					"canal": "ruido",
+					"duracionMs": 60,
+					"volumen": 5,
+					"frecInicial": 4500,
+					"deslizamiento": -10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 60
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "mov-grass-hoja-2",
+					"canal": "ruido",
+					"duracionMs": 50,
+					"volumen": 4,
+					"frecInicial": 4800,
+					"deslizamiento": -12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 50
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "mov-grass-brote",
+					"canal": "pulso1",
+					"duracionMs": 200,
+					"volumen": 6,
+					"frecInicial": 523,
+					"deslizamiento": 2,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-electric",
+		"canal": "pulso1",
+		"ciclo": 12.5,
+		"duracionMs": 400,
+		"volumen": 12,
+		"frecInicial": 1200,
+		"deslizamiento": 8,
+		"vibrato": {
+			"hz": 18,
+			"profundidad": 3
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 400
+		},
+		"capas": [
+			{
+				"desdeMs": 70,
+				"efecto": {
+					"id": "mov-electric-chispa-1",
+					"canal": "ruido",
+					"duracionMs": 25,
+					"volumen": 6,
+					"frecInicial": 5000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 25
+					}
+				}
+			},
+			{
+				"desdeMs": 150,
+				"efecto": {
+					"id": "mov-electric-chispa-2",
+					"canal": "ruido",
+					"duracionMs": 25,
+					"volumen": 5,
+					"frecInicial": 5200,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 25
+					}
+				}
+			},
+			{
+				"desdeMs": 230,
+				"efecto": {
+					"id": "mov-electric-chispa-3",
+					"canal": "ruido",
+					"duracionMs": 25,
+					"volumen": 4,
+					"frecInicial": 4800,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 25
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-ice",
+		"canal": "pulso1",
+		"ciclo": 12.5,
+		"duracionMs": 500,
+		"volumen": 9,
+		"frecInicial": 1320,
+		"deslizamiento": 20,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 500
+		},
+		"capas": [
+			{
+				"desdeMs": 90,
+				"efecto": {
+					"id": "mov-ice-cristal-2",
+					"canal": "pulso2",
+					"duracionMs": 160,
+					"volumen": 8,
+					"frecInicial": 1760,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 160
+					}
+				}
+			},
+			{
+				"desdeMs": 180,
+				"efecto": {
+					"id": "mov-ice-cristal-3",
+					"canal": "pulso1",
+					"duracionMs": 150,
+					"volumen": 7,
+					"frecInicial": 2093,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			},
+			{
+				"desdeMs": 270,
+				"efecto": {
+					"id": "mov-ice-cristal-4",
+					"canal": "pulso2",
+					"duracionMs": 190,
+					"volumen": 6,
+					"frecInicial": 2637,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 190
+					}
+				}
+			},
+			{
+				"desdeMs": 360,
+				"efecto": {
+					"id": "mov-ice-cristal-5",
+					"canal": "pulso1",
+					"duracionMs": 200,
+					"volumen": 5,
+					"frecInicial": 3136,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-fighting",
+		"canal": "ruido",
+		"duracionMs": 320,
+		"volumen": 13,
+		"frecInicial": 400,
+		"deslizamiento": -30,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 320
+		},
+		"capas": [
+			{
+				"desdeMs": 140,
+				"efecto": {
+					"id": "mov-fighting-segundo",
+					"canal": "ruido",
+					"duracionMs": 100,
+					"volumen": 12,
+					"frecInicial": 500,
+					"deslizamiento": -30,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 100
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-fighting-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 60,
+					"volumen": 6,
+					"frecInicial": 150,
+					"deslizamiento": -12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 60
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-poison",
+		"canal": "pulso2",
+		"duracionMs": 580,
+		"volumen": 10,
+		"frecInicial": 500,
+		"deslizamiento": -30,
+		"vibrato": {
+			"hz": 9,
+			"profundidad": 2.5
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 580
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "mov-poison-burbuja",
+					"canal": "ruido",
+					"duracionMs": 150,
+					"volumen": 5,
+					"frecInicial": 700,
+					"deslizamiento": -35,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			},
+			{
+				"desdeMs": 260,
+				"efecto": {
+					"id": "mov-poison-eco",
+					"canal": "pulso1",
+					"duracionMs": 260,
+					"volumen": 7,
+					"frecInicial": 420,
+					"deslizamiento": -25,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 260
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-ground",
+		"canal": "ruido",
+		"duracionMs": 600,
+		"volumen": 14,
+		"frecInicial": 150,
+		"deslizamiento": -10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-ground-retumbo",
+					"canal": "pulso1",
+					"duracionMs": 600,
+					"volumen": 10,
+					"frecInicial": 80,
+					"deslizamiento": -4,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "mov-ground-eco",
+					"canal": "ruido",
+					"duracionMs": 300,
+					"volumen": 8,
+					"frecInicial": 90,
+					"deslizamiento": -3,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-flying",
+		"canal": "ruido",
+		"duracionMs": 350,
+		"volumen": 9,
+		"frecInicial": 3000,
+		"deslizamiento": 20,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 350
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-flying-impulso",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 7,
+					"frecInicial": 800,
+					"deslizamiento": 30,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "mov-flying-aire",
+					"canal": "ruido",
+					"duracionMs": 150,
+					"volumen": 5,
+					"frecInicial": 6000,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-psychic",
+		"canal": "pulso1",
+		"duracionMs": 620,
+		"volumen": 10,
+		"frecInicial": 600,
+		"deslizamiento": 12,
+		"vibrato": {
+			"hz": 3,
+			"profundidad": 4
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 620
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-psychic-capa",
+					"canal": "pulso2",
+					"duracionMs": 600,
+					"volumen": 6,
+					"frecInicial": 900,
+					"deslizamiento": -12,
+					"vibrato": {
+						"hz": 4,
+						"profundidad": 3
+					},
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "mov-psychic-zumbido",
+					"canal": "ruido",
+					"duracionMs": 400,
+					"volumen": 3,
+					"frecInicial": 1200,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-bug",
+		"canal": "pulso1",
+		"duracionMs": 450,
+		"volumen": 10,
+		"frecInicial": 220,
+		"deslizamiento": 5,
+		"vibrato": {
+			"hz": 16,
+			"profundidad": 1.5
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 450
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-bug-zumbido",
+					"canal": "pulso2",
+					"duracionMs": 400,
+					"volumen": 6,
+					"frecInicial": 330,
+					"deslizamiento": 8,
+					"vibrato": {
+						"hz": 20,
+						"profundidad": 1
+					},
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			},
+			{
+				"desdeMs": 150,
+				"efecto": {
+					"id": "mov-bug-alas",
+					"canal": "ruido",
+					"duracionMs": 150,
+					"volumen": 4,
+					"frecInicial": 2500,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-rock",
+		"canal": "ruido",
+		"duracionMs": 400,
+		"volumen": 14,
+		"frecInicial": 250,
+		"deslizamiento": -25,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 400
+		},
+		"capas": [
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "mov-rock-segundo",
+					"canal": "ruido",
+					"duracionMs": 90,
+					"volumen": 12,
+					"frecInicial": 200,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 90
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-rock-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 120,
+					"volumen": 8,
+					"frecInicial": 110,
+					"deslizamiento": -10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 120
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-ghost",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 9,
+		"frecInicial": 180,
+		"deslizamiento": -4,
+		"vibrato": {
+			"hz": 2,
+			"profundidad": 3
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-ghost-sombra",
+					"canal": "pulso2",
+					"duracionMs": 550,
+					"volumen": 6,
+					"frecInicial": 190,
+					"deslizamiento": -4,
+					"vibrato": {
+						"hz": 2,
+						"profundidad": 2
+					},
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 550
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "mov-ghost-eco",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 4,
+					"frecInicial": 160,
+					"deslizamiento": -3,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "mov-ghost-aire",
+					"canal": "ruido",
+					"duracionMs": 250,
+					"volumen": 3,
+					"frecInicial": 300,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-dragon",
+		"canal": "ruido",
+		"duracionMs": 650,
+		"volumen": 14,
+		"frecInicial": 120,
+		"deslizamiento": 12,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 650
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-dragon-rugido",
+					"canal": "pulso1",
+					"duracionMs": 620,
+					"volumen": 10,
+					"frecInicial": 90,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 620
+					}
+				}
+			},
+			{
+				"desdeMs": 250,
+				"efecto": {
+					"id": "mov-dragon-cola",
+					"canal": "ruido",
+					"duracionMs": 300,
+					"volumen": 8,
+					"frecInicial": 200,
+					"deslizamiento": -8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-dark",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 9,
+		"frecInicial": 110,
+		"deslizamiento": 0,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-dark-disonancia",
+					"canal": "pulso2",
+					"duracionMs": 580,
+					"volumen": 8,
+					"frecInicial": 116,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 580
+					}
+				}
+			},
+			{
+				"desdeMs": 250,
+				"efecto": {
+					"id": "mov-dark-sombra",
+					"canal": "ruido",
+					"duracionMs": 350,
+					"volumen": 5,
+					"frecInicial": 200,
+					"deslizamiento": -6,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 350
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "mov-dark-eco",
+					"canal": "pulso1",
+					"duracionMs": 250,
+					"volumen": 4,
+					"frecInicial": 104,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-steel",
+		"canal": "pulso1",
+		"ciclo": 12.5,
+		"duracionMs": 380,
+		"volumen": 10,
+		"frecInicial": 880,
+		"deslizamiento": 6,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 380
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mov-steel-golpe",
+					"canal": "ruido",
+					"duracionMs": 45,
+					"volumen": 9,
+					"frecInicial": 5200,
+					"deslizamiento": -15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 45
+					}
+				}
+			},
+			{
+				"desdeMs": 90,
+				"efecto": {
+					"id": "mov-steel-filo",
+					"canal": "pulso2",
+					"duracionMs": 100,
+					"volumen": 7,
+					"frecInicial": 1100,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 100
+					}
+				}
+			},
+			{
+				"desdeMs": 170,
+				"efecto": {
+					"id": "mov-steel-brillo",
+					"canal": "pulso1",
+					"duracionMs": 120,
+					"volumen": 5,
+					"frecInicial": 1320,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 120
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mov-fairy",
+		"canal": "pulso1",
+		"ciclo": 25,
+		"duracionMs": 550,
+		"volumen": 8,
+		"frecInicial": 1568,
+		"deslizamiento": 15,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 550
+		},
+		"capas": [
+			{
+				"desdeMs": 40,
+				"efecto": {
+					"id": "mov-fairy-campana-1",
+					"canal": "pulso2",
+					"duracionMs": 200,
+					"volumen": 7,
+					"frecInicial": 1976,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 80,
+				"efecto": {
+					"id": "mov-fairy-campana-2",
+					"canal": "pulso1",
+					"duracionMs": 200,
+					"volumen": 6,
+					"frecInicial": 2349,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "mov-fairy-campana-3",
+					"canal": "pulso2",
+					"duracionMs": 200,
+					"volumen": 6,
+					"frecInicial": 2794,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 160,
+				"efecto": {
+					"id": "mov-fairy-campana-4",
+					"canal": "pulso1",
+					"duracionMs": 220,
+					"volumen": 5,
+					"frecInicial": 3136,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 220
+					}
+				}
+			},
+			{
+				"desdeMs": 220,
+				"efecto": {
+					"id": "mov-fairy-brillo",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 3,
+					"frecInicial": 7000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe",
+		"canal": "ruido",
+		"duracionMs": 80,
+		"volumen": 12,
+		"frecInicial": 900,
+		"deslizamiento": -20,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 80
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 50,
+					"volumen": 6,
+					"frecInicial": 180,
+					"deslizamiento": -10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 50
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-fuerte",
+		"canal": "ruido",
+		"duracionMs": 220,
+		"volumen": 15,
+		"frecInicial": 420,
+		"deslizamiento": -25,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 220
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-fuerte-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 150,
+					"volumen": 8,
+					"frecInicial": 160,
+					"deslizamiento": -8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-superefectivo",
+		"canal": "ruido",
+		"duracionMs": 240,
+		"volumen": 15,
+		"frecInicial": 700,
+		"deslizamiento": -30,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 240
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-superefectivo-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 180,
+					"volumen": 9,
+					"frecInicial": 220,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 180
+					}
+				}
+			},
+			{
+				"desdeMs": 60,
+				"efecto": {
+					"id": "golpe-superefectivo-segundo",
+					"canal": "ruido",
+					"duracionMs": 120,
+					"volumen": 10,
+					"frecInicial": 1400,
+					"deslizamiento": -25,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 120
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-poco-eficaz",
+		"canal": "ruido",
+		"duracionMs": 150,
+		"volumen": 8,
+		"frecInicial": 300,
+		"deslizamiento": -12,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 150
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-poco-eficaz-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 100,
+					"volumen": 5,
+					"frecInicial": 140,
+					"deslizamiento": -5,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 100
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-sin-efecto",
+		"canal": "ruido",
+		"duracionMs": 110,
+		"volumen": 6,
+		"frecInicial": 180,
+		"deslizamiento": -5,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 110
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-sin-efecto-cuerpo",
+					"canal": "pulso2",
+					"duracionMs": 80,
+					"volumen": 4,
+					"frecInicial": 100,
+					"deslizamiento": -3,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 80
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-critico",
+		"canal": "ruido",
+		"duracionMs": 360,
+		"volumen": 10,
+		"frecInicial": 1200,
+		"deslizamiento": -35,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 360
+		},
+		"capas": [
+			{
+				"desdeMs": 50,
+				"efecto": {
+					"id": "golpe-critico-segundo",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 7,
+					"frecInicial": 1800,
+					"deslizamiento": -30,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-critico-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 4,
+					"frecInicial": 300,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "golpe-critico-brillo",
+					"canal": "pulso2",
+					"duracionMs": 180,
+					"volumen": 3,
+					"frecInicial": 600,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 180
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "golpe-fallo",
+		"canal": "pulso1",
+		"duracionMs": 300,
+		"volumen": 9,
+		"frecInicial": 500,
+		"deslizamiento": -30,
+		"vibrato": {
+			"hz": 5,
+			"profundidad": 1
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 300
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "golpe-fallo-aire",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 5,
+					"frecInicial": 400,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "debilitado",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 8,
+		"frecInicial": 330,
+		"deslizamiento": -12,
+		"vibrato": {
+			"hz": 4,
+			"profundidad": 2
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "debilitado-capa",
+					"canal": "pulso2",
+					"duracionMs": 500,
+					"volumen": 5,
+					"frecInicial": 220,
+					"deslizamiento": -8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "debilitado-aire",
+					"canal": "ruido",
+					"duracionMs": 300,
+					"volumen": 3,
+					"frecInicial": 300,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "curar",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 8,
+		"frecInicial": 523,
+		"deslizamiento": 15,
+		"vibrato": {
+			"hz": 6,
+			"profundidad": 0.5
+		},
+		"envolvente": {
+			"ataqueMs": 80,
+			"decaimientoMs": 620
+		},
+		"capas": [
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "curar-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 400,
+					"volumen": 6,
+					"frecInicial": 659,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			},
+			{
+				"desdeMs": 400,
+				"efecto": {
+					"id": "curar-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 5,
+					"frecInicial": 784,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "captura-exito",
+		"canal": "pulso1",
+		"duracionMs": 1200,
+		"volumen": 9,
+		"frecInicial": 523,
+		"deslizamiento": 12,
+		"envolvente": {
+			"ataqueMs": 20,
+			"decaimientoMs": 1180
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "captura-exito-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 600,
+					"volumen": 8,
+					"frecInicial": 659,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			},
+			{
+				"desdeMs": 220,
+				"efecto": {
+					"id": "captura-exito-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 600,
+					"volumen": 8,
+					"frecInicial": 784,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			},
+			{
+				"desdeMs": 360,
+				"efecto": {
+					"id": "captura-exito-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 500,
+					"volumen": 6,
+					"frecInicial": 1047,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			},
+			{
+				"desdeMs": 520,
+				"efecto": {
+					"id": "captura-exito-capa-5",
+					"canal": "pulso1",
+					"duracionMs": 500,
+					"volumen": 5,
+					"frecInicial": 1319,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "captura-fallo",
+		"canal": "pulso2",
+		"duracionMs": 500,
+		"volumen": 8,
+		"frecInicial": 700,
+		"deslizamiento": -35,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 500
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "captura-fallo-ruido",
+					"canal": "ruido",
+					"duracionMs": 300,
+					"volumen": 5,
+					"frecInicial": 500,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "captura-fallo-capa",
+					"canal": "pulso1",
+					"duracionMs": 250,
+					"volumen": 5,
+					"frecInicial": 400,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "bola-lanzar",
+		"canal": "ruido",
+		"duracionMs": 350,
+		"volumen": 9,
+		"frecInicial": 500,
+		"deslizamiento": 25,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 350
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "bola-lanzar-impulso",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 5,
+					"frecInicial": 300,
+					"deslizamiento": 20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "bola-agitar",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 7,
+		"frecInicial": 400,
+		"deslizamiento": 0,
+		"vibrato": {
+			"hz": 10,
+			"profundidad": 1
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "bola-agitar-ruido",
+					"canal": "ruido",
+					"duracionMs": 500,
+					"volumen": 3,
+					"frecInicial": 2000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "bola-agitar-capa",
+					"canal": "pulso2",
+					"duracionMs": 250,
+					"volumen": 4,
+					"frecInicial": 500,
+					"deslizamiento": 2,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "bola-clic",
+		"canal": "pulso1",
+		"ciclo": 12.5,
+		"duracionMs": 60,
+		"volumen": 7,
+		"frecInicial": 1200,
+		"deslizamiento": 0,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 60
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "bola-clic-ruido",
+					"canal": "ruido",
+					"duracionMs": 25,
+					"volumen": 4,
+					"frecInicial": 4000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 25
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "menu-mover",
+		"canal": "pulso1",
+		"ciclo": 25,
+		"duracionMs": 50,
+		"volumen": 5,
+		"frecInicial": 880,
+		"deslizamiento": 0,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 50
+		}
+	},
+	{
+		"id": "menu-aceptar",
+		"canal": "pulso1",
+		"duracionMs": 110,
+		"volumen": 6,
+		"frecInicial": 660,
+		"deslizamiento": 20,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 110
+		},
+		"capas": [
+			{
+				"desdeMs": 40,
+				"efecto": {
+					"id": "menu-aceptar-capa",
+					"canal": "pulso2",
+					"duracionMs": 70,
+					"volumen": 4,
+					"frecInicial": 990,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 70
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "menu-volver",
+		"canal": "pulso2",
+		"duracionMs": 120,
+		"volumen": 5,
+		"frecInicial": 520,
+		"deslizamiento": -18,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 120
+		}
+	},
+	{
+		"id": "menu-error",
+		"canal": "pulso1",
+		"duracionMs": 180,
+		"volumen": 6,
+		"frecInicial": 220,
+		"deslizamiento": 0,
+		"vibrato": {
+			"hz": 14,
+			"profundidad": 2
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 180
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "menu-error-capa",
+					"canal": "pulso2",
+					"duracionMs": 80,
+					"volumen": 4,
+					"frecInicial": 233,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 80
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "comprar",
+		"canal": "pulso1",
+		"duracionMs": 220,
+		"volumen": 6,
+		"frecInicial": 784,
+		"deslizamiento": 8,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 220
+		},
+		"capas": [
+			{
+				"desdeMs": 70,
+				"efecto": {
+					"id": "comprar-capa",
+					"canal": "pulso2",
+					"duracionMs": 150,
+					"volumen": 5,
+					"frecInicial": 1047,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "sin-dinero",
+		"canal": "pulso1",
+		"duracionMs": 160,
+		"volumen": 5,
+		"frecInicial": 300,
+		"deslizamiento": -10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 160
+		},
+		"capas": [
+			{
+				"desdeMs": 70,
+				"efecto": {
+					"id": "sin-dinero-capa",
+					"canal": "pulso2",
+					"duracionMs": 90,
+					"volumen": 4,
+					"frecInicial": 280,
+					"deslizamiento": -6,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 90
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "mensaje",
+		"canal": "pulso1",
+		"duracionMs": 90,
+		"volumen": 4,
+		"frecInicial": 1000,
+		"deslizamiento": 0,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 90
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "mensaje-ruido",
+					"canal": "ruido",
+					"duracionMs": 40,
+					"volumen": 2,
+					"frecInicial": 3000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 40
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "entrada-campo",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 9,
+		"frecInicial": 440,
+		"deslizamiento": 10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 700
+		},
+		"capas": [
+			{
+				"desdeMs": 150,
+				"efecto": {
+					"id": "entrada-campo-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 400,
+					"volumen": 7,
+					"frecInicial": 554,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "entrada-campo-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 350,
+					"volumen": 6,
+					"frecInicial": 659,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 350
+					}
+				}
+			},
+			{
+				"desdeMs": 450,
+				"efecto": {
+					"id": "entrada-campo-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 250,
+					"volumen": 5,
+					"frecInicial": 880,
+					"deslizamiento": 5,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "cambio-pokemon",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 8,
+		"frecInicial": 700,
+		"deslizamiento": -20,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 150,
+				"efecto": {
+					"id": "cambio-pokemon-capa",
+					"canal": "pulso2",
+					"duracionMs": 350,
+					"volumen": 6,
+					"frecInicial": 500,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 350
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "cambio-pokemon-flash",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 3,
+					"frecInicial": 3000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "ps-bajos",
+		"canal": "pulso1",
+		"duracionMs": 550,
+		"volumen": 6,
+		"frecInicial": 880,
+		"deslizamiento": 0,
+		"vibrato": {
+			"hz": 12,
+			"profundidad": 1.5
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 550
+		},
+		"capas": [
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "ps-bajos-capa",
+					"canal": "pulso2",
+					"duracionMs": 300,
+					"volumen": 5,
+					"frecInicial": 660,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-quemado",
+		"canal": "ruido",
+		"duracionMs": 600,
+		"volumen": 9,
+		"frecInicial": 700,
+		"deslizamiento": -25,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "estado-quemado-crujido",
+					"canal": "ruido",
+					"duracionMs": 200,
+					"volumen": 6,
+					"frecInicial": 1300,
+					"deslizamiento": -20,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-paralizado",
+		"canal": "pulso1",
+		"duracionMs": 600,
+		"volumen": 8,
+		"frecInicial": 700,
+		"deslizamiento": 0,
+		"vibrato": {
+			"hz": 18,
+			"profundidad": 4
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "estado-paralizado-chispa",
+					"canal": "ruido",
+					"duracionMs": 120,
+					"volumen": 4,
+					"frecInicial": 5000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 120
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-envenenado",
+		"canal": "pulso2",
+		"duracionMs": 620,
+		"volumen": 7,
+		"frecInicial": 400,
+		"deslizamiento": -20,
+		"vibrato": {
+			"hz": 7,
+			"profundidad": 2
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 620
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "estado-envenenado-burbuja",
+					"canal": "ruido",
+					"duracionMs": 400,
+					"volumen": 3,
+					"frecInicial": 600,
+					"deslizamiento": -15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-dormido",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 6,
+		"frecInicial": 220,
+		"deslizamiento": -3,
+		"envolvente": {
+			"ataqueMs": 100,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "estado-dormido-capa",
+					"canal": "pulso2",
+					"duracionMs": 600,
+					"volumen": 4,
+					"frecInicial": 165,
+					"deslizamiento": -2,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-congelado",
+		"canal": "pulso1",
+		"ciclo": 12.5,
+		"duracionMs": 600,
+		"volumen": 7,
+		"frecInicial": 1568,
+		"deslizamiento": 12,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 600
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "estado-congelado-capa",
+					"canal": "pulso2",
+					"duracionMs": 400,
+					"volumen": 5,
+					"frecInicial": 2093,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			},
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "estado-congelado-brillo",
+					"canal": "ruido",
+					"duracionMs": 150,
+					"volumen": 3,
+					"frecInicial": 5000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "estado-confuso",
+		"canal": "pulso1",
+		"duracionMs": 650,
+		"volumen": 7,
+		"frecInicial": 500,
+		"deslizamiento": 0,
+		"vibrato": {
+			"hz": 5,
+			"profundidad": 5
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 650
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "estado-confuso-capa",
+					"canal": "pulso2",
+					"duracionMs": 620,
+					"volumen": 5,
+					"frecInicial": 540,
+					"deslizamiento": 0,
+					"vibrato": {
+						"hz": 6,
+						"profundidad": 4
+					},
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 620
+					}
+				}
+			},
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "estado-confuso-aire",
+					"canal": "ruido",
+					"duracionMs": 400,
+					"volumen": 3,
+					"frecInicial": 800,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "sube-stat",
+		"canal": "pulso1",
+		"duracionMs": 450,
+		"volumen": 8,
+		"frecInicial": 523,
+		"deslizamiento": 18,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 450
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "sube-stat-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 300,
+					"volumen": 6,
+					"frecInicial": 659,
+					"deslizamiento": 15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "sube-stat-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 250,
+					"volumen": 6,
+					"frecInicial": 784,
+					"deslizamiento": 12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "sube-stat-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 150,
+					"volumen": 5,
+					"frecInicial": 1047,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "baja-stat",
+		"canal": "pulso1",
+		"duracionMs": 450,
+		"volumen": 8,
+		"frecInicial": 1047,
+		"deslizamiento": -18,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 450
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "baja-stat-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 300,
+					"volumen": 6,
+					"frecInicial": 784,
+					"deslizamiento": -15,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "baja-stat-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 250,
+					"volumen": 6,
+					"frecInicial": 659,
+					"deslizamiento": -12,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "baja-stat-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 150,
+					"volumen": 5,
+					"frecInicial": 523,
+					"deslizamiento": -8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 150
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "paso",
+		"canal": "ruido",
+		"duracionMs": 90,
+		"volumen": 6,
+		"frecInicial": 600,
+		"deslizamiento": -10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 90
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "paso-cuerpo",
+					"canal": "pulso1",
+					"duracionMs": 60,
+					"volumen": 3,
+					"frecInicial": 150,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 60
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "cofre-abrir",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 8,
+		"frecInicial": 440,
+		"deslizamiento": 12,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 700
+		},
+		"capas": [
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "cofre-abrir-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 400,
+					"volumen": 6,
+					"frecInicial": 554,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 400
+					}
+				}
+			},
+			{
+				"desdeMs": 350,
+				"efecto": {
+					"id": "cofre-abrir-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 300,
+					"volumen": 6,
+					"frecInicial": 659,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 500,
+				"efecto": {
+					"id": "cofre-abrir-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 200,
+					"volumen": 5,
+					"frecInicial": 880,
+					"deslizamiento": 5,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "cofre-abrir-madera",
+					"canal": "ruido",
+					"duracionMs": 250,
+					"volumen": 3,
+					"frecInicial": 2000,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "evento",
+		"canal": "pulso1",
+		"duracionMs": 400,
+		"volumen": 7,
+		"frecInicial": 880,
+		"deslizamiento": 6,
+		"vibrato": {
+			"hz": 8,
+			"profundidad": 1
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 400
+		},
+		"capas": [
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "evento-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 250,
+					"volumen": 5,
+					"frecInicial": 1047,
+					"deslizamiento": 6,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			},
+			{
+				"desdeMs": 240,
+				"efecto": {
+					"id": "evento-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 160,
+					"volumen": 4,
+					"frecInicial": 1319,
+					"deslizamiento": 4,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 160
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "alfa-aparece",
+		"canal": "ruido",
+		"duracionMs": 700,
+		"volumen": 12,
+		"frecInicial": 180,
+		"deslizamiento": 10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 700
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "alfa-aparece-rugido",
+					"canal": "pulso1",
+					"duracionMs": 650,
+					"volumen": 9,
+					"frecInicial": 110,
+					"deslizamiento": 5,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 650
+					}
+				}
+			},
+			{
+				"desdeMs": 300,
+				"efecto": {
+					"id": "alfa-aparece-capa",
+					"canal": "pulso2",
+					"duracionMs": 350,
+					"volumen": 7,
+					"frecInicial": 165,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 350
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "sombrio-aparece",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 9,
+		"frecInicial": 90,
+		"deslizamiento": -5,
+		"vibrato": {
+			"hz": 3,
+			"profundidad": 3
+		},
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 700
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "sombrio-aparece-capa",
+					"canal": "pulso2",
+					"duracionMs": 650,
+					"volumen": 7,
+					"frecInicial": 95,
+					"deslizamiento": -4,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 650
+					}
+				}
+			},
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "sombrio-aparece-aire",
+					"canal": "ruido",
+					"duracionMs": 500,
+					"volumen": 5,
+					"frecInicial": 150,
+					"deslizamiento": 0,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "jefe-aparece",
+		"canal": "ruido",
+		"duracionMs": 900,
+		"volumen": 14,
+		"frecInicial": 120,
+		"deslizamiento": 8,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 900
+		},
+		"capas": [
+			{
+				"desdeMs": 0,
+				"efecto": {
+					"id": "jefe-aparece-retumbo",
+					"canal": "pulso1",
+					"duracionMs": 850,
+					"volumen": 10,
+					"frecInicial": 80,
+					"deslizamiento": 4,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 850
+					}
+				}
+			},
+			{
+				"desdeMs": 200,
+				"efecto": {
+					"id": "jefe-aparece-capa-2",
+					"canal": "pulso1",
+					"duracionMs": 600,
+					"volumen": 7,
+					"frecInicial": 110,
+					"deslizamiento": 3,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 600
+					}
+				}
+			},
+			{
+				"desdeMs": 400,
+				"efecto": {
+					"id": "jefe-aparece-capa-3",
+					"canal": "pulso2",
+					"duracionMs": 450,
+					"volumen": 6,
+					"frecInicial": 130,
+					"deslizamiento": 2,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 450
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "runa-obtenida",
+		"canal": "pulso1",
+		"duracionMs": 700,
+		"volumen": 8,
+		"frecInicial": 1047,
+		"deslizamiento": 10,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 700
+		},
+		"capas": [
+			{
+				"desdeMs": 100,
+				"efecto": {
+					"id": "runa-obtenida-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 500,
+					"volumen": 7,
+					"frecInicial": 1319,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 500
+					}
+				}
+			},
+			{
+				"desdeMs": 220,
+				"efecto": {
+					"id": "runa-obtenida-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 450,
+					"volumen": 6,
+					"frecInicial": 1568,
+					"deslizamiento": 8,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 450
+					}
+				}
+			},
+			{
+				"desdeMs": 360,
+				"efecto": {
+					"id": "runa-obtenida-capa-4",
+					"canal": "pulso2",
+					"duracionMs": 300,
+					"volumen": 5,
+					"frecInicial": 2093,
+					"deslizamiento": 6,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 500,
+				"efecto": {
+					"id": "runa-obtenida-capa-5",
+					"canal": "pulso1",
+					"duracionMs": 200,
+					"volumen": 4,
+					"frecInicial": 2637,
+					"deslizamiento": 5,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 200
+					}
+				}
+			}
+		]
+	},
+	{
+		"id": "objeto-obtenido",
+		"canal": "pulso1",
+		"duracionMs": 500,
+		"volumen": 8,
+		"frecInicial": 784,
+		"deslizamiento": 12,
+		"envolvente": {
+			"ataqueMs": 0,
+			"decaimientoMs": 500
+		},
+		"capas": [
+			{
+				"desdeMs": 120,
+				"efecto": {
+					"id": "objeto-obtenido-capa-2",
+					"canal": "pulso2",
+					"duracionMs": 300,
+					"volumen": 6,
+					"frecInicial": 1047,
+					"deslizamiento": 10,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 300
+					}
+				}
+			},
+			{
+				"desdeMs": 240,
+				"efecto": {
+					"id": "objeto-obtenido-capa-3",
+					"canal": "pulso1",
+					"duracionMs": 250,
+					"volumen": 5,
+					"frecInicial": 1568,
+					"deslizamiento": 6,
+					"envolvente": {
+						"ataqueMs": 0,
+						"decaimientoMs": 250
+					}
+				}
+			}
+		]
+	}
+]

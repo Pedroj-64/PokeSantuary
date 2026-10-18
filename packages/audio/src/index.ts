@@ -1,5 +1,6 @@
 import { type ColeccionAudio, ColeccionAudioSchema } from "./modelo.js";
 
+export * from "./mml.js";
 export * from "./modelo.js";
 export * from "./renderizar.js";
 

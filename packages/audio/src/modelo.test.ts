@@ -72,23 +72,16 @@ describe("ColeccionAudioSchema", () => {
 		expect(resultado.success ? [] : resultado.error.issues).toEqual([]);
 	});
 
-	it("el pack trae los tres temas y los ocho efectos", () => {
+	it("el pack trae los tres temas ordenados por id y los 58 efectos", () => {
 		const coleccion = ColeccionAudioSchema.parse(LEIDO);
+		// El generador ordena las canciones por id.
 		expect(coleccion.canciones.map((c) => c.id)).toEqual([
-			"mapa",
 			"combate",
+			"mapa",
 			"victoria",
 		]);
-		expect(coleccion.efectos.map((e) => e.id)).toEqual([
-			"menu-mover",
-			"menu-aceptar",
-			"menu-volver",
-			"golpe",
-			"golpe-fuerte",
-			"captura-exito",
-			"captura-fallo",
-			"curar",
-		]);
+		expect(coleccion.efectos).toHaveLength(58);
+		expect(new Set(coleccion.efectos.map((e) => e.id)).size).toBe(58);
 	});
 
 	it("aplica 4 pasos por negra cuando la canción no lo dice", () => {
@@ -260,6 +253,180 @@ describe("ColeccionAudioSchema", () => {
 				if (!efecto) throw new Error("no hay efectos");
 				efecto.frecInicial = 9000;
 			}),
+		).toBe(false);
+	});
+});
+
+/** Canción mínima a la que se le añaden los campos opcionales de la v2. */
+const cancionV2 = (extra: Record<string, unknown> = {}) => ({
+	id: "prueba",
+	nombre: "audio.prueba.nombre",
+	bpm: 120,
+	pasosPorNegra: 4,
+	pasos: 4,
+	repetir: false,
+	pistas: [
+		{
+			canal: "pulso1",
+			...extra,
+			notas: [{ t: 0, d: 4, n: 69, v: 15 }],
+		},
+	],
+});
+
+describe("esquema v2", () => {
+	it("acepta pista y nota con todos los campos nuevos", () => {
+		const cancion = cancionV2({
+			volumen: 12,
+			envolvente: { inicio: 14, paso: -2 },
+			vibrato: { retardoMs: 120, hz: 6, profundidad: 0.3 },
+			pan: -0.4,
+			eco: { retardoMs: 180, mezcla: 0.35 },
+		});
+		cancion.pistas[0] = {
+			...cancion.pistas[0],
+			notas: [
+				{
+					t: 0,
+					d: 4,
+					n: 60,
+					v: 10,
+					ciclo: 12.5,
+					env: { inicio: 15, paso: 1 },
+					desliz: 3,
+					arp: [4, 7],
+				},
+			],
+		} as never;
+		expect(CancionSchema.safeParse(cancion).success).toBe(true);
+	});
+
+	it("acepta bucle y swing en la canción", () => {
+		const cancion = cancionV2();
+		Object.assign(cancion, { bucle: { desde: 2 }, swing: 0.25 });
+		expect(CancionSchema.safeParse(cancion).success).toBe(true);
+	});
+
+	it("acepta golpes de percusión solo en el canal de ruido", () => {
+		const ruido = {
+			id: "prueba",
+			nombre: "audio.prueba.nombre",
+			bpm: 120,
+			pasosPorNegra: 4,
+			pasos: 4,
+			repetir: false,
+			pistas: [
+				{
+					canal: "ruido",
+					notas: [
+						{ t: 0, d: 1, n: 0, v: 12, golpe: "bombo" },
+						{ t: 1, d: 1, n: 90, v: 8, golpe: "charles" },
+					],
+				},
+			],
+		};
+		expect(CancionSchema.safeParse(ruido).success).toBe(true);
+		const mal = {
+			...ruido,
+			pistas: [
+				{
+					canal: "pulso1",
+					notas: [
+						{ t: 0, d: 1, n: 60, v: 12, golpe: "bombo" },
+						{ t: 1, d: 1, n: 90, v: 8 },
+					],
+				},
+			],
+		};
+		expect(CancionSchema.safeParse(mal).success).toBe(false);
+	});
+
+	it("rechaza rangos fuera de la v2", () => {
+		for (const roto of [
+			{ pan: 1.2 },
+			{ eco: { retardoMs: 10, mezcla: 0.3 } },
+			{ eco: { retardoMs: 100, mezcla: 0.7 } },
+			{ envolvente: { inicio: 0, paso: 0 } },
+			{ envolvente: { inicio: 8, paso: 8 } },
+			{ vibrato: { retardoMs: 100, hz: 6, profundidad: 3 } },
+			{ volumen: 16 },
+		]) {
+			expect(CancionSchema.safeParse(cancionV2(roto)).success).toBe(false);
+		}
+	});
+
+	it("rechaza arp y ciclo por nota fuera de su canal", () => {
+		const conArp = cancionV2();
+		const notasConArp = [{ t: 0, d: 4, n: 60, v: 10, arp: [4] }];
+		conArp.pistas[0] = {
+			...conArp.pistas[0],
+			notas: notasConArp,
+		} as never;
+		const ruido = {
+			...conArp,
+			pistas: [{ canal: "ruido", notas: notasConArp }],
+		};
+		expect(CancionSchema.safeParse(ruido).success).toBe(false);
+		const pulsos = {
+			...cancionV2(),
+			pistas: [
+				{
+					canal: "onda",
+					onda: Array.from({ length: 32 }, () => 8),
+					notas: [{ t: 0, d: 4, n: 60, v: 10, ciclo: 25 }],
+				},
+			],
+		};
+		expect(CancionSchema.safeParse(pulsos).success).toBe(false);
+	});
+
+	it("rechaza un bucle que empieza fuera de la canción", () => {
+		const cancion = cancionV2();
+		Object.assign(cancion, { bucle: { desde: 4 } });
+		expect(CancionSchema.safeParse(cancion).success).toBe(false);
+	});
+
+	it("acepta efectos con capas y rechaza capas anidadas", () => {
+		const base = {
+			id: "golpe-doble",
+			canal: "ruido",
+			duracionMs: 300,
+			volumen: 12,
+			frecInicial: 900,
+			deslizamiento: -20,
+			envolvente: { ataqueMs: 0, decaimientoMs: 100 },
+		};
+		const capa = {
+			desdeMs: 80,
+			efecto: { ...base, id: "golpe-doble-capa", duracionMs: 120 },
+		};
+		expect(
+			ColeccionAudioSchema.safeParse({
+				canciones: [],
+				efectos: [{ ...base, capas: [capa] }],
+			}).success,
+		).toBe(true);
+		expect(
+			ColeccionAudioSchema.safeParse({
+				canciones: [],
+				efectos: [{ ...base, capas: [{ ...capa, desdeMs: 2001 }] }],
+			}).success,
+		).toBe(false);
+		expect(
+			ColeccionAudioSchema.safeParse({
+				canciones: [],
+				efectos: [
+					{
+						...base,
+						capas: [
+							{
+								desdeMs: 0,
+								efecto: { ...base, capas: [] },
+							},
+						],
+					},
+				],
+			}).success,
 		).toBe(false);
 	});
 });

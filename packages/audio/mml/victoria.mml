@@ -1,0 +1,7 @@
+@cancion id=victoria bpm=132 pasosPorNegra=4 repetir=false
+@nombre audio.victoria.nombre
+@compas=16
+pulso1 ciclo=50 | o5 v13 c4 e4 g2 | o6 c2 o5 g4 e4 | f4 a4 o6 c2 | o5 b2 g2 | e4 g4 o6 c2 | d2 c4 o5 g4 | a4 o6 c4 e2 | v14 c1 |
+pulso2 ciclo=25 | v7 e2 g2 | e2 g2 | a2 o5 c2 | o4 b2 d2 | e2 g2 | b2 d2 | a2 o5 c2 | o4 e2 g2 |
+onda onda=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0 | o2 v13 c2 v12 g2 | v13 c2 v12 g2 | v13 f2 o3 v12 c2 | o2 v13 g2 o3 v12 d2 | o2 v13 c2 v12 g2 | v13 g2 o3 v12 d2 | o2 v13 f2 o3 v12 c2 | o2 v13 c2 v12 g2 |
+ruido corto | v6 h16 v7 h16 v8 h16 v9 h16 r2 r4 | r2 r2 | r2 r2 | r2 r2 | r2 r2 | r2 r2 | r2 r2 | v10 o1 |

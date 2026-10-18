@@ -125,8 +125,8 @@ describe("colección de audio", () => {
 });
 
 describe("efectos", () => {
-	it("trae los ocho efectos con el carácter pedido", () => {
-		expect(COLECCION.efectos).toHaveLength(8);
+	it("trae los 58 efectos con el carácter pedido", () => {
+		expect(COLECCION.efectos).toHaveLength(58);
 		const porId = (id: string) => {
 			const e = COLECCION.efectos.find((x) => x.id === id);
 			if (!e) throw new Error(`falta el efecto ${id}`);
