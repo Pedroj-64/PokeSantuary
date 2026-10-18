@@ -3,6 +3,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
 	AtlasSchema,
+	type Elites,
+	ElitesSchema,
 	EspecieSchema,
 	EventosSchema,
 	ExpedicionBalanceSchema,
@@ -148,6 +150,45 @@ export async function verificar(
 				`eventos.json: ${e instanceof Error ? e.message : String(e)}`,
 			);
 		}
+	});
+	await intentar(async () => {
+		let elites: Elites;
+		try {
+			elites = ElitesSchema.parse(leer(dirPack, "elites.json"));
+		} catch (e) {
+			throw new Error(
+				`elites.json: ${e instanceof Error ? e.message : String(e)}`,
+			);
+		}
+		const conPrefijo = (lista: string[]) =>
+			lista.map((e) => `elites.json: ${e}`);
+		const alfas = await erroresDeSets(elites.alfas, {
+			movimientos: movs,
+			especies,
+		});
+		errores.push(...conPrefijo(alfas));
+		const enAlfas = new Set(elites.alfas.map((s) => s.especie));
+		for (const e of especies)
+			if (!enAlfas.has(e))
+				errores.push(`elites.json: ${e}: falta su set de Alfa`);
+		for (const s of elites.jefe.equipo) {
+			// La cobertura de especies se comprueba aparte, con los Alfa.
+			errores.push(
+				...conPrefijo(
+					await erroresDeSets([s], {
+						movimientos: movs,
+						especies: [s.especie],
+					}),
+				),
+			);
+		}
+		const lista: string[] = JSON.parse(readFileSync(listaMovimientos, "utf8"));
+		for (const s of [...elites.alfas, ...elites.jefe.equipo])
+			for (const m of s.movimientos)
+				if (!lista.includes(m))
+					errores.push(
+						`elites.json: set de ${s.especie}: ${m} no está en tools/pipeline/movimientos.json`,
+					);
 	});
 	return errores;
 }

@@ -1,3 +1,4 @@
+import type { DatosCombate } from "@santuario/battle";
 import {
 	type EstadoExpedicion,
 	elegibles,
@@ -10,7 +11,6 @@ import {
 import Phaser from "phaser";
 import iconosPng from "../assets/iconos-nodo.png?url";
 import { cargarDatosCombate } from "../combate/datosPack.js";
-import type { DatosCombate } from "../expedicion/combateNodo.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";

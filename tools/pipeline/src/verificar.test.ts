@@ -201,6 +201,61 @@ describe("verificar", () => {
 		});
 	});
 
+	describe("elites.json", () => {
+		const editar = (cambio: (elites: Fila[]) => void) => {
+			const dir = copia();
+			const ruta = join(dir, "elites.json");
+			const elites = JSON.parse(readFileSync(ruta, "utf8"));
+			cambio(elites.alfas);
+			writeFileSync(ruta, JSON.stringify(elites));
+			return dir;
+		};
+
+		it("falla si una especie del pack no tiene Alfa", async () => {
+			const dir = editar((alfas) => {
+				const i = alfas.findIndex((s) => s.especie === "pikachu");
+				alfas.splice(i, 1);
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/elites\.json: pikachu: falta su set de Alfa/,
+			);
+		});
+
+		it("falla si un movimiento de un Alfa no está en la lista del pipeline", async () => {
+			const lista = join(mkdtempSync(join(tmpdir(), "lista-")), "m.json");
+			writeFileSync(lista, "[]");
+			expect((await verificar(copia(), lista)).join("\n")).toMatch(
+				/elites\.json: set de .* no está en tools\/pipeline\/movimientos\.json/,
+			);
+		});
+
+		it("falla si el equipo del jefe no tiene tres miembros", async () => {
+			const dir = copia();
+			const ruta = join(dir, "elites.json");
+			const elites = JSON.parse(readFileSync(ruta, "utf8"));
+			elites.jefe.equipo.pop();
+			writeFileSync(ruta, JSON.stringify(elites));
+			expect((await verificar(dir)).join("\n")).toMatch(/elites\.json/);
+		});
+
+		it("falla si una especie del jefe no está en el pack", async () => {
+			const dir = copia();
+			const ruta = join(dir, "elites.json");
+			const elites = JSON.parse(readFileSync(ruta, "utf8"));
+			elites.jefe.equipo[0].especie = "mew";
+			writeFileSync(ruta, JSON.stringify(elites));
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/elites\.json: mew: la especie no está en especies\.json/,
+			);
+		});
+
+		it("falla si falta en el pack", async () => {
+			const dir = copia();
+			rmSync(join(dir, "elites.json"));
+			expect((await verificar(dir)).join("\n")).toMatch(/elites\.json/);
+		});
+	});
+
 	describe("atlas de combate", () => {
 		// Reescribe el manifiesto para que solo falle lo que se manipuló.
 		const resellar = (dir: string) => {

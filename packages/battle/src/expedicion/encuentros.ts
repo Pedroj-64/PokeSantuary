@@ -1,4 +1,3 @@
-import type { MiembroEquipo } from "@santuario/battle";
 import {
 	crearRng,
 	esNodoDeCombate,
@@ -6,6 +5,7 @@ import {
 	type TipoNodo,
 } from "@santuario/core";
 import type { SetCombate } from "@santuario/data";
+import type { MiembroEquipo } from "../combate.js";
 
 /** Especie repetida en el catálogo: se queda la primera aparición. */
 function sinDuplicados(sets: readonly SetCombate[]): SetCombate[] {

@@ -19,5 +19,17 @@ export type {
 	TerrenoFisura,
 } from "./combate.js";
 export { eleccionIlegal, esEleccionIlegal } from "./errores.js";
+export type {
+	DatosCombate,
+	PreparacionCombate,
+} from "./expedicion/combateNodo.js";
+export {
+	cerrarCombate,
+	destinoTrasCombate,
+	dineroDeNodo,
+	prepararCombate,
+	resultadoDeCombate,
+} from "./expedicion/combateNodo.js";
+export { crearRival } from "./expedicion/encuentros.js";
 export type { DatosMovimiento, Estimador } from "./ia.js";
 export type { EventoCombate, Lado } from "./protocolo.js";

@@ -1,4 +1,5 @@
 export * from "./atlas.js";
+export * from "./elites.js";
 export * from "./especie.js";
 export * from "./evento.js";
 export * from "./expedicion.js";

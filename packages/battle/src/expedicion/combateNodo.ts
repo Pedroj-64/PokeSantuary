@@ -1,4 +1,3 @@
-import type { MiembroEquipo } from "@santuario/battle";
 import {
 	crearRng,
 	curarAlMasHerido,
@@ -11,6 +10,7 @@ import {
 	resolverCombate,
 } from "@santuario/core";
 import type { ExpedicionBalance, SetCombate } from "@santuario/data";
+import type { MiembroEquipo } from "../combate.js";
 import { crearRival } from "./encuentros.js";
 
 /** Datos con los que el mapa abre la escena de combate de un nodo. */

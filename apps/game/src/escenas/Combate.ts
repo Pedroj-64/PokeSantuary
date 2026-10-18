@@ -3,6 +3,10 @@ import atlasPng from "@packs/kanto/atlas-combate.png?url";
 import {
 	abrirCombate,
 	type CombateRemoto,
+	cerrarCombate,
+	type DatosCombate,
+	destinoTrasCombate,
+	dineroDeNodo,
 	type Eleccion,
 	type EventoCombate,
 	eleccionIlegal,
@@ -10,7 +14,9 @@ import {
 	type Lado,
 	type MiembroEquipo,
 	type Peticion,
+	prepararCombate,
 	type ResultadoTurno,
+	resultadoDeCombate,
 } from "@santuario/battle";
 import { cuantos, gastar, intentarCaptura } from "@santuario/core";
 import Phaser from "phaser";
@@ -18,14 +24,6 @@ import { cargarDatosCombate } from "../combate/datosPack.js";
 import { crearEquipos } from "../combate/equipos.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
-import {
-	cerrarCombate,
-	type DatosCombate,
-	destinoTrasCombate,
-	dineroDeNodo,
-	prepararCombate,
-	resultadoDeCombate,
-} from "../expedicion/combateNodo.js";
 import { t } from "../i18n/index.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
