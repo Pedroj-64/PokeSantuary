@@ -1,0 +1,19 @@
+{
+	"name": "@santuario/balance",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"balance": "tsx src/cli.ts"
+	},
+	"dependencies": {
+		"@santuario/battle": "workspace:*",
+		"@santuario/core": "workspace:*",
+		"@santuario/data": "workspace:*",
+		"zod": "4.6.7"
+	},
+	"devDependencies": {
+		"@types/node": "26.6.5",
+		"tsx": "4.23.15"
+	}
+}

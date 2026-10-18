@@ -5,6 +5,7 @@
 		{ "path": "packages/data" },
 		{ "path": "packages/battle" },
 		{ "path": "tools/pipeline" },
+		{ "path": "tools/balance" },
 		{ "path": "apps/game" },
 		{ "path": "apps/game/tsconfig.e2e.json" }
 	]

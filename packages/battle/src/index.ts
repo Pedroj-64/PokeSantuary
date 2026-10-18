@@ -30,6 +30,8 @@ export {
 	prepararCombate,
 	resultadoDeCombate,
 } from "./expedicion/combateNodo.js";
-export { crearRival } from "./expedicion/encuentros.js";
+export { crearRival, type TamanosRival } from "./expedicion/encuentros.js";
+export { crearEquipos } from "./expedicion/equipos.js";
+export { expedicionInicial } from "./expedicion/inicio.js";
 export type { DatosMovimiento, Estimador } from "./ia.js";
 export type { EventoCombate, Lado } from "./protocolo.js";

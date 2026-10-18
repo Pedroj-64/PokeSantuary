@@ -20,7 +20,7 @@
 		{
 			"especie": "squirtle",
 			"movimientos": ["surf", "ice-beam", "aura-sphere", "protect"],
-			"habilidad": "rain-dish",
+			"habilidad": "torrent",
 			"naturaleza": "Modest"
 		},
 		{

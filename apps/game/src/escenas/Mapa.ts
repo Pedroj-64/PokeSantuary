@@ -255,7 +255,7 @@ export class Mapa extends Phaser.Scene {
 				dinero?: number;
 				runas?: string[];
 				mochila?: Record<string, number>;
-				equipo?: string[];
+				equipo?: (string | [string, number])[];
 			}) => {
 				const { equipo, ...resto } = cambios;
 				this.scene.restart({
@@ -263,7 +263,11 @@ export class Mapa extends Phaser.Scene {
 						...this.estado,
 						...resto,
 						...(equipo && {
-							equipo: equipo.map((especie) => ({ especie, psPct: 100 })),
+							equipo: equipo.map((m) =>
+								Array.isArray(m)
+									? { especie: m[0], psPct: m[1] }
+									: { especie: m, psPct: 100 },
+							),
 						}),
 					},
 				});

@@ -29,8 +29,29 @@ function barajar<T>(rng: Rng, items: readonly T[]): T[] {
 	return copia;
 }
 
+/** Cuántos rivales trae cada tipo de nodo en los pisos 1, 2 y 3 (viene del balance del pack). */
+export type TamanosRival = Readonly<Record<string, readonly number[]>>;
+
+/** Pone al miembro el nivel de su tipo de nodo y piso, si el balance lo define. */
+export function conNivel(
+	miembro: MiembroEquipo,
+	tipo: TipoNodo,
+	piso: 1 | 2 | 3,
+	niveles?: TamanosRival,
+): MiembroEquipo {
+	const nivel = niveles?.[tipo]?.[piso - 1];
+	return nivel === undefined ? miembro : { ...miembro, nivel };
+}
+
 /** Cuántos rivales trae cada tipo de nodo; el salvaje del piso 3 sortea 1 o 2. */
-function tamanoRival(rng: Rng, tipo: TipoNodo, piso: 1 | 2 | 3): number {
+function tamanoRival(
+	rng: Rng,
+	tipo: TipoNodo,
+	piso: 1 | 2 | 3,
+	tamanos?: TamanosRival,
+): number {
+	const fijo = tamanos?.[tipo]?.[piso - 1];
+	if (fijo !== undefined) return fijo;
 	switch (tipo) {
 		case "salvaje":
 			return piso === 3 ? rng.entero(1, 2) : 1;
@@ -55,6 +76,8 @@ function tamanoRival(rng: Rng, tipo: TipoNodo, piso: 1 | 2 | 3): number {
  * @param nodo Nodo del mapa que se visita (id y tipo).
  * @param sets Catálogo de sets disponibles; no se muta.
  * @param excluir Especies del equipo del jugador que se prefieren evitar.
+ * @param tamanos Tamaño del rival por tipo de nodo y piso; sin él se usa el de siempre.
+ * @param niveles Nivel del rival por tipo de nodo y piso; sin él, el nivel por defecto del motor.
  * @throws {RangeError} Si el tipo no es de combate, si el piso no es 1 a 3 o si
  * el catálogo está vacío.
  */
@@ -64,6 +87,8 @@ export function crearRival(
 	nodo: { id: string; tipo: TipoNodo },
 	sets: readonly SetCombate[],
 	excluir: readonly string[],
+	tamanos?: TamanosRival,
+	niveles?: TamanosRival,
 ): MiembroEquipo[] {
 	if (piso !== 1 && piso !== 2 && piso !== 3) {
 		throw new RangeError(
@@ -82,7 +107,7 @@ export function crearRival(
 	}
 
 	const rng = crearRng(`${semilla}:p${piso}:${nodo.id}`);
-	const tamano = tamanoRival(rng, nodo.tipo, piso);
+	const tamano = tamanoRival(rng, nodo.tipo, piso, tamanos);
 	const catalogo = sinDuplicados(sets);
 	const preferidas = barajar(
 		rng,
@@ -95,5 +120,7 @@ export function crearRival(
 
 	return [...preferidas, ...excluidas]
 		.slice(0, tamano)
-		.map((set) => ({ especie: set.especie, set }));
+		.map((set) =>
+			conNivel({ especie: set.especie, set }, nodo.tipo, piso, niveles),
+		);
 }

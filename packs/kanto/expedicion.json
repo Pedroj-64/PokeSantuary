@@ -3,40 +3,132 @@
 	"bolasIniciales": 5,
 	"recompensa": {
 		"salvaje": [
-			{ "min": 5, "max": 10 },
-			{ "min": 8, "max": 14 },
-			{ "min": 12, "max": 20 }
+			{
+				"min": 5,
+				"max": 10
+			},
+			{
+				"min": 8,
+				"max": 14
+			},
+			{
+				"min": 12,
+				"max": 20
+			}
 		],
 		"entrenador": [
-			{ "min": 12, "max": 20 },
-			{ "min": 18, "max": 28 },
-			{ "min": 25, "max": 40 }
+			{
+				"min": 12,
+				"max": 20
+			},
+			{
+				"min": 18,
+				"max": 28
+			},
+			{
+				"min": 25,
+				"max": 40
+			}
 		],
 		"alfa": [
-			{ "min": 20, "max": 30 },
-			{ "min": 30, "max": 45 },
-			{ "min": 40, "max": 60 }
+			{
+				"min": 20,
+				"max": 30
+			},
+			{
+				"min": 30,
+				"max": 45
+			},
+			{
+				"min": 40,
+				"max": 60
+			}
 		],
 		"sombrio": [
-			{ "min": 15, "max": 25 },
-			{ "min": 25, "max": 35 },
-			{ "min": 35, "max": 50 }
+			{
+				"min": 15,
+				"max": 25
+			},
+			{
+				"min": 25,
+				"max": 35
+			},
+			{
+				"min": 35,
+				"max": 50
+			}
 		],
 		"jefe": [
-			{ "min": 40, "max": 60 },
-			{ "min": 60, "max": 90 },
-			{ "min": 100, "max": 150 }
+			{
+				"min": 40,
+				"max": 60
+			},
+			{
+				"min": 60,
+				"max": 90
+			},
+			{
+				"min": 100,
+				"max": 150
+			}
 		]
 	},
+	"tamanoRival": {
+		"salvaje": [1, 1, 2],
+		"entrenador": [3, 3, 3],
+		"alfa": [1, 1, 1],
+		"sombrio": [1, 1, 1],
+		"jefe": [3, 3, 3]
+	},
+	"nivelRival": {
+		"salvaje": [22, 26, 30],
+		"entrenador": [22, 26, 30],
+		"alfa": [26, 30, 34],
+		"sombrio": [22, 26, 30],
+		"jefe": [26, 30, 34]
+	},
+	"curaTrasVictoriaPct": 0,
 	"catalogoTienda": [
-		{ "id": "poke-ball", "tipo": "ball", "precio": 20 },
-		{ "id": "super-ball", "tipo": "ball", "precio": 45 },
-		{ "id": "baya-aranja", "tipo": "baya", "precio": 15 },
-		{ "id": "baya-zidra", "tipo": "baya", "precio": 30 },
-		{ "id": "mt-rayo", "tipo": "mt", "precio": 60 },
-		{ "id": "mt-terremoto", "tipo": "mt", "precio": 80 },
-		{ "id": "banda-focus", "tipo": "objeto", "precio": 70 },
-		{ "id": "restos", "tipo": "objeto", "precio": 90 }
+		{
+			"id": "poke-ball",
+			"tipo": "ball",
+			"precio": 20
+		},
+		{
+			"id": "super-ball",
+			"tipo": "ball",
+			"precio": 45
+		},
+		{
+			"id": "baya-aranja",
+			"tipo": "baya",
+			"precio": 15
+		},
+		{
+			"id": "baya-zidra",
+			"tipo": "baya",
+			"precio": 30
+		},
+		{
+			"id": "mt-rayo",
+			"tipo": "mt",
+			"precio": 60
+		},
+		{
+			"id": "mt-terremoto",
+			"tipo": "mt",
+			"precio": 80
+		},
+		{
+			"id": "banda-focus",
+			"tipo": "objeto",
+			"precio": 70
+		},
+		{
+			"id": "restos",
+			"tipo": "objeto",
+			"precio": 90
+		}
 	],
 	"multBola": {
 		"poke-ball": 1,

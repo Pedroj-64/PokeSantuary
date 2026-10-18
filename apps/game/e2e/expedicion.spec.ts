@@ -53,11 +53,19 @@ async function jugarHastaElFinal(p: Page) {
 }
 
 /** Abre una expedición con esa semilla y entra en el primer nodo elegible (siempre de combate). */
-async function entrarEnElPrimerCombate(page: Page, semilla: string) {
+async function entrarEnElPrimerCombate(
+	page: Page,
+	semilla: string,
+	preparar?: string,
+) {
 	await page.goto(`/?test=1&semilla=${semilla}`);
 	await page.locator('[data-estado="listo"]').waitFor();
 	await page.keyboard.press("e");
 	await expect.poll(async () => (await mapa(page))?.piso).toBe(1);
+	if (preparar !== undefined) {
+		await page.evaluate(`window.__santuario.mapa.preparar(${preparar})`);
+		await page.waitForTimeout(100);
+	}
 	await page.keyboard.press("1");
 	await expect.poll(async () => (await combate(page)).fase).toBe("menu");
 }
@@ -78,9 +86,11 @@ test.use({ locale: "es-ES" });
 /*
  * Semillas con la política fija de arriba sobre el primer nodo del piso 1 (el
  * rival juega con su IA real): `x4` gana el primer combate con el primero del
- * equipo a 66 %, `x1` lo pierde y `x7` lo gana dejando a dos miembros debilitados.
- * Si el motor, los sets, la IA o el balance cambian, estas semillas dejan de valer
- * a propósito: se buscan de nuevo recorriendo `x1`…`x40` en un bucle e2e desechable.
+ * equipo a 91 % y `x17` lo gana dejando a dos miembros debilitados. La derrota
+ * se fuerza con un Geodude solo y a 1 % de PS, porque con los niveles
+ * del balance actual el primer nodo casi nunca se pierde. Si el motor, los sets,
+ * la IA o el balance cambian, estas semillas dejan de valer a propósito: se
+ * buscan de nuevo simulando `x1`…`x80` con `prepararCombate` y la política fija.
  */
 test("ganar un combate vuelve al mapa con los PS y el dinero actualizados", async ({
 	page,
@@ -90,7 +100,7 @@ test("ganar un combate vuelve al mapa con los PS y el dinero actualizados", asyn
 	await page.keyboard.press("Enter");
 	await expect.poll(async () => (await mapa(page))?.visitados.length).toBe(1);
 	const s = (await mapa(page)) as EstadoMapa;
-	expect(s.equipo).toEqual([66, 100, 100]);
+	expect(s.equipo).toEqual([91, 100, 100]);
 	expect(s.dinero).toBeGreaterThanOrEqual(30 + 5);
 	expect(s.dinero).toBeLessThanOrEqual(30 + 10);
 	expect(s.elegibles.length).toBeGreaterThanOrEqual(1);
@@ -99,7 +109,7 @@ test("ganar un combate vuelve al mapa con los PS y el dinero actualizados", asyn
 test("perder el combate termina la expedición y se conserva la mitad del dinero", async ({
 	page,
 }) => {
-	await entrarEnElPrimerCombate(page, "x1");
+	await entrarEnElPrimerCombate(page, "x1", `{ equipo: [["geodude", 1]] }`);
 	await jugarHastaElFinal(page);
 	await page.keyboard.press("Enter");
 	await expect
@@ -112,7 +122,7 @@ test("perder el combate termina la expedición y se conserva la mitad del dinero
 test("un miembro debilitado no vuelve a salir al combate siguiente", async ({
 	page,
 }) => {
-	await entrarEnElPrimerCombate(page, "x7");
+	await entrarEnElPrimerCombate(page, "x17");
 	await jugarHastaElFinal(page);
 	await page.keyboard.press("Enter");
 	await expect.poll(async () => (await mapa(page))?.visitados.length).toBe(1);

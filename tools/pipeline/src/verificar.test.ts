@@ -23,6 +23,13 @@ const copia = () => {
 	return dir;
 };
 
+// Reescribe el manifiesto para que solo falle lo que se manipuló.
+const resellar = (dir: string) => {
+	const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
+	for (const f of Object.keys(m.archivos)) m.archivos[f] = sha256(join(dir, f));
+	writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
+};
+
 type Marco = { frame: { x: number; y: number; w: number; h: number } };
 type AtlasJson = { frames: Record<string, Marco> };
 type Fila = { especie: string; movimientos: string[] };
@@ -208,6 +215,7 @@ describe("verificar", () => {
 			const elites = JSON.parse(readFileSync(ruta, "utf8"));
 			cambio(elites.alfas);
 			writeFileSync(ruta, JSON.stringify(elites));
+			resellar(dir);
 			return dir;
 		};
 
@@ -235,6 +243,7 @@ describe("verificar", () => {
 			const elites = JSON.parse(readFileSync(ruta, "utf8"));
 			elites.jefe.equipo.pop();
 			writeFileSync(ruta, JSON.stringify(elites));
+			resellar(dir);
 			expect((await verificar(dir)).join("\n")).toMatch(/elites\.json/);
 		});
 
@@ -244,6 +253,7 @@ describe("verificar", () => {
 			const elites = JSON.parse(readFileSync(ruta, "utf8"));
 			elites.jefe.equipo[0].especie = "mew";
 			writeFileSync(ruta, JSON.stringify(elites));
+			resellar(dir);
 			expect((await verificar(dir)).join("\n")).toMatch(
 				/elites\.json: mew: la especie no está en especies\.json/,
 			);
@@ -257,13 +267,6 @@ describe("verificar", () => {
 	});
 
 	describe("atlas de combate", () => {
-		// Reescribe el manifiesto para que solo falle lo que se manipuló.
-		const resellar = (dir: string) => {
-			const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
-			for (const f of Object.keys(m.archivos))
-				m.archivos[f] = sha256(join(dir, f));
-			writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
-		};
 		const editarJson = (dir: string, f: (a: AtlasJson) => void) => {
 			const ruta = join(dir, "atlas-combate.json");
 			const a = JSON.parse(readFileSync(ruta, "utf8"));

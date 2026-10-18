@@ -18,6 +18,8 @@ export interface MiembroEquipo {
 	set: SetCombate;
 	/** PS iniciales en porcentaje entero de 1 a 100 (por defecto 100). Solo el jugador los arrastra. */
 	psPct?: number;
+	/** Nivel de 1 a 100 (por defecto 50); es la palanca de escalado de los rivales. */
+	nivel?: number;
 }
 
 /**
@@ -109,7 +111,15 @@ function validarEquipo(lado: Lado, equipo: MiembroEquipo[]): void {
 			`El equipo del ${lado} debe tener entre 1 y ${MAX_EQUIPO} Pokémon`,
 		);
 	}
-	for (const { especie, set, psPct } of equipo) {
+	for (const { especie, set, psPct, nivel } of equipo) {
+		if (
+			nivel !== undefined &&
+			(!Number.isInteger(nivel) || nivel < 1 || nivel > 100)
+		) {
+			throw new Error(
+				`nivel debe ser un entero entre 1 y 100 (recibido ${nivel}) en ${especie}`,
+			);
+		}
 		if (psPct !== undefined) {
 			if (lado === "rival") {
 				throw new Error("psPct solo se admite en el equipo del jugador");
@@ -215,7 +225,7 @@ export class Combate {
 					nature: m.set.naturaleza,
 					evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
 					ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
-					level: NIVEL,
+					level: m.nivel ?? NIVEL,
 					gender: "",
 				})),
 			);

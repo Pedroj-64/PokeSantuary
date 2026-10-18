@@ -1,6 +1,6 @@
 import { type EstadoExpedicion, iniciarExpedicion } from "@santuario/core";
 import type { ExpedicionBalance, SetCombate } from "@santuario/data";
-import { crearEquipos } from "../combate/equipos.js";
+import { crearEquipos } from "./equipos.js";
 
 /**
  * Expedición de prueba: el equipo son tres especies del catálogo elegidas con la

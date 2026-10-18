@@ -1,6 +1,7 @@
 import {
 	type EstadoExpedicion,
 	esNodoDeCombate,
+	generarPiso,
 	iniciarExpedicion,
 	type TipoNodo,
 } from "@santuario/core";
@@ -245,5 +246,68 @@ describe("destinoTrasCombate", () => {
 		expect(destinoTrasCombate({ ...e, estado: "victoria" })).toBe(
 			"FinExpedicion",
 		);
+	});
+});
+
+describe("catálogo de rivales y terreno", () => {
+	it("los rivales salen del catálogo de rivales, no del del jugador", () => {
+		const [e, id] = dentroDe("s2");
+		const raros = ["r1", "r2", "r3", "r4"].map(set);
+		const p = prepararCombate(e, id, SETS, { setsRival: raros });
+		for (const m of p.rival)
+			expect(["r1", "r2", "r3", "r4"]).toContain(m.especie);
+		for (const m of p.jugador)
+			expect(SETS.map((s) => s.especie)).toContain(m.especie);
+	});
+
+	it("solo el jefe del piso 3 lleva el terreno de la fisura", () => {
+		const [e, id] = dentroDe("s2");
+		expect(prepararCombate(e, id, SETS).terreno).toBeUndefined();
+		const piso = (n: 1 | 3) => ({
+			...e,
+			piso: n,
+			mapa: generarPiso(e.semilla, n),
+		});
+		expect(prepararCombate(piso(1), "5-0", SETS).terreno).toBeUndefined();
+		expect(prepararCombate(piso(3), "5-0", SETS).terreno).toBe("grassyterrain");
+	});
+});
+
+describe("Alfa y jefe del bioma", () => {
+	const ELITES = {
+		alfas: ["x1", "x2", "x3"].map(set),
+		jefe: { nombre: "jefe.test.nombre", equipo: ["j1", "j2", "j3"].map(set) },
+	};
+	const comoTipo = (e: EstadoExpedicion, id: string, tipo: TipoNodo) => ({
+		...e,
+		mapa: {
+			...e.mapa,
+			capas: e.mapa.capas.map((capa) =>
+				capa.map((n) => (n.id === id ? { ...n, tipo } : n)),
+			),
+		},
+	});
+
+	it("el Alfa sale del catálogo de Alfa", () => {
+		const [e, id] = dentroDe("s2");
+		const p = prepararCombate(comoTipo(e, id, "alfa"), id, SETS, {
+			elites: ELITES,
+		});
+		expect(p.rival).toHaveLength(1);
+		expect(["x1", "x2", "x3"]).toContain(p.rival[0]?.especie);
+	});
+
+	it("el jefe del piso 3 es el del bioma, en su orden; el del piso 1 no", () => {
+		const [e] = dentroDe("s2");
+		const piso = (n: 1 | 3) => ({
+			...e,
+			piso: n,
+			mapa: generarPiso(e.semilla, n),
+		});
+		const jefe3 = prepararCombate(piso(3), "5-0", SETS, { elites: ELITES });
+		expect(jefe3.rival.map((m) => m.especie)).toEqual(["j1", "j2", "j3"]);
+		const jefe1 = prepararCombate(piso(1), "5-0", SETS, { elites: ELITES });
+		for (const m of jefe1.rival)
+			expect(SETS.map((x) => x.especie)).toContain(m.especie);
 	});
 });

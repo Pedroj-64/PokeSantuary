@@ -1,6 +1,6 @@
-import type { MiembroEquipo } from "@santuario/battle";
 import { crearRng } from "@santuario/core";
 import type { SetCombate } from "@santuario/data";
+import type { MiembroEquipo } from "../combate.js";
 
 const TAMANO = 3;
 

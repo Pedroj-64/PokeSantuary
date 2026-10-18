@@ -4,6 +4,7 @@ import {
 	abrirCombate,
 	type CombateRemoto,
 	cerrarCombate,
+	crearEquipos,
 	type DatosCombate,
 	destinoTrasCombate,
 	dineroDeNodo,
@@ -17,13 +18,14 @@ import {
 	prepararCombate,
 	type ResultadoTurno,
 	resultadoDeCombate,
+	type TerrenoFisura,
 } from "@santuario/battle";
 import { cuantos, gastar, intentarCaptura } from "@santuario/core";
 import Phaser from "phaser";
 import { cargarDatosCombate } from "../combate/datosPack.js";
-import { crearEquipos } from "../combate/equipos.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
+import { cargarElites } from "../expedicion/elitesPack.js";
 import { t } from "../i18n/index.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
@@ -182,19 +184,26 @@ export class Combate extends Phaser.Scene {
 			let semilla: string;
 			let jugador: MiembroEquipo[];
 			let rival: MiembroEquipo[];
+			let terreno: TerrenoFisura | undefined;
 			if (this.datosExpedicion) {
 				const p = prepararCombate(
 					this.datosExpedicion.estado,
 					this.datosExpedicion.nodoId,
 					this.datos.sets,
+					{
+						tamanos: cargarBalance().tamanoRival,
+						niveles: cargarBalance().nivelRival,
+						elites: cargarElites(),
+					},
 				);
 				({ semilla, jugador, rival } = p);
+				terreno = p.terreno;
 				this.expedicion = { ...this.datosExpedicion, vivos: p.vivos };
 			} else {
 				semilla = obtenerSemilla();
 				({ jugador, rival } = crearEquipos(semilla, this.datos.sets));
 			}
-			const abierto = await abrirCombate({ semilla, jugador, rival });
+			const abierto = await abrirCombate({ semilla, jugador, rival, terreno });
 			remoto = abierto.remoto;
 			if (!this.vigente(gen)) return remoto.cerrar();
 			this.remoto = remoto;
@@ -651,7 +660,11 @@ export class Combate extends Phaser.Scene {
 			0,
 		);
 		try {
-			const estado = cerrarCombate(this.expedicion.estado, resultado);
+			const estado = cerrarCombate(
+				this.expedicion.estado,
+				resultado,
+				cargarBalance().curaTrasVictoriaPct,
+			);
 			this.scene.start("Captura", {
 				estado,
 				especie: this.rivalEspecie,
@@ -840,7 +853,11 @@ export class Combate extends Phaser.Scene {
 				dineroDeNodo(cargarBalance(), x.estado, x.nodoId),
 				this.rivalEspecie,
 			);
-			const estado = cerrarCombate(x.estado, resultado);
+			const estado = cerrarCombate(
+				x.estado,
+				resultado,
+				cargarBalance().curaTrasVictoriaPct,
+			);
 			this.scene.start(destinoTrasCombate(estado), { estado });
 		} catch (e) {
 			this.mostrarError(e);

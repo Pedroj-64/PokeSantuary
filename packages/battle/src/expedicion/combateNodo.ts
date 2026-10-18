@@ -1,5 +1,6 @@
 import {
 	crearRng,
+	curar,
 	curarAlMasHerido,
 	type EstadoExpedicion,
 	esNodoDeCombate,
@@ -9,9 +10,9 @@ import {
 	recompensa,
 	resolverCombate,
 } from "@santuario/core";
-import type { ExpedicionBalance, SetCombate } from "@santuario/data";
-import type { MiembroEquipo } from "../combate.js";
-import { crearRival } from "./encuentros.js";
+import type { Elites, ExpedicionBalance, SetCombate } from "@santuario/data";
+import type { MiembroEquipo, TerrenoFisura } from "../combate.js";
+import { conNivel, crearRival, type TamanosRival } from "./encuentros.js";
 
 /** Datos con los que el mapa abre la escena de combate de un nodo. */
 export interface DatosCombate {
@@ -26,7 +27,24 @@ export interface PreparacionCombate {
 	rival: MiembroEquipo[];
 	/** Posiciones, dentro de `estado.equipo`, de los miembros que entran (los vivos). */
 	vivos: number[];
+	/** Condición de fisura del bioma: solo el jefe del último piso la lleva. */
+	terreno?: TerrenoFisura;
 }
+
+/** Con qué se arman los rivales de un nodo; todo es opcional. */
+export interface OpcionesRivales {
+	/** Catálogo de rivales corrientes; por defecto, el del jugador. */
+	setsRival?: readonly SetCombate[];
+	/** Tamaño del equipo rival por tipo de nodo y piso. */
+	tamanos?: TamanosRival;
+	/** Nivel del rival por tipo de nodo y piso. */
+	niveles?: TamanosRival;
+	/** Alfa y jefe del bioma; sin ellos, esos nodos usan el catálogo corriente. */
+	elites?: Elites;
+}
+
+/** Terreno del primer bioma (Bosque Verdemar). */
+const TERRENO_VERDEMAR: TerrenoFisura = "grassyterrain";
 
 /** El motor de combate admite hasta 3 por bando: entran los 3 primeros vivos del equipo. */
 const MAX_EN_COMBATE = 3;
@@ -37,6 +55,34 @@ function buscarNodo(e: EstadoExpedicion, id: string): NodoMapa {
 		throw new RangeError(`el nodo ${id} no existe o no es de combate`);
 	}
 	return nodo;
+}
+
+/** Rival del nodo: el jefe del piso 3 y los Alfa salen de las élites si las hay. */
+function rivalDe(
+	e: EstadoExpedicion,
+	nodo: NodoMapa,
+	setsRival: readonly SetCombate[],
+	tamanos: TamanosRival | undefined,
+	niveles: TamanosRival | undefined,
+	elites: Elites | undefined,
+): MiembroEquipo[] {
+	const propios = e.equipo.map((m) => m.especie);
+	if (elites !== undefined && nodo.tipo === "jefe" && e.piso === 3) {
+		return elites.jefe.equipo.map((set) =>
+			conNivel({ especie: set.especie, set }, nodo.tipo, e.piso, niveles),
+		);
+	}
+	const catalogo =
+		elites !== undefined && nodo.tipo === "alfa" ? elites.alfas : setsRival;
+	return crearRival(
+		e.semilla,
+		e.piso,
+		nodo,
+		catalogo,
+		propios,
+		tamanos,
+		niveles,
+	);
 }
 
 /**
@@ -50,7 +96,9 @@ export function prepararCombate(
 	e: EstadoExpedicion,
 	nodoId: string,
 	sets: readonly SetCombate[],
+	opciones: OpcionesRivales = {},
 ): PreparacionCombate {
+	const { setsRival = sets, tamanos, niveles, elites } = opciones;
 	const nodo = buscarNodo(e, nodoId);
 	const vivos = e.equipo
 		.flatMap((m, i) => (m.psPct > 0 ? [i] : []))
@@ -68,14 +116,9 @@ export function prepararCombate(
 	return {
 		semilla: `${e.semilla}:p${e.piso}:${nodoId}:combate`,
 		jugador,
-		rival: crearRival(
-			e.semilla,
-			e.piso,
-			nodo,
-			sets,
-			e.equipo.map((m) => m.especie),
-		),
+		rival: rivalDe(e, nodo, setsRival, tamanos, niveles, elites),
 		vivos,
+		...(nodo.tipo === "jefe" && e.piso === 3 && { terreno: TERRENO_VERDEMAR }),
 	};
 }
 
@@ -130,17 +173,19 @@ export function dineroDeNodo(
 }
 
 /**
- * Aplica `resolverCombate` y, si se ganó y la expedición sigue, la cura de las
- * runas (la del más herido).
+ * Aplica `resolverCombate` y, si se ganó y la expedición sigue, la cura del
+ * balance para todo el equipo y la de las runas (la del más herido).
  */
 export function cerrarCombate(
 	e: EstadoExpedicion,
 	resultado: ResultadoCombate,
+	curaTrasVictoriaPct = 0,
 ): EstadoExpedicion {
 	const siguiente = resolverCombate(e, resultado);
-	return resultado.victoria && siguiente.estado === "en-curso"
-		? curarAlMasHerido(siguiente, modificadores(e.runas).curaPostCombatePct)
-		: siguiente;
+	if (!resultado.victoria || siguiente.estado !== "en-curso") return siguiente;
+	const curado =
+		curaTrasVictoriaPct > 0 ? curar(siguiente, curaTrasVictoriaPct) : siguiente;
+	return curarAlMasHerido(curado, modificadores(e.runas).curaPostCombatePct);
 }
 
 /** Pantalla que sigue a un combate resuelto. */

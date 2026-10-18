@@ -45,6 +45,40 @@ const catalogoTienda = z
 		'el catálogo necesita al menos una "ball"',
 	);
 
+// Cuántos Pokémon trae el rival de cada tipo de nodo en los pisos 1, 2 y 3.
+const tamanoPorPiso = z.tuple([
+	z.number().int().min(1).max(3),
+	z.number().int().min(1).max(3),
+	z.number().int().min(1).max(3),
+]);
+
+const tamanoRival = z
+	.object({
+		salvaje: tamanoPorPiso,
+		entrenador: tamanoPorPiso,
+		alfa: tamanoPorPiso,
+		sombrio: tamanoPorPiso,
+		jefe: tamanoPorPiso,
+	})
+	.strict();
+
+// Nivel del rival de cada tipo de nodo en los pisos 1, 2 y 3.
+const nivelPorPiso = z.tuple([
+	z.number().int().min(1).max(100),
+	z.number().int().min(1).max(100),
+	z.number().int().min(1).max(100),
+]);
+
+const nivelRival = z
+	.object({
+		salvaje: nivelPorPiso,
+		entrenador: nivelPorPiso,
+		alfa: nivelPorPiso,
+		sombrio: nivelPorPiso,
+		jefe: nivelPorPiso,
+	})
+	.strict();
+
 const multBola = z.record(slug, z.number().positive());
 
 const tasaCaptura = z.record(slug, z.number().int().min(0).max(255));
@@ -58,6 +92,9 @@ export const ExpedicionBalanceSchema = z
 		dineroInicial: z.number().int().min(0),
 		bolasIniciales: z.number().int().min(0),
 		recompensa,
+		tamanoRival,
+		nivelRival,
+		curaTrasVictoriaPct: z.number().int().min(0).max(100),
 		catalogoTienda,
 		multBola,
 		tasaCaptura,

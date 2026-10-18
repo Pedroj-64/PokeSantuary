@@ -1,10 +1,10 @@
 import especiesCrudo from "@packs/kanto/especies.json?raw";
+import { expedicionInicial } from "@santuario/battle";
 import { EspecieSchema } from "@santuario/data";
 import Phaser from "phaser";
 import { z } from "zod";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
-import { expedicionInicial } from "../expedicion/inicio.js";
 import {
 	alCambiarIdioma,
 	cambiarIdioma,

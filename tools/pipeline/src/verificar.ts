@@ -172,6 +172,10 @@ export async function verificar(
 			if (!enAlfas.has(e))
 				errores.push(`elites.json: ${e}: falta su set de Alfa`);
 		for (const s of elites.jefe.equipo) {
+			if (!especies.includes(s.especie))
+				errores.push(
+					`elites.json: ${s.especie}: la especie no está en especies.json`,
+				);
 			// La cobertura de especies se comprueba aparte, con los Alfa.
 			errores.push(
 				...conPrefijo(
