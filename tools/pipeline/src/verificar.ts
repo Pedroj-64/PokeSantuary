@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import {
 	AtlasSchema,
 	EspecieSchema,
+	EventosSchema,
 	ExpedicionBalanceSchema,
 	ManifiestoSchema,
 	type Movimiento,
@@ -138,6 +139,15 @@ export async function verificar(
 				throw new Error(
 					`expedicion.json: tasaCaptura de ${id}, que no está en especies.json`,
 				);
+	});
+	await intentar(() => {
+		try {
+			EventosSchema.parse(leer(dirPack, "eventos.json"));
+		} catch (e) {
+			throw new Error(
+				`eventos.json: ${e instanceof Error ? e.message : String(e)}`,
+			);
+		}
 	});
 	return errores;
 }

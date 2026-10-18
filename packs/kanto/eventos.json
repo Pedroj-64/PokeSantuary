@@ -1,0 +1,138 @@
+[
+	{
+		"id": "manantial",
+		"nodo": "manantial",
+		"titulo": "evento.manantial.titulo",
+		"texto": "evento.manantial.texto",
+		"opciones": [
+			{
+				"texto": "evento.manantial.op1",
+				"efectos": [{ "tipo": "curar", "pct": 50 }]
+			},
+			{
+				"texto": "evento.manantial.op2",
+				"efectos": [{ "tipo": "runa", "runa": "aleatoria" }]
+			}
+		]
+	},
+	{
+		"id": "cofre",
+		"nodo": "cofre",
+		"titulo": "evento.cofre.titulo",
+		"texto": "evento.cofre.texto",
+		"opciones": [
+			{
+				"texto": "evento.cofre.op1",
+				"efectos": [{ "tipo": "dinero", "cantidad": 45 }]
+			},
+			{
+				"texto": "evento.cofre.op2",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": 120 },
+					{ "tipo": "costePs", "pct": 20 }
+				]
+			}
+		]
+	},
+	{
+		"id": "pozo",
+		"nodo": "evento",
+		"titulo": "evento.pozo.titulo",
+		"texto": "evento.pozo.texto",
+		"opciones": [
+			{
+				"texto": "evento.pozo.op1",
+				"efectos": [{ "tipo": "curar", "pct": 40 }]
+			},
+			{
+				"texto": "evento.pozo.op2",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": -10 },
+					{ "tipo": "runa", "runa": "aleatoria" }
+				]
+			}
+		]
+	},
+	{
+		"id": "viajero",
+		"nodo": "evento",
+		"titulo": "evento.viajero.titulo",
+		"texto": "evento.viajero.texto",
+		"opciones": [
+			{
+				"texto": "evento.viajero.op1",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": -40 },
+					{ "tipo": "runa", "runa": "aleatoria" }
+				]
+			},
+			{
+				"texto": "evento.viajero.op2",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": 35 },
+					{ "tipo": "costePs", "pct": 15 }
+				]
+			}
+		]
+	},
+	{
+		"id": "entrenador",
+		"nodo": "evento",
+		"titulo": "evento.entrenador.titulo",
+		"texto": "evento.entrenador.texto",
+		"opciones": [
+			{
+				"texto": "evento.entrenador.op1",
+				"efectos": [
+					{ "tipo": "costePs", "pct": 25 },
+					{ "tipo": "dinero", "cantidad": 60 }
+				]
+			},
+			{
+				"texto": "evento.entrenador.op2",
+				"efectos": [{ "tipo": "curar", "pct": 20 }]
+			}
+		]
+	},
+	{
+		"id": "ruinas",
+		"nodo": "evento",
+		"titulo": "evento.ruinas.titulo",
+		"texto": "evento.ruinas.texto",
+		"opciones": [
+			{
+				"texto": "evento.ruinas.op1",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": 80 },
+					{ "tipo": "costePs", "pct": 20 }
+				]
+			},
+			{
+				"texto": "evento.ruinas.op2",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": -20 },
+					{ "tipo": "curar", "pct": 40 }
+				]
+			}
+		]
+	},
+	{
+		"id": "niebla",
+		"nodo": "evento",
+		"titulo": "evento.niebla.titulo",
+		"texto": "evento.niebla.texto",
+		"opciones": [
+			{
+				"texto": "evento.niebla.op1",
+				"efectos": [
+					{ "tipo": "dinero", "cantidad": 50 },
+					{ "tipo": "costePs", "pct": 25 }
+				]
+			},
+			{
+				"texto": "evento.niebla.op2",
+				"efectos": [{ "tipo": "curar", "pct": 15 }]
+			}
+		]
+	}
+]

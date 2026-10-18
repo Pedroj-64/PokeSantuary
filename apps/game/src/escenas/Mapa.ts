@@ -12,6 +12,7 @@ import type { DatosCombate } from "../expedicion/combateNodo.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
+import type { DatosEleccion } from "./Eleccion.js";
 
 const FUENTE = "monospace";
 const ICONOS = "iconos-nodo";
@@ -162,6 +163,16 @@ export class Mapa extends Phaser.Scene {
 				estado,
 				nodoId: id,
 			} satisfies DatosCombate);
+		} else if (
+			nodo &&
+			(nodo.tipo === "manantial" ||
+				nodo.tipo === "cofre" ||
+				nodo.tipo === "evento")
+		) {
+			this.scene.start("Eleccion", {
+				estado,
+				nodoId: id,
+			} satisfies DatosEleccion);
 		} else {
 			this.scene.restart({ estado } satisfies DatosMapa);
 		}
@@ -185,6 +196,19 @@ export class Mapa extends Phaser.Scene {
 			tipoDe: (id: string) =>
 				this.estado.mapa.capas.flat().find((n) => n.id === id)?.tipo,
 			elegir: (id: string) => this.elegir(id),
+			/** Todos los nodos con su tipo. */
+			nodos: () =>
+				this.estado.mapa.capas.flat().map((n) => ({ id: n.id, tipo: n.tipo })),
+			/** Salta a un nodo de elección sin pasar por las capas anteriores. */
+			irA: (id: string) =>
+				this.scene.start("Eleccion", {
+					estado: {
+						...this.estado,
+						actual: id,
+						visitados: [...this.estado.visitados, id],
+					},
+					nodoId: id,
+				} satisfies DatosEleccion),
 			/** Centro de un nodo en coordenadas de página. */
 			centro: (id: string) => {
 				const c = this.game.canvas.getBoundingClientRect();

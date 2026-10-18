@@ -4,6 +4,7 @@ import {
 	type NodoMapa,
 	type TipoNodo,
 } from "./mapa.js";
+import type { IdRuna } from "./runas.js";
 
 /** Miembro del equipo durante la expedición; `psPct` 0 significa debilitado. */
 export interface MiembroExp {
@@ -24,6 +25,8 @@ export interface EstadoExpedicion {
 	equipo: MiembroExp[];
 	/** Dinero acumulado, entero mayor o igual que 0. */
 	dinero: number;
+	/** Runas de la mochila, sin repetir (máximo `MAX_RUNAS`). */
+	runas: IdRuna[];
 	estado: "en-curso" | "victoria" | "derrota";
 }
 
@@ -95,6 +98,7 @@ export function iniciarExpedicion(
 		visitados: [],
 		equipo: especies.map((especie) => ({ especie, psPct: PS_MAX })),
 		dinero: 0,
+		runas: [],
 		estado: "en-curso",
 	};
 }

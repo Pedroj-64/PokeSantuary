@@ -183,6 +183,24 @@ describe("verificar", () => {
 		});
 	});
 
+	describe("eventos.json", () => {
+		it("falla si no cumple el esquema", async () => {
+			const dir = copia();
+			const ruta = join(dir, "eventos.json");
+			const eventos = JSON.parse(readFileSync(ruta, "utf8"));
+			eventos.pop();
+			eventos.push({ id: "roto" });
+			writeFileSync(ruta, JSON.stringify(eventos));
+			expect((await verificar(dir)).join("\n")).toMatch(/eventos\.json/);
+		});
+
+		it("falla si falta en el pack", async () => {
+			const dir = copia();
+			rmSync(join(dir, "eventos.json"));
+			expect((await verificar(dir)).join("\n")).toMatch(/eventos\.json/);
+		});
+	});
+
 	describe("atlas de combate", () => {
 		// Reescribe el manifiesto para que solo falle lo que se manipuló.
 		const resellar = (dir: string) => {

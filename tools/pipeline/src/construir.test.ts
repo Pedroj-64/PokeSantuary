@@ -23,6 +23,7 @@ describe("construir", () => {
 			cpSync(trabajos, join(d, "trabajos.json"));
 			cpSync(join(dirKanto, "sets.json"), join(d, "sets.json"));
 			cpSync(join(dirKanto, "expedicion.json"), join(d, "expedicion.json"));
+			cpSync(join(dirKanto, "eventos.json"), join(d, "eventos.json"));
 			return d;
 		};
 		const red = vi.fn();

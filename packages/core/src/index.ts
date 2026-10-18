@@ -4,6 +4,13 @@ export {
 	probCaptura,
 } from "./captura.js";
 export {
+	aplicarEfecto,
+	elegirEvento,
+	type ResultadoEfecto,
+	type RivalEvento,
+	sustituirRuna,
+} from "./eventos.js";
+export {
 	curar,
 	type EstadoExpedicion,
 	elegibles,
