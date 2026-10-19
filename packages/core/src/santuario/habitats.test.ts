@@ -433,6 +433,22 @@ describe("visitantes del Atardecer", () => {
 });
 
 describe("visitantes del Alba", () => {
+	it("solo llegan especies del pack (`especiesDisponibles`): las demás se ignoran y el hábitat sigue pendiente", () => {
+		const e = estadoVisitantes([], {
+			momento: "noche",
+			habitatsPendientes: ["pradera-alta"],
+		});
+		const ctx = (disponibles: string[]): ContextoJornada => ({
+			...contexto("pradera-alta", ["oddish", "pidgey", "pikachu"]),
+			especiesDisponibles: disponibles,
+		});
+		const sinNinguna = amanecer(e, balance(), ctx(["abra"]));
+		expect(sinNinguna.estado.residentes).toEqual([]);
+		expect(sinNinguna.estado.habitatsPendientes).toEqual(["pradera-alta"]);
+		const conUna = amanecer(e, balance(), ctx(["abra", "pikachu"]));
+		expect(conUna.estado.residentes.map((r) => r.especie)).toEqual(["pikachu"]);
+	});
+
 	it("crea un visitante determinista y prefiere las especies no vistas", () => {
 		const e = estadoVisitantes([], {
 			momento: "noche",

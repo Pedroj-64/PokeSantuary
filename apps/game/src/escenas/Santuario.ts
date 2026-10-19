@@ -1,4 +1,6 @@
 import { expedicionInicial } from "@santuario/battle";
+import type { EstadoPartida, EventoSantuario } from "@santuario/core";
+import { crearRng } from "@santuario/core";
 import Phaser from "phaser";
 import losetasPng from "../assets/santuario/losetas.png?url";
 import protagonistaPng from "../assets/santuario/protagonista.png?url";
@@ -7,13 +9,17 @@ import { MUSICA } from "../audio/sonidos.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import { t } from "../i18n/index.js";
+import { asegurarSprite } from "../oficial/recursos.js";
 import {
 	bloqueado,
-	crearMundo,
 	edificioCercano,
 	LADO,
-	type Mundo,
-} from "../santuario/mundoProvisional.js";
+	rectanguloDeEdificio,
+	varianteDeLoseta,
+} from "../santuario/colisiones.js";
+import { type LineaResumen, resumenDeJornada } from "../santuario/resumen.js";
+import type { Sesion } from "../santuario/sesion.js";
+import { obtenerSesion } from "../santuario/sesionGlobal.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
 
@@ -22,15 +28,24 @@ const VELOCIDAD = 70; // píxeles por segundo
 const CAJA = { ancho: 10, alto: 6 }; // pies del protagonista, para las colisiones
 const ALCANCE_ARBOL = 34; // distancia al centro del Árbol Cenit para interactuar
 const MS_POR_PASO = 140;
-
-const EDIFICIOS = [
+const TIPOS_LOSETA = [
+	"yerma",
+	"tierra",
+	"pradera",
+	"hierba-alta",
+	"agua",
+	"arena",
+	"roca",
+	"camino",
+];
+const EDIFICIOS_CON_ARTE = [
 	"arbol-cenit",
 	"lecho-hojas",
 	"huerto-bayas",
 	"aserradero",
 	"cantera",
 	"almacen",
-] as const;
+];
 const URL_EDIFICIOS = import.meta.glob("../assets/santuario/*.png", {
 	query: "?url",
 	import: "default",
@@ -41,25 +56,37 @@ const urlEdificio = (id: string): string =>
 
 type Direccion = "abajo" | "arriba" | "lado";
 const FILA: Record<Direccion, number> = { abajo: 0, arriba: 1, lado: 2 };
+const PROFUNDIDAD_UI = 100000;
 
-/** Prototipo caminable del Santuario: isla provisional, protagonista y el Árbol Cenit como puerta a la Fisura. */
+/** Texto de un recurso del resumen o de la barra, con las bayas juntas. */
+const nombreRecurso = (id: string) => t(`recurso.${id}`);
+
+/**
+ * El Santuario: la isla se dibuja desde el estado del núcleo (terreno, edificios, residentes),
+ * el protagonista camina por ella y el tiempo avanza por jornadas con un resumen al atardecer.
+ * Todo cambio pasa por `sesion.despachar`, que guarda sola.
+ */
 export class Santuario extends Phaser.Scene {
-	private mundo!: Mundo;
+	private sesion!: Sesion;
 	private jugador!: Phaser.GameObjects.Sprite;
-	private teclas!: {
-		arriba: Phaser.Input.Keyboard.Key;
-		abajo: Phaser.Input.Keyboard.Key;
-		izq: Phaser.Input.Keyboard.Key;
-		der: Phaser.Input.Keyboard.Key;
-		w: Phaser.Input.Keyboard.Key;
-		a: Phaser.Input.Keyboard.Key;
-		s: Phaser.Input.Keyboard.Key;
-		d: Phaser.Input.Keyboard.Key;
-	};
+	private teclas!: Record<
+		"arriba" | "abajo" | "izq" | "der" | "w" | "a" | "s" | "d",
+		Phaser.Input.Keyboard.Key
+	>;
 	private direccion: Direccion = "abajo";
 	private tPaso = 0;
 	private aviso!: Phaser.GameObjects.Text;
+	private hud!: Phaser.GameObjects.Text;
+	private recursos!: Phaser.GameObjects.Text;
+	private ayuda!: Phaser.GameObjects.Text;
+	private avisoGuardado!: Phaser.GameObjects.Text;
+	private capaMundo?: Phaser.GameObjects.Container;
+	private panel?: Phaser.GameObjects.Container;
 	private cerca = false;
+	private listo = false;
+	/** Evita que una carga lenta pinte sobre una escena ya cerrada. */
+	private generacion = 0;
+	private lineasPanel: LineaResumen[] = [];
 
 	constructor() {
 		super("Santuario");
@@ -76,41 +103,29 @@ export class Santuario extends Phaser.Scene {
 				frameWidth: LADO,
 				frameHeight: LADO,
 			});
-		for (const id of EDIFICIOS)
+		for (const id of EDIFICIOS_CON_ARTE)
 			if (!this.textures.exists(id)) this.load.image(id, urlEdificio(id));
 	}
 
 	create(): void {
-		this.mundo = crearMundo(obtenerSemilla());
-		const m = this.mundo;
+		this.listo = false;
+		this.panel = undefined;
+		this.capaMundo = undefined;
+		this.cerca = false;
+		const gen = ++this.generacion;
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			++this.generacion;
+		});
 		this.cameras.main.setBackgroundColor(0x12122b);
-		this.cameras.main.setBounds(0, 0, m.ancho * LADO, m.alto * LADO);
+		this.crearTeclado();
+		this.crearHud();
+		this.ayuda.setText(t("santuario.cargando"));
+		alPulsarTecla(this, (ev) => this.alTecla(ev.key));
+		void musica(MUSICA.mapa);
+		void this.abrir(gen);
+	}
 
-		for (let y = 0; y < m.alto; y++)
-			for (let x = 0; x < m.ancho; x++) {
-				const i = y * m.ancho + x;
-				this.add
-					.image(
-						x * LADO,
-						y * LADO,
-						"losetas",
-						(m.losetas[i] as number) * 4 + (m.variantes[i] as number),
-					)
-					.setOrigin(0, 0)
-					.setDepth(0);
-			}
-		for (const e of m.edificios)
-			this.add
-				.image(e.x * LADO, e.y * LADO, e.tipo)
-				.setOrigin(0, 0)
-				.setDepth((e.y + e.alto) * LADO);
-
-		this.jugador = this.add
-			.sprite(m.inicio.x, m.inicio.y, "protagonista", 0)
-			.setOrigin(0.5, 1);
-		this.cameras.main.startFollow(this.jugador, true, 0.15, 0.15);
-		this.cameras.main.setZoom(1);
-
+	private crearTeclado(): void {
 		const k = this.input.keyboard;
 		if (!k) throw new Error("el teclado no está disponible");
 		const c = k.createCursorKeys();
@@ -128,38 +143,386 @@ export class Santuario extends Phaser.Scene {
 			s: wasd.S,
 			d: wasd.D,
 		};
-
-		this.add
-			.text(8, 6, t("santuario.titulo"), {
-				fontFamily: FUENTE,
-				fontSize: "10px",
-				color: "#ffd866",
-			})
-			.setScrollFactor(0)
-			.setDepth(100000);
-		this.aviso = this.add
-			.text(240, 258, "", {
-				fontFamily: FUENTE,
-				fontSize: "10px",
-				color: "#1b1b2f",
-				backgroundColor: "#7dff9a",
-				padding: { x: 4, y: 3 },
-			})
-			.setOrigin(0.5, 1)
-			.setScrollFactor(0)
-			.setDepth(100000)
-			.setVisible(false);
-
-		alPulsarTecla(this, (ev) => {
-			const tecla = ev.key.toLowerCase();
-			if (tecla === "e" && this.cerca) this.salirALaFisura();
-			else if (tecla === "escape") this.scene.start("ListaEspecies");
-		});
-		void musica(MUSICA.mapa);
-		this.exponerGancho();
 	}
 
+	private crearHud(): void {
+		const base = { fontFamily: FUENTE, fontSize: "10px" };
+		const fija = (o: Phaser.GameObjects.Text) =>
+			o.setScrollFactor(0).setDepth(PROFUNDIDAD_UI);
+		this.hud = fija(this.add.text(8, 6, "", { ...base, color: "#ffd866" }));
+		this.recursos = fija(
+			this.add.text(8, 19, "", { ...base, color: "#d9c89a" }),
+		);
+		this.ayuda = fija(
+			this.add
+				.text(240, 264, "", { ...base, color: "#9ad1ff" })
+				.setOrigin(0.5, 1),
+		);
+		this.aviso = fija(
+			this.add
+				.text(240, 240, "", {
+					...base,
+					color: "#1b1b2f",
+					backgroundColor: "#7dff9a",
+					padding: { x: 4, y: 3 },
+				})
+				.setOrigin(0.5, 1)
+				.setVisible(false),
+		);
+		this.avisoGuardado = fija(
+			this.add.text(472, 6, "", { ...base, color: "#ff8b8b" }).setOrigin(1, 0),
+		);
+	}
+
+	/** Carga (o crea) la partida y dibuja la isla; un guardado ilegible muestra el error y deja volver. */
+	private async abrir(gen: number): Promise<void> {
+		try {
+			const { sesion, avisos } = await obtenerSesion();
+			if (gen !== this.generacion) return;
+			this.sesion = sesion;
+			this.avisoGuardado.setText(
+				avisos
+					.map((a) =>
+						t(`santuario.aviso.${a === "sin-guardado" ? "sinGuardado" : a}`),
+					)
+					.join("\n"),
+			);
+			this.listo = true;
+			this.cameras.main.setZoom(1);
+			this.repintar();
+			void musica(MUSICA.mapa);
+			this.exponerGancho();
+		} catch (e) {
+			if (gen !== this.generacion) return;
+			this.ayuda.setText(t("santuario.error.volver"));
+			this.hud.setText(t("santuario.error.titulo"));
+			this.recursos.setText(e instanceof Error ? e.message : String(e));
+		}
+	}
+
+	private get p(): EstadoPartida {
+		return this.sesion.partida();
+	}
+
+	// ----------------------------------------------------------------- dibujo
+
+	/** Redibuja el mundo entero desde el estado (es barato: una isla de 40×30 losetas). */
+	private repintar(): void {
+		const { santuario: s } = this.p;
+		const b = this.sesion.ctx.balance;
+		this.capaMundo?.destroy();
+		const capa = this.add.container(0, 0).setDepth(0);
+		this.capaMundo = capa;
+		const { ancho, alto, losetas } = s.terreno;
+		this.cameras.main.setBounds(0, 0, ancho * LADO, alto * LADO);
+
+		for (let y = 0; y < alto; y++)
+			for (let x = 0; x < ancho; x++) {
+				const l = losetas[y * ancho + x];
+				if (l === undefined) continue;
+				capa.add(
+					this.add
+						.image(
+							x * LADO,
+							y * LADO,
+							"losetas",
+							TIPOS_LOSETA.indexOf(l.tipo) * 4 + varianteDeLoseta(x, y),
+						)
+						.setOrigin(0, 0)
+						.setDepth(0),
+				);
+				if (l.objeto !== undefined)
+					capa.add(this.dibujarObjeto(l.objeto, x, y, l.encendido));
+			}
+
+		for (const e of s.edificios) {
+			const r = rectanguloDeEdificio(e, b);
+			const enObra = e.obraRestante > 0;
+			const profundidad = (r.y + r.alto) * LADO;
+			if (EDIFICIOS_CON_ARTE.includes(e.tipo)) {
+				capa.add(
+					this.add
+						.image(r.x * LADO, r.y * LADO, e.tipo)
+						.setOrigin(0, 0)
+						.setAlpha(enObra ? 0.5 : 1)
+						.setDepth(profundidad),
+				);
+			} else {
+				capa.add(
+					this.add
+						.rectangle(
+							r.x * LADO,
+							r.y * LADO,
+							r.ancho * LADO,
+							r.alto * LADO,
+							0x7a5232,
+							enObra ? 0.5 : 1,
+						)
+						.setOrigin(0, 0)
+						.setDepth(profundidad),
+				);
+			}
+			if (enObra)
+				capa.add(
+					this.add
+						.text(
+							(r.x + r.ancho / 2) * LADO,
+							r.y * LADO - 2,
+							`${e.obraRestante}`,
+							{ fontFamily: FUENTE, fontSize: "9px", color: "#ffd866" },
+						)
+						.setOrigin(0.5, 1)
+						.setDepth(PROFUNDIDAD_UI - 1),
+				);
+		}
+
+		this.crearJugadorSiHaceFalta();
+		void this.dibujarResidentes(capa);
+		this.actualizarHud();
+	}
+
+	/** Objetos del terreno con formas sencillas hasta que haya arte propio. */
+	private dibujarObjeto(
+		objeto: string,
+		x: number,
+		y: number,
+		encendido: boolean,
+	): Phaser.GameObjects.GameObject {
+		const cx = x * LADO + LADO / 2;
+		const cy = y * LADO + LADO / 2;
+		const dep = (y + 1) * LADO;
+		switch (objeto) {
+			case "arbol":
+				return this.add.circle(cx, cy - 2, 7, 0x3f9e5f).setDepth(dep);
+			case "arbol-joven":
+				return this.add.circle(cx, cy, 4, 0x67c77f).setDepth(dep);
+			case "brote":
+				return this.add.rectangle(cx, cy + 2, 2, 5, 0x67c77f).setDepth(dep);
+			case "tocon":
+				return this.add.rectangle(cx, cy + 2, 8, 5, 0x573823).setDepth(dep);
+			case "flor":
+				return this.add.circle(cx, cy, 2, 0xf95587).setDepth(dep);
+			case "farol":
+				return this.add
+					.rectangle(cx, cy, 4, 9, encendido ? 0xffd866 : 0x6b7190)
+					.setDepth(dep);
+			case "fogata":
+				return this.add
+					.circle(cx, cy + 2, 4, encendido ? 0xee8130 : 0x4a4f68)
+					.setDepth(dep);
+			default:
+				return this.add.rectangle(cx, cy, 8, 8, 0x9aa0b8).setDepth(dep);
+		}
+	}
+
+	/** Un sprite pequeño (la silueta del sustituto) por residente, cerca del Árbol Cenit. */
+	private async dibujarResidentes(
+		capa: Phaser.GameObjects.Container,
+	): Promise<void> {
+		const gen = this.generacion;
+		const { santuario: s } = this.p;
+		const b = this.sesion.ctx.balance;
+		const arbol = s.edificios.find((e) => e.tipo === "arbol-cenit");
+		if (!arbol) return;
+		const r = rectanguloDeEdificio(arbol, b);
+		const cx = (r.x + r.ancho / 2) * LADO;
+		const cy = (r.y + r.alto) * LADO + 14;
+		for (const [i, res] of s.residentes.entries()) {
+			const rng = crearRng(`${s.semilla}:sitio:${res.uid}`);
+			let pos = { x: cx, y: cy };
+			for (let intento = 0; intento < 12; intento++) {
+				const ang = rng.siguiente() * Math.PI * 2;
+				const rad = 18 + rng.siguiente() * 40 + i * 2;
+				const q = { x: cx + Math.cos(ang) * rad, y: cy + Math.sin(ang) * rad };
+				if (!bloqueado(s, b, q.x - 6, q.y - 4, 12, 8)) {
+					pos = q;
+					break;
+				}
+			}
+			const textura = await asegurarSprite(
+				this,
+				res.especie,
+				"frente",
+				res.tipos[0],
+			);
+			if (gen !== this.generacion || capa !== this.capaMundo) return;
+			const sprite = this.add
+				.image(pos.x, pos.y, textura)
+				.setOrigin(0.5, 1)
+				.setScale(0.25)
+				.setDepth(pos.y)
+				.setAlpha(res.estado === "visitante" ? 0.75 : 1);
+			capa.add(sprite);
+			this.tweens.add({
+				targets: sprite,
+				y: pos.y - 2,
+				duration: 500 + (i % 3) * 120,
+				yoyo: true,
+				repeat: -1,
+			});
+		}
+	}
+
+	private crearJugadorSiHaceFalta(): void {
+		if (this.jugador?.active) return;
+		const { santuario: s } = this.p;
+		const arbol = s.edificios.find((e) => e.tipo === "arbol-cenit");
+		const r = arbol
+			? rectanguloDeEdificio(arbol, this.sesion.ctx.balance)
+			: undefined;
+		const x = r ? (r.x + r.ancho / 2) * LADO : 320;
+		const y = r ? (r.y + r.alto + 2) * LADO : 240;
+		this.jugador = this.add.sprite(x, y, "protagonista", 0).setOrigin(0.5, 1);
+		this.cameras.main.startFollow(this.jugador, true, 0.15, 0.15);
+	}
+
+	private actualizarHud(): void {
+		const { santuario: s } = this.p;
+		this.hud.setText(
+			t("santuario.hud", {
+				jornada: s.jornada,
+				momento: t(`momento.${s.momento}`),
+				armonia: s.armonia,
+			}),
+		);
+		const bayas = Object.entries(s.recursos)
+			.filter(([k]) => k.startsWith("baya:"))
+			.reduce((suma, [, v]) => suma + v, 0);
+		const r = s.recursos;
+		this.recursos.setText(
+			[
+				`${nombreRecurso("madera")} ${r.madera ?? 0}`,
+				`${nombreRecurso("piedra")} ${r.piedra ?? 0}`,
+				`${nombreRecurso("baya")} ${bayas}`,
+				`${nombreRecurso("mineral")} ${r.mineral ?? 0}`,
+				`${nombreRecurso("pokedolares")} ${r.pokedolares ?? 0}`,
+			].join("  ·  "),
+		);
+		const clave =
+			s.momento === "alba" ? "alba" : s.momento === "noche" ? "noche" : "dia";
+		if (!this.panel) this.ayuda.setText(t(`santuario.ayuda.${clave}`));
+	}
+
+	// --------------------------------------------------------------- entrada
+
+	private alTecla(tecla: string): void {
+		const k = tecla.toLowerCase();
+		if (!this.listo) {
+			if (k === "escape") this.scene.start("ListaEspecies");
+			return;
+		}
+		if (this.panel) {
+			if (k === "enter" || k === " ") this.cerrarPanel();
+			return;
+		}
+		if (k === "enter" || k === " ") this.avanzarMomento();
+		else if (k === "e" && this.cerca) this.salirALaFisura();
+		else if (k === "escape") this.scene.start("ListaEspecies");
+	}
+
+	/** Enter: alba → día, día → atardecer (y resumen), noche → alba (y resumen). */
+	private avanzarMomento(): void {
+		const momento = this.p.santuario.momento;
+		const accion =
+			momento === "alba"
+				? ({ tipo: "comenzarDia" } as const)
+				: momento === "dia"
+					? ({ tipo: "pasarDia" } as const)
+					: ({ tipo: "dormir" } as const);
+		const antes = this.p.santuario.recursos;
+		let eventos: EventoSantuario[];
+		try {
+			eventos = this.sesion.despachar(accion);
+		} catch (e) {
+			this.mostrarAviso(e instanceof Error ? e.message : String(e));
+			return;
+		}
+		this.repintar();
+		if (accion.tipo !== "comenzarDia") {
+			const nombre = (uid: string) => {
+				const r = this.p.santuario.residentes.find((x) => x.uid === uid);
+				return r ? t(`especie.${r.especie}`) : uid;
+			};
+			this.abrirPanel(
+				resumenDeJornada(eventos, antes, this.p.santuario.recursos, nombre),
+			);
+		}
+		void this.sesion.guardada().then(() => {
+			if (!this.sesion.guardadoOk())
+				this.avisoGuardado.setText(t("santuario.aviso.errorGuardado"));
+		});
+	}
+
+	private abrirPanel(lineas: LineaResumen[]): void {
+		this.lineasPanel = lineas;
+		const textos = lineas.length
+			? lineas.map((l) => this.textoDeLinea(l))
+			: [t("santuario.resumen.vacio")];
+		const alto = 40 + textos.length * 13;
+		const y0 = Math.max(20, 135 - alto / 2);
+		const fondo = this.add
+			.rectangle(240, y0, 360, alto, 0x12122b, 0.95)
+			.setOrigin(0.5, 0)
+			.setStrokeStyle(1, 0xffd866);
+		const titulo = this.add
+			.text(240, y0 + 8, t("santuario.resumen.titulo"), {
+				fontFamily: FUENTE,
+				fontSize: "11px",
+				color: "#ffd866",
+			})
+			.setOrigin(0.5, 0);
+		const cuerpo = this.add.text(70, y0 + 28, textos.join("\n"), {
+			fontFamily: FUENTE,
+			fontSize: "10px",
+			color: "#ffffff",
+			lineSpacing: 3,
+			wordWrap: { width: 340 },
+		});
+		const pie = this.add
+			.text(240, y0 + alto - 4, t("santuario.resumen.cerrar"), {
+				fontFamily: FUENTE,
+				fontSize: "9px",
+				color: "#9ad1ff",
+			})
+			.setOrigin(0.5, 1);
+		this.panel = this.add
+			.container(0, 0, [fondo, titulo, cuerpo, pie])
+			.setScrollFactor(0)
+			.setDepth(PROFUNDIDAD_UI + 1);
+		this.ayuda.setText("");
+	}
+
+	private cerrarPanel(): void {
+		this.panel?.destroy();
+		this.panel = undefined;
+		this.actualizarHud();
+	}
+
+	/** Texto de una línea del resumen: sustituye ids por nombres legibles. */
+	private textoDeLinea(l: LineaResumen): string {
+		const params: Record<string, string | number> = { ...(l.params ?? {}) };
+		if (typeof params.recurso === "string")
+			params.recurso = nombreRecurso(params.recurso);
+		if (typeof params.edificio === "string")
+			params.edificio = t(`edificio.${params.edificio}`);
+		if (typeof params.habitat === "string")
+			params.habitat = t(`habitat.${params.habitat}.nombre`);
+		if (typeof params.especie === "string")
+			params.especie = t(`especie.${params.especie}`);
+		if (typeof params.motivo === "string")
+			params.motivo = t(`santuario.motivo.${params.motivo}`);
+		return t(l.clave, params);
+	}
+
+	private mostrarAviso(texto: string): void {
+		this.aviso.setText(texto).setVisible(true);
+		this.time.delayedCall(2500, () => this.aviso.setVisible(false));
+	}
+
+	// ------------------------------------------------------------- movimiento
+
 	update(_: number, dt: number): void {
+		if (!this.listo || this.panel) return;
 		const seg = dt / 1000;
 		const ti = this.teclas;
 		const dx =
@@ -186,15 +549,20 @@ export class Santuario extends Phaser.Scene {
 		this.jugador.setFrame(FILA[this.direccion] * 3 + paso);
 		this.jugador.setDepth(this.jugador.y);
 
+		const { santuario: s } = this.p;
+		const b = this.sesion.ctx.balance;
 		const arbol = edificioCercano(
-			this.mundo,
+			s,
+			b,
 			"arbol-cenit",
 			this.jugador.x,
 			this.jugador.y,
 		);
 		const cerca =
 			arbol !== undefined &&
-			arbol.distancia <= ALCANCE_ARBOL + (arbol.edificio.ancho * LADO) / 2;
+			arbol.distancia <=
+				ALCANCE_ARBOL +
+					(rectanguloDeEdificio(arbol.edificio, b).ancho * LADO) / 2;
 		if (cerca !== this.cerca) {
 			this.cerca = cerca;
 			this.aviso.setText(t("santuario.salir")).setVisible(cerca);
@@ -207,7 +575,8 @@ export class Santuario extends Phaser.Scene {
 		const ny = this.jugador.y + dy;
 		if (
 			!bloqueado(
-				this.mundo,
+				this.p.santuario,
+				this.sesion.ctx.balance,
 				nx - CAJA.ancho / 2,
 				ny - CAJA.alto,
 				CAJA.ancho,
@@ -226,6 +595,8 @@ export class Santuario extends Phaser.Scene {
 		});
 	}
 
+	// ---------------------------------------------------------------- pruebas
+
 	/** Solo con `?test=1`: mismos caminos que la interfaz. */
 	private exponerGancho(): void {
 		if (new URLSearchParams(location.search).get("test") !== "1") return;
@@ -234,18 +605,35 @@ export class Santuario extends Phaser.Scene {
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 			delete g.__santuario?.santuario;
 		});
+		const b = () => this.sesion.ctx.balance;
 		g.__santuario.santuario = {
 			estado: () => ({
 				x: Math.round(this.jugador.x),
 				y: Math.round(this.jugador.y),
 				direccion: this.direccion,
 				cercaDelArbol: this.cerca,
+				jornada: this.p.santuario.jornada,
+				momento: this.p.santuario.momento,
+				armonia: this.p.santuario.armonia,
+				recursos: { ...this.p.santuario.recursos },
+				residentes: this.p.santuario.residentes.map((r) => ({
+					uid: r.uid,
+					especie: r.especie,
+					estado: r.estado,
+					hambre: r.hambre,
+					animo: r.animo,
+				})),
+				panel: this.panel !== undefined,
+				lineasPanel: this.lineasPanel.map((l) => l.clave),
+				guardadoOk: this.sesion.guardadoOk(),
+				aviso: this.aviso.visible ? this.aviso.text : "",
 			}),
 			/** Coloca al protagonista (en píxeles) si el sitio es transitable. */
 			colocar: (x: number, y: number) => {
 				if (
 					bloqueado(
-						this.mundo,
+						this.p.santuario,
+						b(),
 						x - CAJA.ancho / 2,
 						y - CAJA.alto,
 						CAJA.ancho,
@@ -257,11 +645,15 @@ export class Santuario extends Phaser.Scene {
 				return true;
 			},
 			arbol: () => {
-				const a = this.mundo.edificios.find((e) => e.tipo === "arbol-cenit");
-				return a
-					? { x: (a.x + a.ancho / 2) * LADO, y: (a.y + a.alto) * LADO + 8 }
-					: null;
+				const a = this.p.santuario.edificios.find(
+					(e) => e.tipo === "arbol-cenit",
+				);
+				if (!a) return null;
+				const r = rectanguloDeEdificio(a, b());
+				return { x: (r.x + r.ancho / 2) * LADO, y: (r.y + r.alto) * LADO + 8 };
 			},
+			/** Espera a que todo lo despachado esté guardado. */
+			guardada: () => this.sesion.guardada(),
 		};
 	}
 }

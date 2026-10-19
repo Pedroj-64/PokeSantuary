@@ -46,6 +46,11 @@ export interface ContextoJornada {
 	habitats: readonly HabitatData[];
 	/** La misma fábrica de residentes que usa la Expedición. */
 	fabricar: Fabricar;
+	/**
+	 * Especies que la fábrica sabe crear (las del pack). Los hábitats pueden listar
+	 * especies que aún no están en el pack: se ignoran. Si falta, valen todas.
+	 */
+	especiesDisponibles?: readonly string[];
 }
 
 /** Lado de la ventana de un hábitat. */
@@ -331,7 +336,12 @@ export const pasoVisitantesAlba: Paso = (e, _b, _rng, ctx) => {
 			continue;
 		}
 		const presentes = new Set(residentes.map((r) => r.especie));
-		const candidatas = habitat.especies.filter((s) => !presentes.has(s));
+		const candidatas = habitat.especies.filter(
+			(s) =>
+				!presentes.has(s) &&
+				(ctx.especiesDisponibles === undefined ||
+					ctx.especiesDisponibles.includes(s)),
+		);
 		if (candidatas.length === 0) {
 			pendientes.push(id);
 			continue;

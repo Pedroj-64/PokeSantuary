@@ -5,6 +5,15 @@ type EstadoSantuario = {
 	y: number;
 	direccion: string;
 	cercaDelArbol: boolean;
+	jornada: number;
+	momento: string;
+	armonia: number;
+	recursos: Record<string, number>;
+	residentes: { uid: string; especie: string; estado: string }[];
+	panel: boolean;
+	lineasPanel: string[];
+	guardadoOk: boolean;
+	aviso: string;
 };
 
 const estado = (p: Page) =>
@@ -12,8 +21,8 @@ const estado = (p: Page) =>
 		"window.__santuario.santuario?.estado() ?? null",
 	) as Promise<EstadoSantuario | null>;
 
-async function entrar(page: Page) {
-	await page.goto("/?test=1&semilla=m2");
+async function entrar(page: Page, semilla = "m2") {
+	await page.goto(`/?test=1&semilla=${semilla}`);
 	await page.locator('[data-estado="listo"]').waitFor();
 	await page.keyboard.press("s");
 	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
@@ -78,4 +87,60 @@ test("Esc vuelve a la lista de especies", async ({ page }) => {
 	await expect
 		.poll(() => page.evaluate("window.__santuario.santuario === undefined"))
 		.toBe(true);
+});
+
+test("empieza con tres residentes en el Alba de la jornada 1", async ({
+	page,
+}) => {
+	await entrar(page, "m-inicio");
+	const s = (await estado(page)) as EstadoSantuario;
+	expect(s.jornada).toBe(1);
+	expect(s.momento).toBe("alba");
+	expect(s.residentes.map((r) => r.especie)).toEqual([
+		"bulbasaur",
+		"charmander",
+		"squirtle",
+	]);
+});
+
+test("Enter recorre alba, día, atardecer con resumen, noche y la jornada siguiente", async ({
+	page,
+}) => {
+	await entrar(page, "m-jornada");
+	await page.keyboard.press("Enter");
+	await expect.poll(async () => (await estado(page))?.momento).toBe("dia");
+	await page.keyboard.press("Enter"); // pasar el día: se resuelve el Atardecer
+	await expect.poll(async () => (await estado(page))?.panel).toBe(true);
+	expect(((await estado(page)) as EstadoSantuario).momento).toBe("noche");
+	// con el panel abierto, Enter solo lo cierra
+	await page.keyboard.press("Enter");
+	await expect.poll(async () => (await estado(page))?.panel).toBe(false);
+	expect(((await estado(page)) as EstadoSantuario).momento).toBe("noche");
+	await page.keyboard.press("Enter"); // dormir
+	await expect
+		.poll(async () => (await estado(page))?.jornada, {
+			message: `aviso: ${(await estado(page))?.aviso}`,
+		})
+		.toBe(2);
+	expect(((await estado(page)) as EstadoSantuario).momento).toBe("alba");
+});
+
+test("el progreso se guarda: al recargar la página sigue la misma jornada", async ({
+	page,
+}) => {
+	await entrar(page, "m-guardado");
+	await page.keyboard.press("Enter");
+	await page.keyboard.press("Enter");
+	await expect.poll(async () => (await estado(page))?.panel).toBe(true);
+	await page.evaluate("window.__santuario.santuario.guardada()");
+	const antes = (await estado(page)) as EstadoSantuario;
+	await page.reload();
+	await page.locator('[data-estado="listo"]').waitFor();
+	await page.keyboard.press("s");
+	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
+	const despues = (await estado(page)) as EstadoSantuario;
+	expect(despues.momento).toBe(antes.momento);
+	expect(despues.jornada).toBe(antes.jornada);
+	expect(despues.recursos).toEqual(antes.recursos);
+	expect(despues.guardadoOk).toBe(true);
 });
