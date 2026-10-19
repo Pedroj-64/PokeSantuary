@@ -3,3 +3,8 @@ dist
 *.tsbuildinfo
 test-results/
 docs/gdd.md
+# Assets oficiales: nunca en git (se piden en ejecución o viven en local)
+/oficial/
+tools/pipeline/cache/sprites/
+packs/kanto/atlas-combate.json
+packs/kanto/atlas-combate.png

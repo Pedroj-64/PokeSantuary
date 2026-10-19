@@ -43,8 +43,7 @@ describe("construir", () => {
 			"movimientos.json",
 			"sets.json",
 			"manifest.json",
-			"atlas-combate.json",
-			"atlas-combate.png",
+			"oficial.json",
 		]) {
 			expect(readFileSync(join(a, f))).toEqual(readFileSync(join(b, f)));
 		}

@@ -17,6 +17,8 @@ export function construirDatosCombate(
 	sets: SetCombate[];
 	nombres: NombresVisibles;
 	tipoDeMovimiento(slug: string): string;
+	/** Tipo principal de la especie (para el sustituto del sprite). */
+	tipoDeEspecie(slug: string): string | undefined;
 } {
 	const especies = z.array(EspecieSchema).parse(JSON.parse(especiesCrudo));
 	const movimientos = z
@@ -31,6 +33,7 @@ export function construirDatosCombate(
 			movimiento: (slug) =>
 				movimientos.find((m) => m.id === slug)?.nombre[idiomaActual()] ?? slug,
 		},
+		tipoDeEspecie: (slug) => especies.find((e) => e.id === slug)?.tipos[0],
 		tipoDeMovimiento: (slug) =>
 			movimientos.find((m) => m.id === slug)?.tipo ?? "normal",
 	};

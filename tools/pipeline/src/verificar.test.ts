@@ -8,7 +8,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PNG } from "pngjs";
+import type { Oficial } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import { sha256 } from "./manifiesto.js";
 import { verificar } from "./verificar.js";
@@ -30,8 +30,6 @@ const resellar = (dir: string) => {
 	writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
 };
 
-type Marco = { frame: { x: number; y: number; w: number; h: number } };
-type AtlasJson = { frames: Record<string, Marco> };
 type Fila = { especie: string; movimientos: string[] };
 
 describe("verificar", () => {
@@ -266,120 +264,68 @@ describe("verificar", () => {
 		});
 	});
 
-	describe("atlas de combate", () => {
-		const editarJson = (dir: string, f: (a: AtlasJson) => void) => {
-			const ruta = join(dir, "atlas-combate.json");
-			const a = JSON.parse(readFileSync(ruta, "utf8"));
-			f(a);
-			writeFileSync(ruta, JSON.stringify(a));
+	describe("assets oficiales", () => {
+		const editarOficial = (dir: string, f: (o: Oficial) => void) => {
+			const ruta = join(dir, "oficial.json");
+			const o = JSON.parse(readFileSync(ruta, "utf8"));
+			f(o);
+			writeFileSync(ruta, JSON.stringify(o));
 			resellar(dir);
 		};
 
-		it("contiene los 20 marcos esperados", () => {
-			const a = JSON.parse(
-				readFileSync(join(PACK_REAL, "atlas-combate.json"), "utf8"),
+		it("oficial.json cubre las 10 especies con dos URL cada una", () => {
+			const o = JSON.parse(
+				readFileSync(join(PACK_REAL, "oficial.json"), "utf8"),
 			);
-			expect(Object.keys(a.frames)).toHaveLength(20);
-			expect(a.frames["combate/pikachu/frente"]).toBeDefined();
-			expect(a.frames["combate/zubat/espalda"]).toBeDefined();
-			expect(a.meta.size.w).toBeLessThanOrEqual(2048);
-			expect(a.meta.size.h).toBeLessThanOrEqual(2048);
+			expect(Object.keys(o.sprites)).toHaveLength(10);
+			expect(o.sprites.pikachu.frente).toMatch(/^https:\/\/raw\.github/);
+			expect(o.sprites.zubat.espalda).toMatch(/\/back\/\d+\.png$/);
 		});
 
-		it("falla si el JSON del atlas no es válido", async () => {
+		it("falla si falta una especie en oficial.json", async () => {
 			const dir = copia();
-			writeFileSync(join(dir, "atlas-combate.json"), '{"frames":1}');
-			resellar(dir);
+			editarOficial(dir, (o) => delete o.sprites.eevee);
 			expect((await verificar(dir)).join("\n")).toMatch(
-				/expected record, received number/,
+				/oficial\.json: falta eevee/,
 			);
 		});
 
-		it("falla si falta un marco", async () => {
+		it("falla si oficial.json trae una especie que no está en el pack", async () => {
 			const dir = copia();
-			editarJson(dir, (a) => delete a.frames["combate/eevee/espalda"]);
+			editarOficial(dir, (o) => {
+				o.sprites.mew = o.sprites.abra as Oficial["sprites"][string];
+			});
 			expect((await verificar(dir)).join("\n")).toMatch(
-				/falta el marco combate\/eevee\/espalda/,
+				/oficial\.json: mew no está en especies\.json/,
 			);
 		});
 
-		it("falla con tamaño cero, negativo o fuera del PNG", async () => {
-			for (const cambio of [
-				(f: Marco) => {
-					f.frame.w = 0;
-				},
-				(f: Marco) => {
-					f.frame.h = -3;
-				},
-				(f: Marco) => {
-					f.frame.x = 5000;
-				},
-			]) {
-				const dir = copia();
-				editarJson(dir, (a) =>
-					cambio(a.frames["combate/abra/frente"] as Marco),
-				);
-				expect((await verificar(dir)).join("\n")).toMatch(
-					/combate\/abra\/frente/,
-				);
-			}
-		});
-
-		it("falla si los píxeles del atlas difieren del sprite fuente", async () => {
+		it("falla con una URL fuera de PokeAPI/sprites", async () => {
 			const dir = copia();
-			const ruta = join(dir, "atlas-combate.png");
-			const png = PNG.sync.read(readFileSync(ruta));
-			const a = JSON.parse(
-				readFileSync(join(dir, "atlas-combate.json"), "utf8"),
-			);
-			const { x, y } = a.frames["combate/abra/frente"].frame;
-			const i = (y * png.width + x) * 4;
-			png.data[i] = (png.data[i] ?? 0) ^ 0xff;
-			writeFileSync(ruta, PNG.sync.write(png));
-			resellar(dir);
+			editarOficial(dir, (o) => {
+				(o.sprites.abra as { frente: string }).frente =
+					"https://evil.example/x.png";
+			});
 			expect((await verificar(dir)).join("\n")).toMatch(
-				/combate\/abra\/frente difiere/,
+				/URL de sprite no permitida/,
 			);
 		});
 
-		it("falla con mensaje legible si un PNG de la caché es corrupto o hostil", async () => {
-			const cache = mkdtempSync(join(tmpdir(), "cache-"));
-			cpSync(
-				join(PACK_REAL, "../../tools/pipeline/cache/sprites"),
-				join(cache, "sprites"),
-				{ recursive: true },
+		it("falla si git versiona un asset oficial", async () => {
+			const errores = await verificar(copia(), undefined, () => [
+				"packs/kanto/atlas-combate.png",
+				"oficial/o2/golpe.wav",
+				"packs/kanto/oficial.json",
+			]);
+			expect(errores.join("\n")).toMatch(
+				/atlas-combate\.png: asset oficial versionado/,
 			);
-			const ruta = join(cache, "sprites", "abra-frente.png");
-			// firma incorrecta
-			writeFileSync(
-				ruta,
-				Buffer.from("no soy un png, ni de lejos, de verdad que no lo soy"),
-			);
-			expect((await verificar(copia(), undefined, cache)).join("\n")).toMatch(
-				/abra-frente\.png: no es un PNG/,
-			);
-			// IHDR falsificado de 100000x100000
-			const real = readFileSync(
-				join(PACK_REAL, "../../tools/pipeline/cache/sprites/abra-espalda.png"),
-			);
-			real.writeUInt32BE(100000, 16);
-			real.writeUInt32BE(100000, 20);
-			writeFileSync(ruta, real);
-			expect((await verificar(copia(), undefined, cache)).join("\n")).toMatch(
-				/abra-frente\.png: dimensiones del PNG fuera de rango \(100000x100000/,
-			);
+			expect(errores.join("\n")).toMatch(/golpe\.wav: asset oficial/);
+			expect(errores.join("\n")).not.toMatch(/oficial\.json: asset/);
 		});
 
-		it("falla si el hash del PNG cambia", async () => {
-			const dir = copia();
-			const ruta = join(dir, "atlas-combate.png");
-			writeFileSync(
-				ruta,
-				Buffer.concat([readFileSync(ruta), Buffer.from([0])]),
-			);
-			expect((await verificar(dir)).join("\n")).toMatch(
-				/atlas-combate\.png.*hash/,
-			);
+		it("el repositorio real no versiona ningún asset oficial", async () => {
+			expect(await verificar(copia())).toEqual([]);
 		});
 	});
 });

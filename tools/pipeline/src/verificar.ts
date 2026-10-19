@@ -1,8 +1,8 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-	AtlasSchema,
 	type Elites,
 	ElitesSchema,
 	EspecieSchema,
@@ -11,6 +11,7 @@ import {
 	ManifiestoSchema,
 	type Movimiento,
 	MovimientoSchema,
+	OficialSchema,
 	SetCombateSchema,
 	TrabajosPorTipoSchema,
 } from "@santuario/data";
@@ -18,11 +19,26 @@ import { z } from "zod";
 import { archivosDelPack } from "./construir.js";
 import { resolverEnPack, sha256 } from "./manifiesto.js";
 import { erroresDeSets, unirMovimiento } from "./movimientos.js";
-import { LADOS, leerPng, nombreMarco, rutaSprite } from "./sprites.js";
+import { oficialesVersionados } from "./oficial.js";
 import { especiesPkmn } from "./unir.js";
 
 const leer = (dir: string, f: string) =>
 	JSON.parse(readFileSync(join(dir, f), "utf8"));
+
+/** Archivos que git versiona; sin repositorio (p. ej. un tarball) no hay nada que comprobar. */
+function listarVersionados(): string[] {
+	try {
+		return execFileSync("git", ["ls-files"], {
+			cwd: fileURLToPath(new URL("../../..", import.meta.url)),
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		})
+			.split("\n")
+			.filter(Boolean);
+	} catch {
+		return [];
+	}
+}
 
 // Revisa el pack sin red. Devuelve la lista de errores (vacía si todo está bien).
 export async function verificar(
@@ -30,7 +46,7 @@ export async function verificar(
 	listaMovimientos = fileURLToPath(
 		new URL("../movimientos.json", import.meta.url),
 	),
-	dirCache = fileURLToPath(new URL("../cache", import.meta.url)),
+	archivosVersionados = listarVersionados,
 ): Promise<string[]> {
 	const errores: string[] = [];
 	const intentar = async (f: () => void | Promise<void>) => {
@@ -74,36 +90,18 @@ export async function verificar(
 		}
 	});
 	await intentar(() => {
-		const atlas = AtlasSchema.parse(leer(dirPack, "atlas-combate.json"));
-		const png = leerPng(
-			readFileSync(resolverEnPack(dirPack, "atlas-combate.png")),
-			"atlas-combate.png",
-			2048,
-		);
+		const oficial = OficialSchema.parse(leer(dirPack, "oficial.json"));
 		for (const especie of especies)
-			for (const lado of LADOS) {
-				const nombre = nombreMarco(especie, lado);
-				const m = atlas.frames[nombre];
-				if (!m) {
-					errores.push(`atlas: falta el marco ${nombre}`);
-					continue;
-				}
-				const { x, y, w, h } = m.frame;
-				if (w <= 0 || h <= 0 || x + w > png.width || y + h > png.height) {
-					errores.push(`atlas: ${nombre} con tamaño o posición no válidos`);
-					continue;
-				}
-				const rutaFuente = rutaSprite(dirCache, especie, lado);
-				const fuente = leerPng(readFileSync(rutaFuente), rutaFuente);
-				let igual = fuente.width === w && fuente.height === h;
-				for (let fila = 0; igual && fila < h; fila++) {
-					const a = (y + fila) * png.width * 4 + x * 4;
-					igual = png.data
-						.subarray(a, a + w * 4)
-						.equals(fuente.data.subarray(fila * w * 4, (fila + 1) * w * 4));
-				}
-				if (!igual) errores.push(`atlas: ${nombre} difiere del sprite fuente`);
-			}
+			if (!oficial.sprites[especie])
+				errores.push(`oficial.json: falta ${especie}`);
+		for (const especie of Object.keys(oficial.sprites))
+			if (!especies.includes(especie))
+				errores.push(`oficial.json: ${especie} no está en especies.json`);
+	});
+	await intentar(() => {
+		const versionados = oficialesVersionados(archivosVersionados());
+		for (const f of versionados)
+			errores.push(`${f}: asset oficial versionado en git (regla 4.2.4)`);
 	});
 	await intentar(() => {
 		const lista = z

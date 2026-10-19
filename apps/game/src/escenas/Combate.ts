@@ -1,5 +1,3 @@
-import atlasJson from "@packs/kanto/atlas-combate.json?url";
-import atlasPng from "@packs/kanto/atlas-combate.png?url";
 import {
 	abrirCombate,
 	type CombateRemoto,
@@ -29,11 +27,11 @@ import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import { cargarElites } from "../expedicion/elitesPack.js";
 import { t } from "../i18n/index.js";
+import { asegurarSprite } from "../oficial/recursos.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
 
 const FUENTE = "monospace";
-const ATLAS = "combate";
 const NIVEL = 50;
 
 // Paleta coherente con la lista de especies (#1b1b2f, #ffd866, #9ad1ff).
@@ -123,11 +121,6 @@ export class Combate extends Phaser.Scene {
 		this.rivalEspecie = "";
 		this.nivelesRival = new Map();
 		this.intentosCaptura = 0;
-	}
-
-	preload(): void {
-		if (!this.textures.exists(ATLAS))
-			this.load.atlas(ATLAS, atlasPng, atlasJson);
 	}
 
 	create(): void {
@@ -315,7 +308,7 @@ export class Combate extends Phaser.Scene {
 		const x = rival ? 380 : 110;
 		const baseY = rival ? 78 : 140;
 		const sprite = this.add
-			.image(x, baseY, ATLAS)
+			.image(x, baseY, "__DEFAULT")
 			.setScale(2)
 			.setVisible(false);
 		const antes = this.children.length;
@@ -421,15 +414,23 @@ export class Combate extends Phaser.Scene {
 				return;
 			}
 			case "cambio": {
+				const gen = this.generacion;
 				const l = this.campo[e.lado];
 				void efecto(SFX.entradaCampo);
 				if (e.lado === "rival") this.rivalEspecie = e.especie;
+				const vista = e.lado === "jugador" ? "espalda" : "frente";
+				const textura = await asegurarSprite(
+					this,
+					e.especie,
+					vista,
+					this.datos.tipoDeEspecie(e.especie),
+				);
+				if (!this.vigente(gen)) return;
 				l.hp = e.hp;
 				l.hpMax = e.hpMax;
 				l.ratio = e.hpMax > 0 ? e.hp / e.hpMax : 0;
-				const vista = e.lado === "jugador" ? "espalda" : "frente";
 				l.sprite
-					.setTexture(ATLAS, `combate/${e.especie}/${vista}`)
+					.setTexture(textura)
 					.setPosition(l.sprite.x, l.baseY)
 					.setAlpha(0)
 					.setVisible(true);
@@ -952,6 +953,10 @@ export class Combate extends Phaser.Scene {
 				hpJugador: this.campo.jugador.hp,
 				hpRival: this.campo.rival.hp,
 				error: this.errorMostrado,
+				texturas: {
+					jugador: this.campo.jugador.sprite.texture.key,
+					rival: this.campo.rival.sprite.texture.key,
+				},
 			}),
 			/** El siguiente `elegir` rechaza como fallo fatal o como elección ilegal (misma gestión que un rechazo real). */
 			forzarFallo: (tipo: "fatal" | "ilegal") => {
