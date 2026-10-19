@@ -20,6 +20,16 @@ export interface MiembroExp {
 	especie: string;
 	/** PS en porcentaje, entero de 0 a 100. */
 	psPct: number;
+	/** Nivel del miembro; si falta, la progresión lo ignora (expediciones de prueba sin niveles). */
+	nivel?: number;
+	/** Movimientos activos (hasta 4). */
+	movimientos?: string[];
+	/** Movimientos olvidados que se pueden recordar. */
+	recordables?: string[];
+	/** Movimientos que quiere aprender y esperan a que el jugador elija cuál olvidar (hay 4 activos). */
+	pendientesMovimiento?: string[];
+	/** Amistad 0..5 (para evolucionar por amistad). */
+	amistad?: number;
 }
 
 /** Estado completo de una expedición; ninguna función lo muta. */

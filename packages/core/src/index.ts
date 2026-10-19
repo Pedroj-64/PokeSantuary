@@ -1,4 +1,11 @@
 export {
+	alineacionAutomatica,
+	conscientes,
+	necesitaElegir,
+	TAMANO_ALINEACION,
+	validarAlineacion,
+} from "./alineacion.js";
+export {
 	aprender,
 	aprenderTodos,
 	type EntradaAprendizaje,
@@ -42,6 +49,14 @@ export {
 	type ResultadoCombate,
 	resolverCombate,
 } from "./expedicion.js";
+export {
+	type EntradaDerrota,
+	estaFallido,
+	llamasIniciales,
+	type ResultadoDerrota,
+	resolverDerrota,
+	type TablaFarol,
+} from "./farol.js";
 export {
 	ESTADISTICAS,
 	type Estadistica,
@@ -87,6 +102,15 @@ export {
 	VERSION_PARTIDA,
 } from "./partida.js";
 export { type Accion, type Estado, type Evento, paso } from "./paso.js";
+export {
+	type ContextoProgresion,
+	type EventoProgresion,
+	elegirOlvido,
+	evolucionar,
+	type OpcionesVictoria,
+	type ResultadoProgresion,
+	registrarVictoria,
+} from "./progresion.js";
 export {
 	type RangoDinero,
 	recompensa,
