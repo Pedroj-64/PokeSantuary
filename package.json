@@ -13,6 +13,7 @@
 		"dev": "pnpm --filter @santuario/game --if-present dev",
 		"build": "pnpm --filter @santuario/game --if-present build",
 		"budget": "pnpm --filter @santuario/pipeline --if-present budget",
+		"arte:build": "aseprite -b --script-param raiz=\"$PWD\" --script tools/arte/santuario.lua",
 		"balance": "pnpm --filter @santuario/balance balance",
 		"e2e": "pnpm --filter @santuario/game --if-present e2e"
 	},

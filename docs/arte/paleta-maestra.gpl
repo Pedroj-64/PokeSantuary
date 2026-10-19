@@ -1,0 +1,34 @@
+GIMP Palette
+Name: Ecos del Santuario (primera versión)
+Columns: 6
+#
+ 18  18  43	noche
+ 27  27  66	noche2
+ 38  38  96	noche3
+ 43 110  73	verde
+ 63 158  95	verde2
+ 31  82  54	verde0
+103 199 127	verde3
+217 200 154	crema
+232 220 182	crema2
+184 166 121	crema0
+154 160 184	gris
+107 113 144	gris2
+ 74  79 104	gris0
+ 75  58  44	tierra
+ 92  72  55	tierra2
+ 59  45  34	tierra0
+ 90  79  72	yerma
+107  95  85	yerma2
+ 70  61  55	yerma0
+ 43  79 140	agua
+ 59 111 181	agua2
+143 184 232	agua3
+ 32  61 110	agua0
+122  82  50	madera
+154 107  64	madera2
+ 87  56  35	madera0
+255 216 102	luz
+217  83  79	fruta
+230 185 140	piel
+ 10  10  26	sombra

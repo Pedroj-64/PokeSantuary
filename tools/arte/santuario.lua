@@ -1,9 +1,15 @@
 -- Arte original del Santuario (losetas 16x16 y edificios), generado por código.
--- Ejecutar con Aseprite en modo batch:  aseprite -b --script tools/arte/santuario.lua
+-- Ejecutar con Aseprite en modo batch:  pnpm arte:build
+-- (equivale a: aseprite -b --script-param raiz=<carpeta del repo>/ --script tools/arte/santuario.lua)
 -- Salida: apps/game/src/assets/santuario/*.png
 -- Paleta: la del logo (azul noche, verde bosque, crema, gris azulado) más tonos de tierra y agua.
+-- Los colores viven también en packs/comun/paleta.json; una prueba exige que coincidan.
 
-local RAIZ = (app.params and app.params["raiz"]) or "/home/ajolote/Documentos/Codigo/santuario/"
+local RAIZ = app.params and app.params["raiz"]
+if not RAIZ or RAIZ == "" then
+  error("Falta --script-param raiz=<carpeta del repo>/ (usa `pnpm arte:build`)")
+end
+if RAIZ:sub(-1) ~= "/" then RAIZ = RAIZ .. "/" end
 local OUT = RAIZ .. "apps/game/src/assets/santuario/"
 os.execute('mkdir -p "' .. OUT .. '"')
 
