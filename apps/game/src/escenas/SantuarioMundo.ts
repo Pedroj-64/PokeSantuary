@@ -22,10 +22,16 @@ import {
 } from "../santuario/colisiones.js";
 import { nombreDeEspecie } from "../santuario/nombres.js";
 import {
+	decoracionesDisponibles,
 	kitsDisponibles,
 	lechosPosibles,
 	mejorasPosibles,
+	type Prueba,
+	puedeCamino,
 	puedeColocar,
+	puedeDecorar,
+	puedeMarcar,
+	residentesConTerreno,
 	tareasPosibles,
 } from "../santuario/opciones.js";
 import { type ItemMenu, PanelMenu } from "../santuario/panelMenu.js";
@@ -104,11 +110,14 @@ export class SantuarioMundo extends Phaser.Scene {
 	private menu!: PanelMenu;
 	/** Residentes marcados para la expedición mientras se elige el equipo. */
 	private elegidos = new Set<string>();
-	/** Modo de colocar un kit: el cursor sobre la isla y su rectángulo de vista previa. */
-	private colocando?: {
-		tipo: string;
+	/** Modo cursor: elegir una loseta de la isla (colocar un kit, marcar terreno...). */
+	private cursor?: {
 		x: number;
 		y: number;
+		titulo: string;
+		probar: (x: number, y: number) => Prueba;
+		confirmar: (x: number, y: number) => void;
+		cancelar: () => void;
 		marco: Phaser.GameObjects.Rectangle;
 		texto: Phaser.GameObjects.Text;
 	};
@@ -136,7 +145,7 @@ export class SantuarioMundo extends Phaser.Scene {
 		this.listo = false;
 		this.panel = undefined;
 		this.capaMundo = undefined;
-		this.colocando = undefined;
+		this.cursor = undefined;
 		this.menu = new PanelMenu(this);
 		this.menu.alElegirInactivo(() => this.mostrarAviso(t("gestion.faltan")));
 		this.cerca = false;
@@ -314,6 +323,22 @@ export class SantuarioMundo extends Phaser.Scene {
 				);
 		}
 
+		for (const m of s.accionesMarcadas)
+			capa.add(
+				this.add
+					.rectangle(
+						m.x * LADO + 1,
+						m.y * LADO + 1,
+						LADO - 2,
+						LADO - 2,
+						0xffd866,
+						0.3,
+					)
+					.setOrigin(0, 0)
+					.setStrokeStyle(1, 0xffd866)
+					.setDepth((m.y + 1) * LADO),
+			);
+
 		this.crearJugadorSiHaceFalta();
 		void this.dibujarResidentes(capa);
 		this.actualizarHud();
@@ -449,8 +474,8 @@ export class SantuarioMundo extends Phaser.Scene {
 			if (k === "escape") this.scene.start("ListaEspecies");
 			return;
 		}
-		if (this.colocando) {
-			this.teclaColocar(k);
+		if (this.cursor) {
+			this.teclaCursor(k);
 			return;
 		}
 		if (this.menu.tecla(tecla)) return;
@@ -549,6 +574,10 @@ export class SantuarioMundo extends Phaser.Scene {
 			{
 				texto: t("gestion.principal.mejorar"),
 				alElegir: () => this.menuMejoras(),
+			},
+			{
+				texto: t("gestion.principal.terreno"),
+				alElegir: () => this.menuTerreno(),
 			},
 			{
 				texto: t("gestion.principal.cerrar"),
@@ -735,19 +764,26 @@ export class SantuarioMundo extends Phaser.Scene {
 		);
 	}
 
-	// -------------------------------------------------------------- colocación
+	// ------------------------------------------------------------------ cursor
 
-	private iniciarColocacion(tipo: string): void {
+	/** Inicia el modo cursor: una vista previa verde o roja que se mueve por la isla. */
+	private iniciarCursor(o: {
+		titulo: string;
+		ancho?: number;
+		alto?: number;
+		probar: (x: number, y: number) => Prueba;
+		confirmar: (x: number, y: number) => void;
+		cancelar: () => void;
+	}): void {
 		this.menu.cerrar();
 		this.aviso.setVisible(false);
 		this.cerca = false;
-		const def = this.balance.edificios.find((d) => d.id === tipo);
 		const marco = this.add
 			.rectangle(
 				0,
 				0,
-				(def?.tamano.w ?? 1) * LADO,
-				(def?.tamano.h ?? 1) * LADO,
+				(o.ancho ?? 1) * LADO,
+				(o.alto ?? 1) * LADO,
 				0x7dff9a,
 				0.4,
 			)
@@ -765,61 +801,230 @@ export class SantuarioMundo extends Phaser.Scene {
 			.setOrigin(0.5, 1)
 			.setScrollFactor(0)
 			.setDepth(PROFUNDIDAD_UI);
-		this.colocando = {
-			tipo,
+		this.cursor = {
 			x: Math.floor(this.jugador.x / LADO),
 			y: Math.floor((this.jugador.y - 4) / LADO),
+			titulo: o.titulo,
+			probar: o.probar,
+			confirmar: o.confirmar,
+			cancelar: o.cancelar,
 			marco,
 			texto,
 		};
 		this.ayuda.setText("");
-		this.actualizarColocacion();
+		this.actualizarCursor();
 	}
 
-	private actualizarColocacion(): void {
-		const c = this.colocando;
+	private actualizarCursor(): void {
+		const c = this.cursor;
 		if (!c) return;
-		const r = puedeColocar(this.p.santuario, c.tipo, c.x, c.y, this.balance);
+		const r = c.probar(c.x, c.y);
 		c.marco.setPosition(c.x * LADO, c.y * LADO);
 		c.marco.setFillStyle(r.ok ? 0x7dff9a : 0xff8b8b, 0.4);
 		c.texto.setText(
-			`${t("gestion.colocar.titulo", { edificio: this.nombreEdificio(c.tipo) })}\n${
-				r.ok ? t("gestion.colocar.ayuda") : r.motivo
-			}`,
+			`${c.titulo}\n${r.ok ? t("gestion.colocar.ayuda") : r.motivo}`,
 		);
 	}
 
-	private teclaColocar(k: string): void {
-		const c = this.colocando;
+	private teclaCursor(k: string): void {
+		const c = this.cursor;
 		if (!c) return;
 		const { ancho, alto } = this.p.santuario.terreno;
 		const mover = (dx: number, dy: number) => {
 			c.x = Math.max(0, Math.min(ancho - 1, c.x + dx));
 			c.y = Math.max(0, Math.min(alto - 1, c.y + dy));
-			this.actualizarColocacion();
+			this.actualizarCursor();
 		};
 		if (k === "arrowleft" || k === "a") mover(-1, 0);
 		else if (k === "arrowright" || k === "d") mover(1, 0);
 		else if (k === "arrowup" || k === "w") mover(0, -1);
 		else if (k === "arrowdown" || k === "s") mover(0, 1);
 		else if (k === "escape") {
-			this.terminarColocacion();
-			this.menuConstruir();
+			const cancelar = c.cancelar;
+			this.terminarCursor();
+			cancelar();
 		} else if (k === "enter" || k === " ") {
-			const tipo = c.tipo;
-			if (
-				this.gestionar({ tipo: "colocarKit", edificio: tipo, x: c.x, y: c.y })
-			) {
-				this.terminarColocacion();
-				this.menuConstruir();
-			}
+			const r = c.probar(c.x, c.y);
+			if (r.ok) c.confirmar(c.x, c.y);
+			else this.mostrarAviso(r.motivo);
 		}
 	}
 
-	private terminarColocacion(): void {
-		this.colocando?.marco.destroy();
-		this.colocando?.texto.destroy();
-		this.colocando = undefined;
+	private terminarCursor(): void {
+		this.cursor?.marco.destroy();
+		this.cursor?.texto.destroy();
+		this.cursor = undefined;
+	}
+
+	private iniciarColocacion(tipo: string): void {
+		const def = this.balance.edificios.find((d) => d.id === tipo);
+		this.iniciarCursor({
+			titulo: t("gestion.colocar.titulo", {
+				edificio: this.nombreEdificio(tipo),
+			}),
+			ancho: def?.tamano.w,
+			alto: def?.tamano.h,
+			probar: (x, y) =>
+				puedeColocar(this.p.santuario, tipo, x, y, this.balance),
+			confirmar: (x, y) => {
+				if (!this.gestionar({ tipo: "colocarKit", edificio: tipo, x, y }))
+					return;
+				this.terminarCursor();
+				this.menuConstruir();
+			},
+			cancelar: () => this.menuConstruir(),
+		});
+	}
+
+	// ----------------------------------------------------------------- terreno
+
+	private nombreAccion = (accion: string) => t(`especialidad.${accion}`);
+
+	private menuTerreno(indice = 0): void {
+		const items: ItemMenu[] = [
+			{
+				texto: t("gestion.terreno.marcar"),
+				alElegir: () => this.menuMarcar(),
+			},
+			{
+				texto: t("gestion.terreno.camino"),
+				alElegir: () => this.iniciarCamino(),
+			},
+			{
+				texto: t("gestion.terreno.decorar"),
+				alElegir: () => this.menuDecorar(),
+			},
+		];
+		this.menu.mostrar(
+			t("gestion.principal.terreno"),
+			items,
+			t("gestion.pie"),
+			() => this.menuPrincipal(3),
+			indice,
+		);
+	}
+
+	/** Residentes libres con Especialidad de terreno y los que ya tienen una marca (para quitarla). */
+	private menuMarcar(indice = 0): void {
+		const s = this.p.santuario;
+		const libres = residentesConTerreno(s);
+		const conMarca = s.residentes.filter(
+			(r) => r.tarea.tipo === "especialidad",
+		);
+		const nombre = (uid: string) => {
+			const r = s.residentes.find((x) => x.uid === uid);
+			return r ? nombreDeEspecie(r.especie) : uid;
+		};
+		const items: ItemMenu[] = [
+			...libres.map((l, i) => ({
+				texto: `${nombre(l.uid)}  (${l.acciones.map(this.nombreAccion).join(", ")})`,
+				alElegir: () => this.menuAccionesDe(l.uid, l.acciones, i),
+			})),
+			...conMarca.map((r) => ({
+				texto: t("gestion.terreno.quitar", { nombre: nombre(r.uid) }),
+				alElegir: () => {
+					if (this.gestionar({ tipo: "desmarcarAccion", uid: r.uid }))
+						this.menuMarcar(indice);
+				},
+			})),
+		];
+		this.menu.mostrar(
+			t("gestion.terreno.marcar"),
+			items.length
+				? items
+				: [{ texto: t("gestion.vacio"), activo: false, alElegir: () => {} }],
+			t("gestion.pie"),
+			() => this.menuTerreno(0),
+			indice,
+		);
+	}
+
+	private menuAccionesDe(
+		uid: string,
+		acciones: string[],
+		volverA: number,
+	): void {
+		const items: ItemMenu[] = acciones.map((accion) => ({
+			texto: this.nombreAccion(accion),
+			alElegir: () => this.iniciarMarca(uid, accion, volverA),
+		}));
+		this.menu.mostrar(
+			t("gestion.terreno.accion"),
+			items,
+			t("gestion.pie"),
+			() => this.menuMarcar(volverA),
+		);
+	}
+
+	private iniciarMarca(uid: string, accion: string, volverA: number): void {
+		const r = this.p.santuario.residentes.find((x) => x.uid === uid);
+		const nivel = r?.especialidades[accion] ?? 1;
+		const lado = nivel >= 3 ? 3 : nivel === 2 ? 2 : 1;
+		this.iniciarCursor({
+			titulo: t("gestion.terreno.marcando", {
+				accion: this.nombreAccion(accion),
+				nombre: r ? nombreDeEspecie(r.especie) : uid,
+			}),
+			ancho: lado,
+			alto: lado,
+			probar: (x, y) =>
+				puedeMarcar(this.p.santuario, uid, accion, x, y, this.balance),
+			confirmar: (x, y) => {
+				if (!this.gestionar({ tipo: "marcarAccion", uid, accion, x, y }))
+					return;
+				this.terminarCursor();
+				this.menuMarcar(volverA);
+			},
+			cancelar: () => this.menuAccionesDe(uid, [accion], volverA),
+		});
+	}
+
+	private iniciarCamino(): void {
+		this.iniciarCursor({
+			titulo: t("gestion.terreno.trazando"),
+			probar: (x, y) => puedeCamino(this.p.santuario, x, y, this.balance),
+			confirmar: (x, y) => {
+				// se puede seguir trazando: el cursor se queda y se prueba de nuevo
+				if (this.gestionar({ tipo: "colocarCamino", x, y }))
+					this.actualizarCursor();
+			},
+			cancelar: () => this.menuTerreno(1),
+		});
+	}
+
+	private menuDecorar(indice = 0): void {
+		const items: ItemMenu[] = decoracionesDisponibles(
+			this.p.santuario,
+			this.balance,
+		).map((d, i) => ({
+			texto: `${t(`decoracion.${d.id}`)}  (${this.textoCoste(d.coste)}, +${d.puntos})${
+				d.asequible ? "" : `  [${t("gestion.faltan")}]`
+			}`,
+			activo: d.asequible,
+			alElegir: () => this.iniciarDecoracion(d.id, i),
+		}));
+		this.menu.mostrar(
+			t("gestion.terreno.decorar"),
+			items,
+			t("gestion.pie"),
+			() => this.menuTerreno(2),
+			indice,
+		);
+	}
+
+	private iniciarDecoracion(id: string, volverA: number): void {
+		this.iniciarCursor({
+			titulo: t("gestion.terreno.colocando", {
+				decoracion: t(`decoracion.${id}`),
+			}),
+			probar: (x, y) => puedeDecorar(this.p.santuario, id, x, y, this.balance),
+			confirmar: (x, y) => {
+				if (!this.gestionar({ tipo: "colocarDecoracion", id, x, y })) return;
+				this.terminarCursor();
+				this.menuDecorar(volverA);
+			},
+			cancelar: () => this.menuDecorar(volverA),
+		});
 	}
 
 	private abrirPanel(lineas: LineaResumen[]): void {
@@ -891,8 +1096,7 @@ export class SantuarioMundo extends Phaser.Scene {
 	// ------------------------------------------------------------- movimiento
 
 	update(_: number, dt: number): void {
-		if (!this.listo || this.panel || this.menu.abierto || this.colocando)
-			return;
+		if (!this.listo || this.panel || this.menu.abierto || this.cursor) return;
 		const seg = dt / 1000;
 		const ti = this.teclas;
 		const dx =
@@ -1090,7 +1294,8 @@ export class SantuarioMundo extends Phaser.Scene {
 					obraRestante: e.obraRestante,
 				})),
 				menu: this.menu.abierto,
-				colocando: this.colocando !== undefined,
+				colocando: this.cursor !== undefined,
+				marcas: this.p.santuario.accionesMarcadas.length,
 				panel: this.panel !== undefined,
 				lineasPanel: this.lineasPanel.map((l) => l.clave),
 				guardadoOk: this.sesion.guardadoOk(),
@@ -1119,6 +1324,14 @@ export class SantuarioMundo extends Phaser.Scene {
 				if (!a) return null;
 				const r = rectanguloDeEdificio(a, b());
 				return { x: (r.x + r.ancho / 2) * LADO, y: (r.y + r.alto) * LADO + 8 };
+			},
+			/** Tipo y objeto de una loseta de la isla. */
+			loseta: (x: number, y: number) => {
+				const l =
+					this.p.santuario.terreno.losetas[
+						y * this.p.santuario.terreno.ancho + x
+					];
+				return l ? { tipo: l.tipo, objeto: l.objeto ?? null } : null;
 			},
 			/** Espera a que todo lo despachado esté guardado. */
 			guardada: () => this.sesion.guardada(),

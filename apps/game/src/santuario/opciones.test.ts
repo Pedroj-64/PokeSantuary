@@ -7,10 +7,15 @@ import {
 import { describe, expect, it } from "vitest";
 import balanceCrudo from "../../../../packs/kanto/santuario.json";
 import {
+	decoracionesDisponibles,
 	kitsDisponibles,
 	lechosPosibles,
 	mejorasPosibles,
+	puedeCamino,
 	puedeColocar,
+	puedeDecorar,
+	puedeMarcar,
+	residentesConTerreno,
 	tareasPosibles,
 } from "./opciones.js";
 
@@ -213,5 +218,90 @@ describe("mejorasPosibles", () => {
 		expect(l.map((m) => m.tipo)).not.toContain("arbol-cenit");
 		const max = conEdificio(base(), "huerto-bayas", "ed5", 0, 3);
 		expect(mejorasPosibles(max, balance)).toEqual([]);
+	});
+});
+
+/** Cambia el tipo de una loseta (para armar casos). */
+const loseta = (
+	e: EstadoSantuario,
+	x: number,
+	y: number,
+	cambios: Record<string, unknown>,
+): EstadoSantuario => ({
+	...e,
+	terreno: {
+		...e.terreno,
+		losetas: e.terreno.losetas.map((l, i) =>
+			i === y * e.terreno.ancho + x ? { ...l, ...cambios } : l,
+		),
+	},
+});
+
+describe("terreno: quién puede marcar y dónde", () => {
+	const conEspecialidad = (
+		especialidades: Record<string, number>,
+		o: Partial<Residente> = {},
+	): EstadoSantuario => ({
+		...base(),
+		residentes: [residente("r1", { especialidades, ...o })],
+	});
+
+	it("solo cuentan los residentes libres con alguna Especialidad de terreno", () => {
+		const e: EstadoSantuario = {
+			...base(),
+			residentes: [
+				residente("r1", { especialidades: { regar: 1, crecer: 1 } }),
+				residente("r2", { especialidades: { generar: 1 } }), // no es de terreno
+				residente("r3", { especialidades: { cortar: 1 }, estado: "agotado" }),
+				residente("r4", {
+					especialidades: { romper: 1 },
+					tarea: { tipo: "trabajo", edificio: "ed2" },
+				}),
+				residente("r5"),
+			],
+		};
+		expect(residentesConTerreno(e)).toEqual([
+			{ uid: "r1", acciones: ["crecer", "regar"] },
+		]);
+	});
+
+	it("puedeMarcar acepta una acción aplicable y rechaza una que no con su motivo", () => {
+		const e = loseta(conEspecialidad({ crecer: 1, cortar: 1 }), 5, 5, {
+			tipo: "yerma",
+		});
+		expect(puedeMarcar(e, "r1", "crecer", 5, 5, balance)).toEqual({ ok: true });
+		const mal = puedeMarcar(e, "r1", "cortar", 5, 5, balance);
+		expect(mal.ok).toBe(false);
+		expect("motivo" in mal && mal.motivo.length > 0).toBe(true);
+		expect(puedeMarcar(e, "r1", "regar", 5, 5, balance).ok).toBe(false); // sin esa Especialidad
+		expect(puedeMarcar(e, "r1", "crecer", -1, 5, balance).ok).toBe(false);
+	});
+
+	it("puedeCamino exige tierra o pradera y piedra", () => {
+		const e = loseta(base(), 5, 5, { tipo: "tierra" });
+		expect(puedeCamino(e, 5, 5, balance)).toEqual({ ok: true });
+		expect(
+			puedeCamino({ ...e, recursos: { piedra: 0 } }, 5, 5, balance).ok,
+		).toBe(false);
+		expect(
+			puedeCamino(loseta(base(), 5, 5, { tipo: "agua" }), 5, 5, balance).ok,
+		).toBe(false);
+	});
+
+	it("puedeDecorar y decoracionesDisponibles", () => {
+		const e = loseta(base(), 5, 5, { tipo: "tierra" });
+		expect(puedeDecorar(e, "banco", 5, 5, balance)).toEqual({ ok: true });
+		expect(puedeDecorar(e, "no-existe", 5, 5, balance).ok).toBe(false);
+		const lista = decoracionesDisponibles(
+			{ ...e, recursos: { madera: 1 } },
+			balance,
+		);
+		expect(lista.find((d) => d.id === "valla-de-madera")?.asequible).toBe(true);
+		expect(lista.find((d) => d.id === "banco")?.asequible).toBe(false);
+	});
+
+	it("probar no modifica el estado", () => {
+		const e = Object.freeze(loseta(base(), 5, 5, { tipo: "tierra" }));
+		expect(() => puedeCamino(e, 5, 5, balance)).not.toThrow();
 	});
 });

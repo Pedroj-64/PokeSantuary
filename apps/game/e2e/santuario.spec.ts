@@ -24,6 +24,7 @@ type EstadoSantuario = {
 	}[];
 	menu: boolean;
 	colocando: boolean;
+	marcas: number;
 	panel: boolean;
 	lineasPanel: string[];
 	guardadoOk: boolean;
@@ -353,4 +354,84 @@ test("la expedición en curso se guarda: al recargar, E junto al Árbol la retom
 	await expect
 		.poll(() => page.evaluate("window.__santuario.mapa?.estado().dinero"))
 		.toBe(77);
+});
+
+test("terreno: un residente con Especialidad marca una acción y al pasar el día cambia la loseta", async ({
+	page,
+}) => {
+	await entrar(page, "m-terreno");
+	await pulsar(page, "Enter"); // comenzar el día
+	await expect.poll(async () => (await actual(page)).momento).toBe("dia");
+	const arbol = (await page.evaluate(
+		"window.__santuario.santuario.arbol()",
+	)) as {
+		x: number;
+		y: number;
+	};
+	await page.evaluate(
+		`window.__santuario.santuario.colocar(${arbol.x}, ${arbol.y})`,
+	);
+	const tx = Math.floor(arbol.x / 16);
+	const ty = Math.floor((arbol.y - 4) / 16);
+	const loseta = () =>
+		page.evaluate(
+			`window.__santuario.santuario.loseta(${tx}, ${ty})`,
+		) as Promise<{
+			tipo: string;
+		}>;
+	expect((await loseta()).tipo).toBe("tierra"); // el claro que rodea al Árbol
+
+	// G → Terreno → Marcar → Bulbasaur → Hacer crecer → Enter sobre la loseta del protagonista
+	await pulsar(page, "g", "ArrowDown", "ArrowDown", "ArrowDown", "Enter");
+	await pulsar(page, "Enter", "Enter", "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(true);
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).marcas).toBe(1);
+	expect((await actual(page)).residentes[0]?.tarea.tipo).toBe("especialidad");
+	await pulsar(page, "Escape", "Escape", "Escape");
+	await expect.poll(async () => (await actual(page)).menu).toBe(false);
+
+	// el cambio ocurre al Atardecer: la tierra pasa a pradera y el residente queda libre
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).panel).toBe(true);
+	expect((await loseta()).tipo).toBe("pradera");
+	const s = await actual(page);
+	expect(s.marcas).toBe(0);
+	expect(s.residentes[0]?.tarea.tipo).toBe("nada");
+});
+
+test("terreno: se traza un camino con piedra y se puede quitar una marca antes de que se cumpla", async ({
+	page,
+}) => {
+	await entrar(page, "m-camino");
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).momento).toBe("dia");
+	const arbol = (await page.evaluate(
+		"window.__santuario.santuario.arbol()",
+	)) as {
+		x: number;
+		y: number;
+	};
+	await page.evaluate(
+		`window.__santuario.santuario.colocar(${arbol.x}, ${arbol.y})`,
+	);
+	// G → Terreno → Camino (cuesta 1 de piedra); Esc cancela y no se gasta más
+	await pulsar(page, "g", "ArrowDown", "ArrowDown", "ArrowDown", "Enter");
+	await pulsar(page, "ArrowDown", "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(true);
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).recursos.piedra).toBe(5);
+	await pulsar(page, "Escape");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(false);
+	// seguimos en el menú de Terreno: Marcar → Bulbasaur → Hacer crecer → confirmar
+	await expect.poll(async () => (await actual(page)).menu).toBe(true);
+	await pulsar(page, "ArrowUp", "Enter", "Enter", "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(true);
+	// la loseta del protagonista ya es camino y no admite crecer: se mueve el cursor a la de al lado
+	await pulsar(page, "ArrowRight", "Enter");
+	await expect.poll(async () => (await actual(page)).marcas).toBe(1);
+	// de vuelta en la lista: Charmander, Squirtle y, al final, "Quitar la marca de Bulbasaur"
+	await pulsar(page, "ArrowDown", "ArrowDown", "Enter");
+	await expect.poll(async () => (await actual(page)).marcas).toBe(0);
+	expect((await actual(page)).residentes[0]?.tarea.tipo).toBe("nada");
 });

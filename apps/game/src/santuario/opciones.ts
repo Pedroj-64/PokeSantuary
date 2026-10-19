@@ -1,8 +1,11 @@
 import {
 	asignarLecho,
 	asignarTarea,
+	colocarCamino,
+	colocarDecoracion,
 	colocarKit,
 	type EstadoSantuario,
+	marcarAccion,
 	mejorarEdificio,
 	type SantuarioBalance,
 	type Tarea,
@@ -160,4 +163,90 @@ export function mejorasPosibles(
 		});
 	}
 	return lista;
+}
+
+/** Especialidades que cambian el terreno (las demás actúan en otros sitios). */
+export const ACCIONES_DE_TERRENO = [
+	"crecer",
+	"regar",
+	"romper",
+	"cortar",
+	"encender",
+] as const;
+
+/** Resultado de probar una orden de terreno: legal, o el motivo que da el núcleo. */
+export type Prueba = { ok: true } | { ok: false; motivo: string };
+const prueba = (orden: () => unknown): Prueba => {
+	const motivo = rechazo(orden);
+	return motivo === undefined ? { ok: true } : { ok: false, motivo };
+};
+
+/** Residentes que pueden marcar una acción de terreno ahora, con las que saben hacer. */
+export function residentesConTerreno(
+	e: EstadoSantuario,
+): { uid: string; acciones: string[] }[] {
+	return e.residentes.flatMap((r) => {
+		if (
+			(r.estado !== "descansado" && r.estado !== "visitante") ||
+			r.tarea.tipo !== "nada"
+		)
+			return [];
+		const acciones = ACCIONES_DE_TERRENO.filter(
+			(a) => (r.especialidades[a] ?? 0) >= 1,
+		);
+		return acciones.length > 0 ? [{ uid: r.uid, acciones: [...acciones] }] : [];
+	});
+}
+
+/** ¿Puede este residente hacer esta acción en esta loseta? */
+export function puedeMarcar(
+	e: EstadoSantuario,
+	uid: string,
+	accion: string,
+	x: number,
+	y: number,
+	b: SantuarioBalance,
+): Prueba {
+	return prueba(() => marcarAccion(e, uid, accion, x, y, b));
+}
+
+/** ¿Se puede trazar un camino en esta loseta (cuesta piedra)? */
+export function puedeCamino(
+	e: EstadoSantuario,
+	x: number,
+	y: number,
+	b: SantuarioBalance,
+): Prueba {
+	return prueba(() => colocarCamino(e, x, y, b));
+}
+
+/** ¿Se puede colocar esta decoración aquí? */
+export function puedeDecorar(
+	e: EstadoSantuario,
+	id: string,
+	x: number,
+	y: number,
+	b: SantuarioBalance,
+): Prueba {
+	return prueba(() => colocarDecoracion(e, id, x, y, b));
+}
+
+export interface OpcionDecoracion {
+	id: string;
+	puntos: number;
+	coste: Record<string, number>;
+	asequible: boolean;
+}
+
+/** Decoraciones del balance con su coste y si hay materiales para pagarlas. */
+export function decoracionesDisponibles(
+	e: EstadoSantuario,
+	b: SantuarioBalance,
+): OpcionDecoracion[] {
+	return b.decoraciones.map((d) => ({
+		id: d.id,
+		puntos: d.puntos,
+		coste: { ...d.coste },
+		asequible: alcanza(e.recursos, d.coste),
+	}));
 }
