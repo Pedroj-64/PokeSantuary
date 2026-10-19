@@ -78,6 +78,8 @@ export interface Residente {
 	diasInquieto: number;
 	/** Jornadas que le quedan como visitante. */
 	visitanteRestante?: number;
+	/** Id del hábitat que lo trajo, solo para los visitantes. */
+	habitat?: string;
 	/** Lo rellena la producción del Atardecer. */
 	trabajoHoy: "preferido" | "no-preferido" | "ninguno";
 	habloHoy: boolean;
@@ -151,6 +153,8 @@ export interface EstadoSantuario {
 	terreno: Terreno;
 	/** 0 a 100; la calculó el último Atardecer. */
 	armonia: number;
+	/** Especies vistas (Pokédex mínima); la Alba prefiere las que no están. */
+	vistas: string[];
 	/** Tema elegido en la Charla del Alba de esta jornada. */
 	temaCharla?: TemaCharla;
 	accionesMarcadas: AccionMarcada[];
@@ -310,6 +314,7 @@ export function crearSantuario(
 		],
 		terreno: terrenoInicial(semilla, balance),
 		armonia: 50,
+		vistas: [],
 		accionesMarcadas: [],
 		habitatsCompletos: [],
 		habitatsDescubiertos: [],

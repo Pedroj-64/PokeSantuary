@@ -92,6 +92,13 @@ export {
 	mejorarEdificio,
 } from "./santuario/gestion.js";
 export {
+	type ContextoJornada,
+	detectarHabitats,
+	type HabitatData,
+	type MotivoVisita,
+	type RecetaHabitat,
+} from "./santuario/habitats.js";
+export {
 	amanecer,
 	calcularArmonia,
 	confortDeZona,

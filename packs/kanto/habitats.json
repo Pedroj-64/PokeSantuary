@@ -1,0 +1,175 @@
+[
+	{
+		"id": "pradera-alta",
+		"nombre": "habitat.pradera-alta.nombre",
+		"pista": "habitat.pradera-alta.pista",
+		"receta": {
+			"loseta": { "hierba-alta": 4 },
+			"objetos": { "flor": 1 }
+		},
+		"momento": "dia",
+		"especies": ["oddish", "pidgey"]
+	},
+	{
+		"id": "orilla",
+		"nombre": "habitat.orilla.nombre",
+		"pista": "habitat.orilla.pista",
+		"receta": {
+			"loseta": { "agua": 2, "arena": 2, "roca": 1 }
+		},
+		"momento": "dia",
+		"especies": ["psyduck", "squirtle"]
+	},
+	{
+		"id": "rincon-oscuro",
+		"nombre": "habitat.rincon-oscuro.nombre",
+		"pista": "habitat.rincon-oscuro.pista",
+		"receta": {
+			"loseta": { "roca": 2 },
+			"objetos": { "farol-apagado": 1 }
+		},
+		"momento": "noche",
+		"especies": ["gastly", "zubat"]
+	},
+	{
+		"id": "bosquecillo",
+		"nombre": "habitat.bosquecillo.nombre",
+		"pista": "habitat.bosquecillo.pista",
+		"receta": {
+			"objetos": { "arbol": 2, "tocon": 1 }
+		},
+		"momento": "dia",
+		"especies": ["caterpie", "pikachu"]
+	},
+	{
+		"id": "cantera-viva",
+		"nombre": "habitat.cantera-viva.nombre",
+		"pista": "habitat.cantera-viva.pista",
+		"receta": {
+			"loseta": { "roca": 3, "tierra": 1 }
+		},
+		"momento": "dia",
+		"especies": ["geodude", "onix"]
+	},
+	{
+		"id": "pista-de-entrenamiento",
+		"nombre": "habitat.pista-de-entrenamiento.nombre",
+		"pista": "habitat.pista-de-entrenamiento.pista",
+		"receta": {
+			"loseta": { "tierra": 4, "camino": 1 },
+			"objetos": { "tocon": 1 }
+		},
+		"momento": "dia",
+		"especies": ["machop"]
+	},
+	{
+		"id": "claro-lunar",
+		"nombre": "habitat.claro-lunar.nombre",
+		"pista": "habitat.claro-lunar.pista",
+		"receta": {
+			"loseta": { "pradera": 3 },
+			"objetos": { "decoracion:piedra-luna": 1 }
+		},
+		"momento": "noche",
+		"especies": ["clefairy"]
+	},
+	{
+		"id": "refugio-de-piedra",
+		"nombre": "habitat.refugio-de-piedra.nombre",
+		"pista": "habitat.refugio-de-piedra.pista",
+		"receta": {
+			"loseta": { "roca": 2, "hierba-alta": 2 }
+		},
+		"momento": "noche",
+		"especies": ["cubone"]
+	},
+	{
+		"id": "laboratorio-en-ruinas",
+		"nombre": "habitat.laboratorio-en-ruinas.nombre",
+		"pista": "habitat.laboratorio-en-ruinas.pista",
+		"receta": {
+			"loseta": { "camino": 2 },
+			"objetos": { "decoracion:maquina-rota": 1 }
+		},
+		"momento": "dia",
+		"especies": ["magnemite"]
+	},
+	{
+		"id": "matorral-seco",
+		"nombre": "habitat.matorral-seco.nombre",
+		"pista": "habitat.matorral-seco.pista",
+		"receta": {
+			"loseta": { "yerma": 3, "roca": 1 }
+		},
+		"momento": "dia",
+		"especies": ["ekans", "koffing"]
+	},
+	{
+		"id": "jardin-de-flores",
+		"nombre": "habitat.jardin-de-flores.nombre",
+		"pista": "habitat.jardin-de-flores.pista",
+		"receta": {
+			"loseta": { "pradera": 3, "agua": 1 },
+			"objetos": { "flor": 3 }
+		},
+		"momento": "dia",
+		"especies": ["bulbasaur"]
+	},
+	{
+		"id": "hoguera",
+		"nombre": "habitat.hoguera.nombre",
+		"pista": "habitat.hoguera.pista",
+		"receta": {
+			"loseta": { "tierra": 2 },
+			"objetos": { "fogata-encendida": 1 }
+		},
+		"momento": "noche",
+		"especies": ["charmander"]
+	},
+	{
+		"id": "rincon-acogedor",
+		"nombre": "habitat.rincon-acogedor.nombre",
+		"pista": "habitat.rincon-acogedor.pista",
+		"receta": {
+			"loseta": { "pradera": 2 },
+			"objetos": { "flor": 1 },
+			"edificios": ["lecho-paja"]
+		},
+		"momento": "dia",
+		"especies": ["eevee"]
+	},
+	{
+		"id": "rincon-psiquico",
+		"nombre": "habitat.rincon-psiquico.nombre",
+		"pista": "habitat.rincon-psiquico.pista",
+		"receta": {
+			"loseta": { "camino": 2 },
+			"objetos": { "decoracion:banco": 1, "farol-encendido": 1 }
+		},
+		"momento": "noche",
+		"especies": ["abra"]
+	},
+	{
+		"id": "estanque-profundo",
+		"nombre": "habitat.estanque-profundo.nombre",
+		"pista": "habitat.estanque-profundo.pista",
+		"receta": {
+			"loseta": { "agua": 4 }
+		},
+		"momento": "noche",
+		"especies": ["dratini"],
+		"raro": 0.25
+	},
+	{
+		"id": "playa-fria",
+		"nombre": "habitat.playa-fria.nombre",
+		"pista": "habitat.playa-fria.pista",
+		"receta": {
+			"loseta": { "arena": 3, "agua": 1 },
+			"objetos": { "decoracion:concha-grande": 1 }
+		},
+		"momento": "dia",
+		"especies": ["lapras"],
+		"raro": 0.25
+	}
+]

@@ -5,6 +5,12 @@ import type {
 	Sabor,
 	SantuarioBalance,
 } from "./estado.js";
+import {
+	type ContextoJornada,
+	pasoHabitats,
+	pasoVisitantesAlba,
+	pasoVisitantesAtardecer,
+} from "./habitats.js";
 import { pasoObra, pasoProduccion } from "./produccion.js";
 import { pasoTerreno } from "./terreno.js";
 
@@ -28,6 +34,8 @@ export type Paso = (
 	e: EstadoSantuario,
 	b: SantuarioBalance,
 	rng: Rng,
+	/** Datos y fábrica que solo necesitan los pasos de hábitats. */
+	ctx?: ContextoJornada,
 ) => Resultado;
 
 // Orden canónico de sabores para elegir baya de forma determinista.
@@ -206,22 +214,26 @@ const pasoCierre: Paso = (e) => ({
 });
 
 /**
- * Pasos del Atardecer, EN ORDEN. Las Tareas 3, 4 y 5 insertan los suyos antes
- * de "comida".
+ * Pasos del Atardecer, EN ORDEN. Los hábitats se recalculan tras el terreno y
+ * los visitantes se evalúan tras la comida (con el Hambre ya comida).
  */
 export const PASOS_ATARDECER: { id: string; paso: Paso }[] = [
 	{ id: "obra", paso: pasoObra },
 	{ id: "produccion", paso: pasoProduccion },
 	{ id: "terreno", paso: pasoTerreno },
+	{ id: "habitats", paso: pasoHabitats },
 	{ id: "comida", paso: pasoComida },
+	{ id: "visitantes-atardecer", paso: pasoVisitantesAtardecer },
 	{ id: "animo", paso: pasoAnimo },
 	{ id: "confort-armonia", paso: pasoConfortArmonia },
 	{ id: "inquietud", paso: pasoInquietud },
 	{ id: "cierre", paso: pasoCierre },
 ];
 
-/** Pasos del Alba; la Tarea 5 añade la llegada de visitantes. */
-export const PASOS_ALBA: { id: string; paso: Paso }[] = [];
+/** Pasos del Alba: la llegada de visitantes a los hábitats pendientes. */
+export const PASOS_ALBA: { id: string; paso: Paso }[] = [
+	{ id: "visitantes", paso: pasoVisitantesAlba },
+];
 
 /** Zona de la isla que contiene la loseta (x, y). */
 export function zonaDe(x: number, y: number, b: SantuarioBalance): number {
@@ -316,10 +328,12 @@ export function inquietos(e: EstadoSantuario, b: SantuarioBalance): string[] {
  * Resuelve el Atardecer entero con `crearRng(semilla:jornada:n)`.
  *
  * @throws {Error} Si el estado no está en el momento "atardecer".
+ * @param ctx? Datos y fábrica para los pasos de hábitats; sin él no detectan.
  */
 export function resolverAtardecer(
 	e: EstadoSantuario,
 	b: SantuarioBalance,
+	ctx?: ContextoJornada,
 ): Resultado {
 	if (e.momento !== "atardecer") {
 		throw new Error(
@@ -330,7 +344,7 @@ export function resolverAtardecer(
 	let estado = e;
 	const eventos: EventoSantuario[] = [];
 	for (const { paso } of PASOS_ATARDECER) {
-		const resultado = paso(estado, b, rng);
+		const resultado = paso(estado, b, rng, ctx);
 		estado = resultado.estado;
 		eventos.push(...resultado.eventos);
 	}
@@ -342,8 +356,13 @@ export function resolverAtardecer(
  * los pasos del Alba con `crearRng(semilla:alba:<jornada nueva>)`.
  *
  * @throws {Error} Si el estado no está en el momento "noche".
+ * @param ctx? Datos y fábrica para la llegada de visitantes; sin él no llegan.
  */
-export function amanecer(e: EstadoSantuario, b: SantuarioBalance): Resultado {
+export function amanecer(
+	e: EstadoSantuario,
+	b: SantuarioBalance,
+	ctx?: ContextoJornada,
+): Resultado {
 	if (e.momento !== "noche") {
 		throw new Error(
 			`amanecer(): el momento debe ser "noche" (recibido "${e.momento}")`,
@@ -365,7 +384,7 @@ export function amanecer(e: EstadoSantuario, b: SantuarioBalance): Resultado {
 	};
 	const eventos: EventoSantuario[] = [];
 	for (const { paso } of PASOS_ALBA) {
-		const resultado = paso(estado, b, rng);
+		const resultado = paso(estado, b, rng, ctx);
 		estado = resultado.estado;
 		eventos.push(...resultado.eventos);
 	}

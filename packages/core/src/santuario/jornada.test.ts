@@ -132,12 +132,14 @@ function ejecutar(id: string, e: EstadoSantuario) {
 }
 
 describe("PASOS", () => {
-	it("el Atardecer resuelve obra, producción, terreno, comida, ánimo, confort-armonía, inquietud y cierre, en ese orden", () => {
+	it("el Atardecer resuelve obra, producción, terreno, hábitats, comida, visitantes, ánimo, confort-armonía, inquietud y cierre, en ese orden", () => {
 		expect(PASOS_ATARDECER.map((p) => p.id)).toEqual([
 			"obra",
 			"produccion",
 			"terreno",
+			"habitats",
 			"comida",
+			"visitantes-atardecer",
 			"animo",
 			"confort-armonia",
 			"inquietud",
@@ -145,8 +147,8 @@ describe("PASOS", () => {
 		]);
 	});
 
-	it("el Alba todavía no tiene pasos propios", () => {
-		expect(PASOS_ALBA).toEqual([]);
+	it("el Alba trae a los visitantes de los hábitats pendientes", () => {
+		expect(PASOS_ALBA.map((p) => p.id)).toEqual(["visitantes"]);
 	});
 });
 

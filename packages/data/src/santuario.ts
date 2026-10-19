@@ -331,3 +331,87 @@ export const SantuarioBalanceSchema = z
 		}
 	});
 export type SantuarioBalance = z.infer<typeof SantuarioBalanceSchema>;
+
+// Tipos de loseta que puede pedir una receta de hábitat (GDD §11.7); son los
+// mismos del estado del Santuario.
+const tipoLoseta = z.enum([
+	"yerma",
+	"tierra",
+	"pradera",
+	"hierba-alta",
+	"agua",
+	"arena",
+	"roca",
+	"camino",
+]);
+
+// Objeto de loseta de una receta: los del estado más las decoraciones.
+const objetoLoseta = z
+	.string()
+	.regex(
+		/^(flor|arbol|tocon|farol-apagado|farol-encendido|fogata-encendida|decoracion:[a-z0-9]+(-[a-z0-9]+)*)$/,
+	);
+
+// Receta de una ventana de 3 x 3 losetas.
+export const RecetaHabitatSchema = z
+	.object({
+		loseta: z.partialRecord(tipoLoseta, enteroPositivo).optional(),
+		objetos: z.record(objetoLoseta, enteroPositivo).optional(),
+		edificios: z.array(slug).min(1).optional(),
+	})
+	.strict();
+
+/**
+ * Un hábitat del pack (GDD §11.7). Las decoraciones que pide una receta pueden
+ * no existir todavía en el balance: el juego las ignora hasta que lleguen.
+ */
+export const HabitatSchema = z
+	.object({
+		id: slug,
+		// Claves i18n del nombre y de la pista del Libro de Hábitats.
+		nombre: z.string().min(1),
+		pista: z.string().min(1),
+		receta: RecetaHabitatSchema,
+		momento: z.enum(["dia", "noche"]),
+		especies: z.array(slug).min(1),
+		// Probabilidad por Alba de que llegue su visitante; 1 si falta.
+		raro: z.number().min(0).max(1).optional(),
+	})
+	.strict();
+export type Habitat = z.infer<typeof HabitatSchema>;
+
+/**
+ * Catálogo de hábitats del pack, en el orden en que se comprueban las recetas.
+ * Una receta no puede pedir más de 9 losetas (no cabría en la ventana).
+ */
+export const HabitatsSchema = z
+	.array(HabitatSchema)
+	.min(1)
+	.refine((a) => new Set(a.map((h) => h.id)).size === a.length, "ids repetidos")
+	.superRefine((a, ctx) => {
+		a.forEach((h, i) => {
+			const losetas = Object.values(h.receta.loseta ?? {}).reduce(
+				(suma, n) => suma + n,
+				0,
+			);
+			const objetos = Object.values(h.receta.objetos ?? {}).reduce(
+				(suma, n) => suma + n,
+				0,
+			);
+			if (losetas + objetos > 9) {
+				ctx.addIssue({
+					code: "custom",
+					path: [i, "receta"],
+					message: `${h.id} pide más de 9 losetas y no cabe en 3 x 3`,
+				});
+			}
+			if (losetas + objetos === 0 && (h.receta.edificios ?? []).length === 0) {
+				ctx.addIssue({
+					code: "custom",
+					path: [i, "receta"],
+					message: `${h.id} no pide nada`,
+				});
+			}
+		});
+	});
+export type Habitats = z.infer<typeof HabitatsSchema>;

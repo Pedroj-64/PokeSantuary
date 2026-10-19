@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	ESPECIALIDADES,
 	EspecialidadesSchema,
+	HabitatsSchema,
 	SantuarioBalanceSchema,
 } from "./santuario.js";
 import { NATURALEZAS } from "./set.js";
@@ -37,6 +38,49 @@ const ESPECIES: string[] = (
 		),
 	) as { id: string }[]
 ).map((e) => e.id);
+
+/** Catálogo de hábitats del pack, tal cual está en el repositorio. */
+const HABITATS: unknown = JSON.parse(
+	readFileSync(
+		new URL("../../../packs/kanto/habitats.json", import.meta.url),
+		"utf8",
+	),
+);
+
+/** Forma suelta de un hábitat crudo para romper una regla a la vez. */
+interface HabitatCrudo {
+	id: string;
+	nombre: string;
+	pista: string;
+	receta: {
+		loseta?: Record<string, number>;
+		objetos?: Record<string, number>;
+		edificios?: string[];
+		[k: string]: unknown;
+	};
+	momento: string;
+	especies: string[];
+	raro?: number;
+	[k: string]: unknown;
+}
+
+/** Copia independiente del catálogo de hábitats. */
+const habitatsBase = (): HabitatCrudo[] =>
+	structuredClone(HABITATS) as HabitatCrudo[];
+
+/** Valida una copia del catálogo con una mutación aplicada. */
+const habitatsRoto = (romper: (crudo: HabitatCrudo[]) => void): boolean => {
+	const crudo = habitatsBase();
+	romper(crudo);
+	return HabitatsSchema.safeParse(crudo).success;
+};
+
+/** Hábitat del catálogo crudo; falla la prueba si no existe. */
+const habitat = (crudo: HabitatCrudo[], id: string): HabitatCrudo => {
+	const encontrado = crudo.find((h) => h.id === id);
+	if (!encontrado) throw new Error(`el pack no trae el hábitat ${id}`);
+	return encontrado;
+};
 
 /** Forma suelta del JSON para romper una regla a la vez. */
 interface EdificioCrudo {
@@ -537,4 +581,143 @@ describe("EspecialidadesSchema", () => {
 	it.todo(
 		"cada Especialidad la tienen al menos 3 especies de 2 líneas evolutivas (al llegar a las 63 especies)",
 	);
+});
+
+describe("HabitatsSchema", () => {
+	it("acepta el catálogo real del pack", () => {
+		const resultado = HabitatsSchema.safeParse(HABITATS);
+		expect(resultado.success ? [] : resultado.error.issues).toEqual([]);
+	});
+
+	it("el pack trae los 16 hábitats del GDD §11.7 en orden", () => {
+		const datos = HabitatsSchema.parse(HABITATS);
+		expect(datos.map((h) => h.id)).toEqual([
+			"pradera-alta",
+			"orilla",
+			"rincon-oscuro",
+			"bosquecillo",
+			"cantera-viva",
+			"pista-de-entrenamiento",
+			"claro-lunar",
+			"refugio-de-piedra",
+			"laboratorio-en-ruinas",
+			"matorral-seco",
+			"jardin-de-flores",
+			"hoguera",
+			"rincon-acogedor",
+			"rincon-psiquico",
+			"estanque-profundo",
+			"playa-fria",
+		]);
+	});
+
+	it("solo Estanque profundo y Playa fría son raros (0,25 por Alba)", () => {
+		const datos = HabitatsSchema.parse(HABITATS);
+		for (const h of datos) {
+			if (h.id === "estanque-profundo" || h.id === "playa-fria") {
+				expect(h.raro).toBe(0.25);
+			} else {
+				expect(h.raro).toBeUndefined();
+			}
+		}
+	});
+
+	it("cada receta cabe en una ventana de 3 x 3 y pide algo", () => {
+		const datos = HabitatsSchema.parse(HABITATS);
+		for (const h of datos) {
+			const losetas = Object.values(h.receta.loseta ?? {}).reduce(
+				(a, n) => a + n,
+				0,
+			);
+			const objetos = Object.values(h.receta.objetos ?? {}).reduce(
+				(a, n) => a + n,
+				0,
+			);
+			const edificios = (h.receta.edificios ?? []).length;
+			expect(losetas + objetos).toBeLessThanOrEqual(9);
+			expect(losetas + objetos + edificios).toBeGreaterThan(0);
+		}
+	});
+
+	it("mapea el Lecho de paja como edificio y las claves de objeto del estado", () => {
+		const datos = HabitatsSchema.parse(HABITATS);
+		const acogedor = datos.find((h) => h.id === "rincon-acogedor");
+		expect(acogedor?.receta.edificios).toEqual(["lecho-paja"]);
+		const oscuro = datos.find((h) => h.id === "rincon-oscuro");
+		expect(oscuro?.receta.objetos).toEqual({ "farol-apagado": 1 });
+	});
+
+	it("no exige que las especies existan en el pack (Oddish y Pidgey)", () => {
+		const datos = HabitatsSchema.parse(HABITATS);
+		const pradera = datos.find((h) => h.id === "pradera-alta");
+		expect(pradera?.especies).toEqual(["oddish", "pidgey"]);
+		for (const h of datos) {
+			expect(h.especies.length).toBeGreaterThanOrEqual(1);
+		}
+	});
+
+	it("rechaza un id repetido", () => {
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").id = "pradera-alta";
+			}),
+		).toBe(false);
+	});
+
+	it("rechaza una clave desconocida en cualquier nivel", () => {
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").extra = 1;
+			}),
+		).toBe(false);
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta.extra = 1;
+			}),
+		).toBe(false);
+	});
+
+	it("rechaza un tipo de loseta, un objeto o un momento que no existen", () => {
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta.loseta = { lava: 1 };
+			}),
+		).toBe(false);
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta.objetos = { "flor-marchita": 1 };
+			}),
+		).toBe(false);
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").momento = "tarde";
+			}),
+		).toBe(false);
+	});
+
+	it("rechaza una cantidad cero, un raro fuera de 0..1 o una receta vacía", () => {
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta.loseta = { arena: 0 };
+			}),
+		).toBe(false);
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").raro = 2;
+			}),
+		).toBe(false);
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta = {};
+			}),
+		).toBe(false);
+	});
+
+	it("rechaza una receta que no cabría en 3 x 3", () => {
+		expect(
+			habitatsRoto((crudo) => {
+				habitat(crudo, "orilla").receta = { loseta: { agua: 10 } };
+			}),
+		).toBe(false);
+	});
 });
