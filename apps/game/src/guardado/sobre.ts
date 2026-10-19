@@ -27,12 +27,17 @@ export interface Opciones<T> {
 	validar: (partida: unknown) => T;
 }
 
-/** JSON con las claves ordenadas: la suma no depende del orden de inserción. */
+/**
+ * JSON con las claves ordenadas: la suma no depende del orden de inserción.
+ * Como `JSON.stringify`, omite las propiedades `undefined` (si no, la suma del
+ * texto guardado, que no las trae, no coincidiría con la de la partida original).
+ */
 export function canonico(valor: unknown): string {
 	if (Array.isArray(valor)) return `[${valor.map(canonico).join(",")}]`;
 	if (valor !== null && typeof valor === "object") {
 		const o = valor as Record<string, unknown>;
 		return `{${Object.keys(o)
+			.filter((k) => o[k] !== undefined)
 			.sort()
 			.map((k) => `${JSON.stringify(k)}:${canonico(o[k])}`)
 			.join(",")}}`;

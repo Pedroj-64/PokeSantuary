@@ -58,6 +58,20 @@ describe("sobre de guardado", () => {
 		expect(a.suma).toBe(b.suma);
 	});
 
+	it("las propiedades undefined no rompen la suma (el JSON las omite al guardar)", async () => {
+		const partida = {
+			jornada: 3,
+			oro: 1,
+			expedicion: undefined,
+			tema: undefined,
+		};
+		const texto = await empaquetar(partida, 2);
+		expect(await desempaquetar(texto, opciones)).toEqual({
+			jornada: 3,
+			oro: 1,
+		});
+	});
+
 	it("un byte cambiado en la partida da 'corrupto'", async () => {
 		const texto = await empaquetar({ jornada: 7, oro: 30 }, 2);
 		expect(await codigoDe(texto.replace('"oro":30', '"oro":31'))).toBe(

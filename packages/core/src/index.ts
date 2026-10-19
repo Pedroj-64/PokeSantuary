@@ -40,6 +40,15 @@ export {
 	usarBaya,
 	usarBayaAlMasHerido,
 } from "./mochila.js";
+export {
+	type AccionPartida,
+	type ContextoPartida,
+	crearPartida,
+	type EstadoPartida,
+	type ResultadoPartida,
+	reducir,
+	VERSION_PARTIDA,
+} from "./partida.js";
 export { type Accion, type Estado, type Evento, paso } from "./paso.js";
 export {
 	type RangoDinero,
