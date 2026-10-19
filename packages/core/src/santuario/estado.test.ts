@@ -6,6 +6,7 @@ import {
 	type SantuarioBalance,
 	type TipoLoseta,
 } from "./estado.js";
+import { terrenoInicial } from "./terreno.js";
 
 // Este paquete no trae `@types/node`, así que el módulo se carga por su nombre
 // y se declara aquí el único tipo que se usa.
@@ -93,21 +94,20 @@ describe("crearSantuario", () => {
 		expect(e.siguienteUid).toBe(2);
 	});
 
-	it("crea el terreno completo, todo yerma y sin objetos", () => {
-		const e = crearSantuario("s1", balance());
+	it("crea la isla rota de terrenoInicial", () => {
+		const b = balance();
+		const e = crearSantuario("s1", b);
 		const total = BALANCE.isla.ancho * BALANCE.isla.alto;
 		expect(e.terreno).toMatchObject({
 			ancho: BALANCE.isla.ancho,
 			alto: BALANCE.isla.alto,
 		});
 		expect(e.terreno.losetas).toHaveLength(total);
+		expect(e.terreno).toEqual(terrenoInicial("s1", b));
 		for (const l of e.terreno.losetas) {
-			expect(l).toEqual({
-				tipo: "yerma",
-				edad: 0,
-				humedad: false,
-				encendido: false,
-			});
+			expect(l.objeto).toBeUndefined();
+			expect(l.humedad).toBe(false);
+			expect(l.encendido).toBe(false);
 		}
 	});
 
@@ -117,8 +117,9 @@ describe("crearSantuario", () => {
 		const segunda = e.terreno.losetas[1];
 		if (!primera || !segunda) throw new Error("faltan losetas");
 		expect(primera).not.toBe(segunda);
-		primera.tipo = "agua";
-		expect(segunda.tipo).toBe("yerma");
+		const antes = segunda.tipo;
+		primera.tipo = "arena";
+		expect(segunda.tipo).toBe(antes);
 	});
 
 	it("se puede congelar la entrada y el resultado sin lanzar", () => {

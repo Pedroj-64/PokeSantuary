@@ -1,3 +1,5 @@
+import { terrenoInicial } from "./terreno.js";
+
 /** Momento del día; la jornada avanza alba → dia → atardecer → noche. */
 export type Momento = "alba" | "dia" | "atardecer" | "noche";
 
@@ -256,7 +258,7 @@ export function esAreaUtil(l: Loseta): boolean {
 
 /**
  * Crea el Santuario inicial (GDD §11): jornada 1 al alba, recursos del balance,
- * el Árbol Cenit terminado en el centro y el resto del terreno yerma.
+ * el Árbol Cenit terminado en el centro y la isla rota de `terrenoInicial`.
  *
  * Es determinista y no comparte referencias con `balance`.
  *
@@ -289,12 +291,6 @@ export function crearSantuario(
 			`crearSantuario(): el Árbol Cenit no cabe en una isla de ${ancho} x ${alto}`,
 		);
 	}
-	const losetas: Loseta[] = Array.from({ length: ancho * alto }, () => ({
-		tipo: "yerma",
-		edad: 0,
-		humedad: false,
-		encendido: false,
-	}));
 	return {
 		semilla,
 		jornada: 1,
@@ -312,7 +308,7 @@ export function crearSantuario(
 				resto: {},
 			},
 		],
-		terreno: { ancho, alto, losetas },
+		terreno: terrenoInicial(semilla, balance),
 		armonia: 50,
 		accionesMarcadas: [],
 		habitatsCompletos: [],

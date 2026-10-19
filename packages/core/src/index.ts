@@ -107,6 +107,20 @@ export {
 } from "./santuario/jornada.js";
 export { pasoObra, pasoProduccion } from "./santuario/produccion.js";
 export {
+	accionesPosibles,
+	colocarCamino,
+	colocarDecoracion,
+	desmarcarAccion,
+	enIsla,
+	loseta,
+	marcarAccion,
+	nivelEspecialidad,
+	pasoTerreno,
+	plantarBrote,
+	terrenoInicial,
+	vecinosDe,
+} from "./santuario/terreno.js";
+export {
 	type Articulo,
 	comprar,
 	ofertaTienda,

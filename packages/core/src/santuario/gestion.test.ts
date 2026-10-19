@@ -189,6 +189,10 @@ describe("colocarKit", () => {
 		expect(sinRecursos).toEqual(antes);
 
 		const yerma = estado();
+		const losetaYerma = yerma.terreno.losetas[0];
+		if (!losetaYerma) throw new Error("falta la loseta");
+		losetaYerma.tipo = "yerma";
+		losetaYerma.objeto = undefined;
 		expect(() => colocarKit(yerma, "lecho-hojas", 0, 0, balance())).toThrow(
 			RangeError,
 		);

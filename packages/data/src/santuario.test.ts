@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { SantuarioBalanceSchema } from "./santuario.js";
+import {
+	ESPECIALIDADES,
+	EspecialidadesSchema,
+	SantuarioBalanceSchema,
+} from "./santuario.js";
 import { NATURALEZAS } from "./set.js";
 
 // Este paquete no trae `@types/node`, así que el módulo se carga por su nombre
@@ -15,6 +19,24 @@ const LEIDO: unknown = JSON.parse(
 		"utf8",
 	),
 );
+
+/** Catálogo de Especialidades por especie, tal cual está en el repositorio. */
+const ESPECIALIDADES_LEIDAS: unknown = JSON.parse(
+	readFileSync(
+		new URL("../../../packs/kanto/especialidades.json", import.meta.url),
+		"utf8",
+	),
+);
+
+/** Ids de las especies del pack, en orden. */
+const ESPECIES: string[] = (
+	JSON.parse(
+		readFileSync(
+			new URL("../../../packs/kanto/especies.json", import.meta.url),
+			"utf8",
+		),
+	) as { id: string }[]
+).map((e) => e.id);
 
 /** Forma suelta del JSON para romper una regla a la vez. */
 interface EdificioCrudo {
@@ -461,4 +483,58 @@ describe("SantuarioBalanceSchema", () => {
 		for (const neutra of ["Hardy", "Docile", "Serious", "Bashful", "Quirky"])
 			expect(NATURALEZAS).toContain(neutra);
 	});
+
+	it("exporta las 11 Especialidades activas del Pack 1", () => {
+		expect(ESPECIALIDADES).toEqual([
+			"cortar",
+			"romper",
+			"regar",
+			"crecer",
+			"encender",
+			"generar",
+			"construir",
+			"iluminar",
+			"recolectar",
+			"animar",
+			"volar",
+		]);
+	});
+});
+
+describe("EspecialidadesSchema", () => {
+	it("acepta el catálogo real del pack y cubre las diez especies", () => {
+		const datos = EspecialidadesSchema.parse(ESPECIALIDADES_LEIDAS);
+		expect(Object.keys(datos)).toEqual(ESPECIES);
+		for (const lista of Object.values(datos)) {
+			expect(lista.length).toBeGreaterThanOrEqual(1);
+			expect(lista.length).toBeLessThanOrEqual(2);
+		}
+	});
+
+	it("rechaza una Especialidad desconocida, tres, ninguna o una repetida", () => {
+		const valido = EspecialidadesSchema.parse(ESPECIALIDADES_LEIDAS);
+		expect(
+			EspecialidadesSchema.safeParse({
+				...valido,
+				eevee: ["volar", "teletransportar"],
+			}).success,
+		).toBe(false);
+		expect(
+			EspecialidadesSchema.safeParse({
+				...valido,
+				evee: ["volar", "cortar", "regar"],
+			}).success,
+		).toBe(false);
+		expect(
+			EspecialidadesSchema.safeParse({ ...valido, eevee: [] }).success,
+		).toBe(false);
+		expect(
+			EspecialidadesSchema.safeParse({ ...valido, eevee: ["volar", "volar"] })
+				.success,
+		).toBe(false);
+	});
+
+	it.todo(
+		"cada Especialidad la tienen al menos 3 especies de 2 líneas evolutivas (al llegar a las 63 especies)",
+	);
 });

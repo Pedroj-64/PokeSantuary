@@ -6,6 +6,7 @@ import type {
 	SantuarioBalance,
 } from "./estado.js";
 import { pasoObra, pasoProduccion } from "./produccion.js";
+import { pasoTerreno } from "./terreno.js";
 
 /** Eventos que produce un paso de la jornada; las Tareas 3 a 5 añaden los suyos. */
 export type EventoSantuario =
@@ -211,6 +212,7 @@ const pasoCierre: Paso = (e) => ({
 export const PASOS_ATARDECER: { id: string; paso: Paso }[] = [
 	{ id: "obra", paso: pasoObra },
 	{ id: "produccion", paso: pasoProduccion },
+	{ id: "terreno", paso: pasoTerreno },
 	{ id: "comida", paso: pasoComida },
 	{ id: "animo", paso: pasoAnimo },
 	{ id: "confort-armonia", paso: pasoConfortArmonia },

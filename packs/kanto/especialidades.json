@@ -1,0 +1,12 @@
+{
+	"bulbasaur": ["crecer"],
+	"charmander": ["cortar", "encender"],
+	"squirtle": ["regar"],
+	"pikachu": ["generar", "animar"],
+	"zubat": ["volar"],
+	"abra": ["iluminar"],
+	"machop": ["construir"],
+	"geodude": ["romper"],
+	"gastly": ["iluminar"],
+	"eevee": ["recolectar", "animar"]
+}

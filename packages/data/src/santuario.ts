@@ -7,6 +7,35 @@ import { slug } from "./slug.js";
 export const NaturalezaSchema = z.enum(NATURALEZAS);
 export type Naturaleza = z.infer<typeof NaturalezaSchema>;
 
+// Especialidades activas del Pack 1 (GDD §11.5); Allanar, Teletransportar,
+// Clima y Explotar quedan aparcados.
+export const ESPECIALIDADES = [
+	"cortar",
+	"romper",
+	"regar",
+	"crecer",
+	"encender",
+	"generar",
+	"construir",
+	"iluminar",
+	"recolectar",
+	"animar",
+	"volar",
+] as const;
+export const EspecialidadIdSchema = z.enum(ESPECIALIDADES);
+export type EspecialidadId = z.infer<typeof EspecialidadIdSchema>;
+
+// Una o dos Especialidades por especie; la segunda se abre con Amistad 3.
+export const EspecialidadesSchema = z.record(
+	slug,
+	z
+		.array(EspecialidadIdSchema)
+		.min(1)
+		.max(2)
+		.refine((e) => new Set(e).size === e.length, "especialidades duplicadas"),
+);
+export type Especialidades = z.infer<typeof EspecialidadesSchema>;
+
 // Sabores de baya de los juegos, más "neutro" para las que no tienen uno.
 export const SaborSchema = z.enum([
 	"picante",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type EstadoExpedicion, iniciarExpedicion } from "../expedicion.js";
+import type { EstadoExpedicion } from "../expedicion.js";
 import { crearRng, type Rng } from "../rng.js";
 import {
 	crearSantuario,
