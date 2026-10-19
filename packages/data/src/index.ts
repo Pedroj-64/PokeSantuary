@@ -4,6 +4,7 @@ export * from "./evento.js";
 export * from "./expedicion.js";
 export * from "./manifiesto.js";
 export * from "./movimiento.js";
+export * from "./niveles.js";
 export * from "./oficial.js";
 export * from "./santuario.js";
 export * from "./set.js";
