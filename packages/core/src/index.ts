@@ -1,4 +1,14 @@
 export {
+	aprender,
+	aprenderTodos,
+	type EntradaAprendizaje,
+	MAX_MOVIMIENTOS,
+	type Movimientos,
+	movimientosIniciales,
+	nuevosMovimientos,
+	type ResultadoAprender,
+} from "./aprender.js";
+export {
 	type DatosCaptura,
 	intentarCaptura,
 	probCaptura,
@@ -11,6 +21,14 @@ export {
 	type RivalEvento,
 	sustituirRuna,
 } from "./eventos.js";
+export {
+	AMISTAD_EVOLUCION,
+	type CondicionEvolucion,
+	type ContextoEvolucion,
+	type Evolucion,
+	evolucionesDisponibles,
+	type MomentoJornada,
+} from "./evolucionar.js";
 export {
 	curar,
 	curarAlMasHerido,
