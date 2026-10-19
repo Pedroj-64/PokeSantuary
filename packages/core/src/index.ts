@@ -25,6 +25,15 @@ export {
 	resolverCombate,
 } from "./expedicion.js";
 export {
+	ESTADISTICAS,
+	type Estadistica,
+	efectoNaturaleza,
+	elegirNaturaleza,
+	generarIV,
+	type IV,
+	multiplicadorNaturaleza,
+} from "./individuo.js";
+export {
 	generarPiso,
 	type MapaPiso,
 	type NodoMapa,
@@ -75,6 +84,7 @@ export {
 	modificadores,
 	resolverMisterio,
 } from "./runas.js";
+export { esTemaDelDia, TEMAS_CHARLA, temasDelDia } from "./santuario/charla.js";
 export {
 	type AccionMarcada,
 	crearSantuario,
