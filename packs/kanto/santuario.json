@@ -1,0 +1,185 @@
+{
+	"isla": { "ancho": 40, "alto": 30, "zona": 10 },
+	"recursosIniciales": {
+		"pokedolares": 0,
+		"madera": 10,
+		"piedra": 6,
+		"mineral": 0,
+		"fragmentos": 0,
+		"recuerdos": 0,
+		"baya:neutro": 20
+	},
+	"comida": {
+		"umbral": 70,
+		"caidaPorJornada": 25,
+		"neutra": { "hambre": 25, "animo": 0 },
+		"favorita": { "hambre": 35, "animo": 5 },
+		"noGusta": { "hambre": 15, "animo": -5 },
+		"sabores": {
+			"Hardy": { "favorito": "neutro", "noGusta": "neutro" },
+			"Lonely": { "favorito": "picante", "noGusta": "acido" },
+			"Brave": { "favorito": "picante", "noGusta": "dulce" },
+			"Adamant": { "favorito": "picante", "noGusta": "seco" },
+			"Naughty": { "favorito": "picante", "noGusta": "amargo" },
+			"Bold": { "favorito": "acido", "noGusta": "picante" },
+			"Docile": { "favorito": "neutro", "noGusta": "neutro" },
+			"Relaxed": { "favorito": "acido", "noGusta": "dulce" },
+			"Impish": { "favorito": "acido", "noGusta": "seco" },
+			"Lax": { "favorito": "acido", "noGusta": "amargo" },
+			"Timid": { "favorito": "dulce", "noGusta": "picante" },
+			"Hasty": { "favorito": "dulce", "noGusta": "acido" },
+			"Serious": { "favorito": "neutro", "noGusta": "neutro" },
+			"Jolly": { "favorito": "dulce", "noGusta": "seco" },
+			"Naive": { "favorito": "dulce", "noGusta": "amargo" },
+			"Modest": { "favorito": "seco", "noGusta": "picante" },
+			"Mild": { "favorito": "seco", "noGusta": "acido" },
+			"Quiet": { "favorito": "seco", "noGusta": "dulce" },
+			"Bashful": { "favorito": "neutro", "noGusta": "neutro" },
+			"Rash": { "favorito": "seco", "noGusta": "amargo" },
+			"Calm": { "favorito": "amargo", "noGusta": "picante" },
+			"Gentle": { "favorito": "amargo", "noGusta": "acido" },
+			"Sassy": { "favorito": "amargo", "noGusta": "dulce" },
+			"Careful": { "favorito": "amargo", "noGusta": "seco" },
+			"Quirky": { "favorito": "neutro", "noGusta": "neutro" }
+		}
+	},
+	"animo": {
+		"inicial": 60,
+		"preferido": 10,
+		"noPreferido": -5,
+		"confortBase": 2,
+		"confortFactor": 5,
+		"hambreBaja": -15,
+		"hambreBajaUmbral": 30,
+		"peticion": 20,
+		"temaAnimo": 10,
+		"sinLecho": -10,
+		"agotado": -5,
+		"sombrioSuelto": -5,
+		"hablo": 3,
+		"animar": 5
+	},
+	"confort": {
+		"puntosPorNivel": 4,
+		"min": 1,
+		"max": 5
+	},
+	"armonia": {
+		"pesoAnimo": 0.6,
+		"pesoConfort": 0.4,
+		"factorConfort": 20,
+		"umbralAlto": 70,
+		"umbralMuyAlto": 90,
+		"umbralBajo": 30,
+		"multProduccionAlta": 1.2
+	},
+	"inquietud": {
+		"animoUmbral": 25,
+		"jornadasAviso": 3,
+		"jornadasSalida": 4,
+		"multProduccion": 0.5
+	},
+	"produccion": {
+		"multNivel": [1, 1.5, 2],
+		"multPreferido": 1.5,
+		"animoBase": 0.5,
+		"multEspecialidad": 1.25,
+		"multCharlaTrabajo": 1.25,
+		"obraBasePorConstructor": 2,
+		"obraPorNivelEspecialidad": 1,
+		"obraCharlaRaices": 2,
+		"mineralProbabilidad": 0.2,
+		"tiposMineral": ["rock", "ground", "steel"]
+	},
+	"capacidadArbol": [6, 10, 15, 22, 30],
+	"capacidadAlmacen": [50, 100, 200],
+	"edificios": [
+		{
+			"id": "arbol-cenit",
+			"tamano": { "w": 3, "h": 3 },
+			"kit": {},
+			"obra": 0,
+			"nivelMax": 5,
+			"requiereArbol": 0,
+			"plazas": [],
+			"especialidadesAfines": []
+		},
+		{
+			"id": "lecho-hojas",
+			"tamano": { "w": 1, "h": 1 },
+			"kit": { "madera": 2 },
+			"obra": 2,
+			"nivelMax": 1,
+			"requiereArbol": 1,
+			"plazas": [],
+			"especialidadesAfines": []
+		},
+		{
+			"id": "lecho-paja",
+			"tamano": { "w": 1, "h": 1 },
+			"kit": { "madera": 2, "piedra": 1 },
+			"obra": 3,
+			"nivelMax": 1,
+			"requiereArbol": 2,
+			"plazas": [],
+			"especialidadesAfines": []
+		},
+		{
+			"id": "huerto-bayas",
+			"tamano": { "w": 2, "h": 2 },
+			"kit": { "madera": 6, "piedra": 4 },
+			"obra": 6,
+			"nivelMax": 3,
+			"requiereArbol": 1,
+			"plazas": [2, 3, 4],
+			"trabajo": "cultivar",
+			"especialidadesAfines": ["crecer", "regar"],
+			"produce": { "recurso": "baya", "base": 3 }
+		},
+		{
+			"id": "almacen",
+			"tamano": { "w": 2, "h": 2 },
+			"kit": { "madera": 8, "piedra": 6 },
+			"obra": 6,
+			"nivelMax": 3,
+			"requiereArbol": 1,
+			"plazas": [],
+			"especialidadesAfines": []
+		},
+		{
+			"id": "aserradero",
+			"tamano": { "w": 2, "h": 2 },
+			"kit": { "madera": 4, "piedra": 6 },
+			"obra": 6,
+			"nivelMax": 3,
+			"requiereArbol": 1,
+			"plazas": [2, 3, 3],
+			"trabajo": "aserrar",
+			"especialidadesAfines": ["cortar"],
+			"produce": { "recurso": "madera", "base": 2 }
+		},
+		{
+			"id": "cantera",
+			"tamano": { "w": 2, "h": 2 },
+			"kit": { "madera": 8, "piedra": 2 },
+			"obra": 6,
+			"nivelMax": 3,
+			"requiereArbol": 1,
+			"plazas": [2, 3, 3],
+			"trabajo": "minar",
+			"especialidadesAfines": ["romper"],
+			"produce": { "recurso": "piedra", "base": 2 }
+		}
+	],
+	"decoraciones": [
+		{ "id": "banco", "puntos": 1, "coste": { "madera": 2 } },
+		{ "id": "macetero", "puntos": 1, "coste": { "piedra": 2 } },
+		{ "id": "valla-de-madera", "puntos": 1, "coste": { "madera": 1 } },
+		{ "id": "cartel", "puntos": 1, "coste": { "madera": 1 } },
+		{ "id": "farol", "puntos": 1, "coste": { "madera": 1, "piedra": 1 } },
+		{ "id": "fogata", "puntos": 2, "coste": { "madera": 3, "piedra": 1 } },
+		{ "id": "estatua-unown", "puntos": 3, "coste": { "piedra": 6 } },
+		{ "id": "piedra-luna", "puntos": 3, "coste": { "piedra": 8 } }
+	],
+	"camino": { "costePiedra": 1 }
+}

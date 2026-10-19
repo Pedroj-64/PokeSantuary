@@ -57,6 +57,26 @@ export {
 	resolverMisterio,
 } from "./runas.js";
 export {
+	type AccionMarcada,
+	crearSantuario,
+	type DecoracionBalance,
+	type Edificio,
+	type EdificioBalance,
+	type EstadoResidente,
+	type EstadoSantuario,
+	esAreaUtil,
+	type Loseta,
+	type Momento,
+	type OrigenResidente,
+	type Residente,
+	type Sabor,
+	type SantuarioBalance,
+	type Tarea,
+	type TemaCharla,
+	type Terreno,
+	type TipoLoseta,
+} from "./santuario/estado.js";
+export {
 	type Articulo,
 	comprar,
 	ofertaTienda,
