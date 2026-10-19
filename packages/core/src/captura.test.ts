@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { type DatosCaptura, intentarCaptura, probCaptura } from "./captura.js";
 
@@ -110,6 +111,119 @@ describe("intentarCaptura", () => {
 		);
 		expect(() => intentarCaptura("c", 1.5, datos(0, 255, 1))).toThrow(
 			RangeError,
+		);
+	});
+});
+
+describe("probCaptura con campos opcionales", () => {
+	const formulaVieja = (d: DatosCaptura): number => {
+		const factor = (3 - (2 * d.psPct) / 100) / 3;
+		return Math.min(1, (factor * d.tasaBase * d.multBola) / 255);
+	};
+
+	it("sin los campos opcionales da lo mismo que la fórmula vieja", () => {
+		const casos: DatosCaptura[] = [
+			{ psPct: 100, tasaBase: 255, multBola: 1 },
+			{ psPct: 0, tasaBase: 255, multBola: 1 },
+			{ psPct: 50, tasaBase: 90, multBola: 1 },
+			{ psPct: 50, tasaBase: 255, multBola: 2 },
+			{ psPct: 10, tasaBase: 100, multBola: 3 },
+		];
+		for (const d of casos) {
+			expect(probCaptura(d)).toBeCloseTo(formulaVieja(d), 10);
+		}
+	});
+
+	it("multEstado: 2 duplica la probabilidad antes del tope", () => {
+		const base = probCaptura(datos(100, 255, 1)); // 1/3
+		const doble = probCaptura({ ...datos(100, 255, 1), multEstado: 2 });
+		expect(doble).toBeCloseTo(base * 2, 10);
+	});
+
+	it("multEstado: 1.5 multiplica por 1.5", () => {
+		const base = probCaptura(datos(100, 255, 1));
+		const con15 = probCaptura({ ...datos(100, 255, 1), multEstado: 1.5 });
+		expect(con15).toBeCloseTo(base * 1.5, 10);
+	});
+
+	it("el tope sigue en 1 aunque multEstado lo supere", () => {
+		expect(probCaptura({ ...datos(0, 255, 1), multEstado: 2 })).toBe(1);
+		expect(probCaptura({ ...datos(0, 255, 1), multEstado: 10 })).toBe(1);
+	});
+
+	it("bonoFinal: 0.15 suma 0,15 y luego aplica el tope", () => {
+		const base = probCaptura(datos(100, 255, 1)); // 1/3 ~ 0.3333
+		expect(probCaptura({ ...datos(100, 255, 1), bonoFinal: 0.15 })).toBeCloseTo(
+			base + 0.15,
+			10,
+		);
+		// Caso donde sin tope pasaría de 1: se clampea a 1
+		expect(probCaptura({ ...datos(0, 255, 1), bonoFinal: 0.15 })).toBe(1);
+	});
+
+	it("rechaza multEstado invalido", () => {
+		for (const multEstado of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+			expect(() => probCaptura({ ...datos(50, 90, 1), multEstado })).toThrow(
+				RangeError,
+			);
+		}
+	});
+
+	it("rechaza bonoFinal invalido", () => {
+		for (const bonoFinal of [
+			-0.01,
+			1.01,
+			Number.NaN,
+			Number.POSITIVE_INFINITY,
+		]) {
+			expect(() => probCaptura({ ...datos(50, 90, 1), bonoFinal })).toThrow(
+				RangeError,
+			);
+		}
+	});
+
+	it("acepta los extremos validos de bonoFinal (0 y 1)", () => {
+		expect(() =>
+			probCaptura({ ...datos(50, 90, 1), bonoFinal: 0 }),
+		).not.toThrow();
+		expect(() =>
+			probCaptura({ ...datos(50, 90, 1), bonoFinal: 1 }),
+		).not.toThrow();
+	});
+});
+
+describe("probCaptura propiedades (fast-check)", () => {
+	it("la probabilidad esta en [0, 1] y es monótona no decreciente en multEstado", () => {
+		fc.assert(
+			fc.property(
+				fc.integer({ min: 0, max: 100 }),
+				fc.integer({ min: 0, max: 255 }),
+				fc
+					.float({ min: Math.fround(0.1), max: Math.fround(10) })
+					.filter((n) => Number.isFinite(n)),
+				fc
+					.float({ min: Math.fround(0.1), max: Math.fround(10) })
+					.filter((n) => Number.isFinite(n)),
+				(psPct, tasaBase, multBola, multEstadoA) => {
+					const multEstadoB = multEstadoA * 2;
+					const dA: DatosCaptura = {
+						psPct,
+						tasaBase,
+						multBola,
+						multEstado: multEstadoA,
+					};
+					const dB: DatosCaptura = {
+						psPct,
+						tasaBase,
+						multBola,
+						multEstado: multEstadoB,
+					};
+					const pA = probCaptura(dA);
+					const pB = probCaptura(dB);
+					return pA >= 0 && pA <= 1 && pB >= 0 && pB <= 1 && pB >= pA;
+				},
+			),
+			{ numRuns: 500 },
 		);
 	});
 });

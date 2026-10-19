@@ -41,6 +41,16 @@ export {
 	usarBayaAlMasHerido,
 } from "./mochila.js";
 export {
+	alcanzaEvolucion,
+	nivelBaseGimnasio,
+	nivelInicial,
+	nivelRival,
+	subirNiveles,
+	type TablaNiveles,
+	type TablaSubida,
+	type TipoRival,
+} from "./niveles.js";
+export {
 	type AccionPartida,
 	type ContextoPartida,
 	crearPartida,

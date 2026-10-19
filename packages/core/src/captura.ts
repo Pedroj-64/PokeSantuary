@@ -8,6 +8,10 @@ export interface DatosCaptura {
 	tasaBase: number;
 	/** Multiplicador de la bola usada, mayor que 0. */
 	multBola: number;
+	/** Multiplicador de estado (dormido = 2, etc.), mayor que 0. Por defecto 1. */
+	multEstado?: number;
+	/** Bono final sumado a la probabilidad, entre 0 y 1. Por defecto 0. */
+	bonoFinal?: number;
 }
 
 const PS_MAX = 100;
@@ -37,21 +41,39 @@ function validar(d: DatosCaptura, quien: string): void {
 			`${quien}(): 'multBola' debe ser un número mayor que 0 (recibido ${String(d.multBola)})`,
 		);
 	}
+	const multEstado = d.multEstado ?? 1;
+	if (!Number.isFinite(multEstado) || multEstado <= 0) {
+		throw new RangeError(
+			`${quien}(): 'multEstado' debe ser un número mayor que 0 (recibido ${String(d.multEstado)})`,
+		);
+	}
+	const bonoFinal = d.bonoFinal ?? 0;
+	if (!Number.isFinite(bonoFinal) || bonoFinal < 0 || bonoFinal > 1) {
+		throw new RangeError(
+			`${quien}(): 'bonoFinal' debe ser un número finito entre 0 y 1 (recibido ${String(d.bonoFinal)})`,
+		);
+	}
 }
 
 /**
  * Probabilidad de captura en [0, 1]: cuantos menos PS le queden al objetivo,
  * más fácil es.
  *
- * `probCaptura = min(1, (((3 - 2 * psPct/100) / 3) * tasaBase * multBola) / 255)`
+ * `probCaptura = min(1, (((3 - 2 * psPct/100) / 3) * tasaBase * multBola * multEstado) / 255 + bonoFinal)`
  *
  * @throws {RangeError} Si `psPct` no está entre 0 y 100, si `tasaBase` no está
- * entre 0 y 255 o si `multBola` no es mayor que 0.
+ * entre 0 y 255, si `multBola` no es mayor que 0, si `multEstado` no es mayor
+ * que 0 o si `bonoFinal` no está entre 0 y 1.
  */
 export function probCaptura(d: DatosCaptura): number {
 	validar(d, "probCaptura");
+	const multEstado = d.multEstado ?? 1;
+	const bonoFinal = d.bonoFinal ?? 0;
 	const factor = (3 - (2 * d.psPct) / PS_MAX) / 3;
-	return Math.min(1, (factor * d.tasaBase * d.multBola) / TASA_MAX);
+	return Math.min(
+		1,
+		(factor * d.tasaBase * d.multBola * multEstado) / TASA_MAX + bonoFinal,
+	);
 }
 
 /**
