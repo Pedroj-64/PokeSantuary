@@ -5,7 +5,7 @@ Reglas del proyecto y rutina para cada cambio. Complementa `README.md` (comandos
 ## Reglas firmes
 
 - **Idioma.** Código, identificadores, comentarios y documentación técnica en español. Los textos del juego van siempre por claves de `apps/game/src/i18n` (es y en, con las mismas claves) y el idioma se cambia en ejecución.
-- **Sin dinero ni material oficial.** Nada de anuncios, donaciones ni merchandising; ni logotipos ni música oficiales. Los sprites oficiales solo entran por el canal de datos y se cargan desde un atlas, para poder sustituirlos.
+- **Sin dinero ni material oficial.** Nada de anuncios, donaciones ni merchandising; ningún archivo oficial en git (sprites, sonidos, música ni logotipos). Los sprites de combate se piden en ejecución a un repositorio público de terceros y cada uno tiene un sustituto original, así que el juego funciona sin ellos (ver `ASSETS.md`).
 - **Los datos no van en el código.** Especies, movimientos, sets, números de balance y textos de contenido viven en `packs/` y se validan con Zod. Un JSON nuevo necesita su esquema y una prueba.
 - **Nunca `Math.random()` ni la fecha en la lógica.** Todo azar sale del generador con semilla (`@santuario/core`).
 - **Sin llamar a PokeAPI desde el juego.** Solo `tools/pipeline`, con la caché versionada y una pausa de 1 s entre peticiones reales.

@@ -22,7 +22,7 @@ Fan game roguelike de gestión: expediciones por turnos y un santuario que cuida
 
 ## Aviso
 
-Este es un proyecto de fans, **no oficial**, sin fines de lucro y sin afiliación con los titulares de la propiedad intelectual. Pokémon y sus personajes, nombres y demás elementos pertenecen a Nintendo, Creatures Inc., GAME FREAK inc. y The Pokémon Company. No se usan logotipos ni música oficiales, y el proyecto no recibe dinero de ninguna forma.
+Este es un proyecto de fans, **no oficial**, sin fines de lucro y sin afiliación con los titulares de la propiedad intelectual. Pokémon y sus personajes, nombres y demás elementos pertenecen a Nintendo, Creatures Inc., GAME FREAK inc. y The Pokémon Company. El repositorio no contiene sprites, sonidos ni música oficiales (ver [ASSETS.md](ASSETS.md)), y el proyecto no recibe dinero de ninguna forma.
 
 ## Estructura
 
@@ -74,7 +74,7 @@ A roguelike management fan game: turn-based expeditions and a sanctuary to take 
 
 ## Disclaimer
 
-This is an **unofficial** fan project, non-profit and not affiliated with the rights holders. Pokémon and its characters, names and related elements belong to Nintendo, Creatures Inc., GAME FREAK inc. and The Pokémon Company. No official logos or music are used, and the project receives no money in any form.
+This is an **unofficial** fan project, non-profit and not affiliated with the rights holders. Pokémon and its characters, names and related elements belong to Nintendo, Creatures Inc., GAME FREAK inc. and The Pokémon Company. The repository contains no official sprites, sounds or music (see [ASSETS.md](ASSETS.md)), and the project receives no money in any form.
 
 ## Structure
 
