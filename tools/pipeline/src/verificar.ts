@@ -8,6 +8,8 @@ import {
 	ElitesSchema,
 	EspecieSchema,
 	EventosSchema,
+	type Evoluciones,
+	EvolucionesSchema,
 	ExpedicionBalanceSchema,
 	ManifiestoSchema,
 	type Movimiento,
@@ -19,6 +21,7 @@ import {
 import { z } from "zod";
 import { aprendizajePorNivel } from "./aprendizaje.js";
 import { archivosDelPack } from "./construir.js";
+import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { resolverEnPack, sha256 } from "./manifiesto.js";
 import { erroresDeSets, unirMovimiento } from "./movimientos.js";
 import { oficialesVersionados } from "./oficial.js";
@@ -152,6 +155,43 @@ export async function verificar(
 			if (JSON.stringify(esperado) !== JSON.stringify(entradas))
 				errores.push(
 					`aprendizaje.json: ${especie}: no coincide con @pkmn/data`,
+				);
+		}
+	});
+	await intentar(async () => {
+		if (!existsSync(join(dirPack, "evoluciones.json")))
+			throw new Error("evoluciones.json: no existe");
+		const resultado = EvolucionesSchema.safeParse(
+			leer(dirPack, "evoluciones.json"),
+		);
+		if (!resultado.success)
+			throw new Error(`evoluciones.json: ${resultado.error.message}`);
+		const evoluciones: Evoluciones = resultado.data;
+		for (const especie of especies)
+			if (!(especie in evoluciones))
+				errores.push(`evoluciones.json: falta ${especie}`);
+		for (const [especie, entrada] of Object.entries(evoluciones)) {
+			if (!especies.includes(especie))
+				errores.push(`evoluciones.json: ${especie} no está en especies.json`);
+			let esperado: { nivelEtapa: number; evoluciones: unknown[] };
+			try {
+				esperado = {
+					nivelEtapa: nivelEtapa(especie),
+					evoluciones: evolucionesDe(especie),
+				};
+			} catch (e) {
+				errores.push(
+					`evoluciones.json: ${especie}: ${e instanceof Error ? e.message : String(e)}`,
+				);
+				continue;
+			}
+			if (
+				entrada.nivelEtapa !== esperado.nivelEtapa ||
+				JSON.stringify(entrada.evoluciones) !==
+					JSON.stringify(esperado.evoluciones)
+			)
+				errores.push(
+					`evoluciones.json: ${especie}: no coincide con @pkmn/data`,
 				);
 		}
 	});

@@ -3,6 +3,9 @@ import { join } from "node:path";
 import {
 	type Aprendizaje,
 	AprendizajeSchema,
+	type Evolucion,
+	type Evoluciones,
+	EvolucionesSchema,
 	MovimientoSchema,
 	SetCombateSchema,
 	TrabajosPorTipoSchema,
@@ -10,6 +13,7 @@ import {
 import { z } from "zod";
 import { type AprendizajeNivel, aprendizajePorNivel } from "./aprendizaje.js";
 import { descargar, descargarMovimiento, type Red } from "./descargar.js";
+import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { sha256 } from "./manifiesto.js";
 import {
 	erroresDeSets,
@@ -64,6 +68,20 @@ async function generarAprendizaje(
 	return aprendizaje;
 }
 
+// Etapa y evoluciones de todas las especies, con las claves ordenadas.
+function generarEvoluciones(especies: string[]): Evoluciones {
+	const crudo: Record<
+		string,
+		{ nivelEtapa: number; evoluciones: Evolucion[] }
+	> = {};
+	for (const especie of [...especies].sort())
+		crudo[especie] = {
+			nivelEtapa: nivelEtapa(especie),
+			evoluciones: evolucionesDe(especie),
+		};
+	return EvolucionesSchema.parse(crudo);
+}
+
 export async function construir(o: OpcionesConstruir): Promise<number> {
 	const slugs: string[] = JSON.parse(readFileSync(o.especies, "utf8"));
 	const trabajos = TrabajosPorTipoSchema.parse(
@@ -107,6 +125,10 @@ export async function construir(o: OpcionesConstruir): Promise<number> {
 				slugsMov,
 			),
 		),
+	);
+	writeFileSync(
+		join(o.dirPack, "evoluciones.json"),
+		aJson(generarEvoluciones(lista.map((e) => e.id))),
 	);
 	writeFileSync(join(o.dirPack, "oficial.json"), aJson(oficialDe(fuentes)));
 	const archivos = Object.fromEntries(

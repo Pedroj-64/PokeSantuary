@@ -85,6 +85,7 @@ describe("construir", () => {
 			"especies.json",
 			"movimientos.json",
 			"aprendizaje.json",
+			"evoluciones.json",
 			"sets.json",
 			"manifest.json",
 			"oficial.json",

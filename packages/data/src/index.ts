@@ -2,6 +2,7 @@ export * from "./aprendizaje.js";
 export * from "./elites.js";
 export * from "./especie.js";
 export * from "./evento.js";
+export * from "./evolucion.js";
 export * from "./expedicion.js";
 export * from "./manifiesto.js";
 export * from "./movimiento.js";

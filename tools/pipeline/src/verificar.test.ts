@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import type { Movimiento, Oficial } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import { aprendizajePorNivel } from "./aprendizaje.js";
+import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { sha256 } from "./manifiesto.js";
 import {
 	type MovimientoApi,
@@ -71,13 +72,25 @@ for (const slug of JSON.parse(
 }
 const MOVIMIENTOS_TEXTO = `${JSON.stringify(MOVIMIENTOS_PACK, null, "\t")}\n`;
 
+const EVOLUCIONES: Record<
+	string,
+	{ nivelEtapa: number; evoluciones: ReturnType<typeof evolucionesDe> }
+> = {};
+for (const especie of [...ESPECIES_PACK].sort())
+	EVOLUCIONES[especie] = {
+		nivelEtapa: nivelEtapa(especie),
+		evoluciones: evolucionesDe(especie),
+	};
+const EVOLUCIONES_TEXTO = `${JSON.stringify(EVOLUCIONES, null, "\t")}\n`;
+
 const copia = () => {
 	const dir = mkdtempSync(join(tmpdir(), "pack-"));
 	cpSync(PACK_REAL, dir, { recursive: true });
 	writeFileSync(join(dir, "aprendizaje.json"), APRENDIZAJE_TEXTO);
+	writeFileSync(join(dir, "evoluciones.json"), EVOLUCIONES_TEXTO);
 	writeFileSync(join(dir, "movimientos.json"), MOVIMIENTOS_TEXTO);
 	const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
-	for (const f of ["aprendizaje.json", "movimientos.json"])
+	for (const f of ["aprendizaje.json", "evoluciones.json", "movimientos.json"])
 		m.archivos[f] = sha256(join(dir, f));
 	writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
 	return dir;
@@ -272,6 +285,62 @@ describe("verificar", () => {
 			rmSync(join(dir, "aprendizaje.json"));
 			expect((await verificar(dir)).join("\n")).toMatch(
 				/aprendizaje\.json: no existe/,
+			);
+		});
+	});
+
+	describe("evoluciones.json", () => {
+		type EvolucionesCrudas = Record<
+			string,
+			{
+				nivelEtapa: number;
+				evoluciones: { a: string; condicion: Record<string, unknown> }[];
+			}
+		>;
+		const editar = (cambio: (e: EvolucionesCrudas) => void) => {
+			const dir = copia();
+			const ruta = join(dir, "evoluciones.json");
+			const e = JSON.parse(readFileSync(ruta, "utf8")) as EvolucionesCrudas;
+			cambio(e);
+			writeFileSync(ruta, JSON.stringify(e));
+			resellar(dir);
+			return dir;
+		};
+
+		it("falla si falta una especie", async () => {
+			const dir = editar((e) => delete e.charmander);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/evoluciones\.json: falta charmander/,
+			);
+		});
+
+		it("falla si sobra una especie", async () => {
+			const dir = editar((e) => {
+				e.mew = { nivelEtapa: 0, evoluciones: [] };
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/evoluciones\.json: mew no está en especies\.json/,
+			);
+		});
+
+		it("falla si se altera una entrada a mano", async () => {
+			const dir = editar((e) => {
+				const lista = e.charmander?.evoluciones;
+				const entrada = lista?.[0];
+				if (!lista || !entrada)
+					throw new Error("el pack no trae la evolución de charmander");
+				lista[0] = { ...entrada, condicion: { tipo: "nivel", nivel: 20 } };
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/evoluciones\.json: charmander: no coincide con @pkmn\/data/,
+			);
+		});
+
+		it("falla si falta en el pack", async () => {
+			const dir = copia();
+			rmSync(join(dir, "evoluciones.json"));
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/evoluciones\.json: no existe/,
 			);
 		});
 	});
