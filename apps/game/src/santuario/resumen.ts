@@ -100,6 +100,12 @@ export function resumenDeJornada(
 					params: { especie: String(e.especie) },
 				});
 				break;
+			case "sinSitio":
+				lineas.push({
+					clave: "santuario.resumen.sinSitio",
+					params: { especie: String(e.especie) },
+				});
+				break;
 			case "terrenoCambiado":
 				terreno++;
 				break;

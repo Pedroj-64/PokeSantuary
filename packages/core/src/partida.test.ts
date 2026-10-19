@@ -170,6 +170,20 @@ describe("expedición", () => {
 		]);
 	});
 
+	it("la expedición empieza con el dinero y la mochila que da el balance", () => {
+		const p = ir(enElDia(), {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+			dinero: 70,
+			mochila: { "poke-ball": 5 },
+		});
+		expect(p.expedicion?.dinero).toBe(70);
+		expect(p.expedicion?.mochila).toEqual({ "poke-ball": 5 });
+		// sin datos de inicio: cero y mochila vacía
+		expect(saliendo().expedicion?.dinero).toBe(0);
+	});
+
 	it("solo se sale de día, una vez por jornada y sin otra expedición en curso", () => {
 		expect(() =>
 			ir(crearPartida("s1", ctx().balance), {

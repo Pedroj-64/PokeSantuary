@@ -69,7 +69,7 @@ test("el protagonista camina con las flechas y mira hacia donde va", async ({
 	expect(despues.direccion).toBe("lado");
 });
 
-test("los edificios bloquean el paso y junto al Árbol se puede salir a la Fisura", async ({
+test("los edificios bloquean el paso y junto al Árbol se elige el equipo para la Fisura", async ({
 	page,
 }) => {
 	await entrar(page);
@@ -92,10 +92,9 @@ test("los edificios bloquean el paso y junto al Árbol se puede salir a la Fisur
 	expect(((await estado(page)) as EstadoSantuario).y).toBeGreaterThanOrEqual(
 		arbol.y - 4,
 	);
+	// E abre la elección del equipo (la salida completa se prueba más abajo)
 	await page.keyboard.press("e");
-	await expect
-		.poll(() => page.evaluate("window.__santuario.mapa?.estado().piso ?? 0"))
-		.toBe(1);
+	await expect.poll(async () => (await estado(page))?.menu).toBe(true);
 });
 
 test("Esc vuelve a la lista de especies", async ({ page }) => {
@@ -247,4 +246,111 @@ test("gestión: Esc cancela la colocación sin gastar materiales ni construir na
 	const s = await actual(page);
 	expect(s.recursos.madera).toBe(10);
 	expect(s.edificios.filter((e) => e.tipo !== "arbol-cenit")).toEqual([]);
+});
+
+/** Sale a la Fisura con el primer residente y deja la escena del mapa lista. */
+async function salirConElPrimero(page: Page, semilla: string) {
+	await entrar(page, semilla);
+	await pulsar(page, "Enter"); // comenzar el día
+	await expect.poll(async () => (await actual(page)).momento).toBe("dia");
+	const arbol = (await page.evaluate(
+		"window.__santuario.santuario.arbol()",
+	)) as {
+		x: number;
+		y: number;
+	};
+	await page.evaluate(
+		`window.__santuario.santuario.colocar(${arbol.x}, ${arbol.y})`,
+	);
+	await expect.poll(async () => (await actual(page)).cercaDelArbol).toBe(true);
+	await pulsar(page, "e");
+	await expect.poll(async () => (await actual(page)).menu).toBe(true);
+	// [ ] primer residente → marcar; bajar hasta "Salir" (3 residentes + salir)
+	await pulsar(page, "Enter", "ArrowDown", "ArrowDown", "ArrowDown", "Enter");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.mapa?.estado().piso ?? 0"))
+		.toBe(1);
+}
+
+test("expedición desde el Santuario: sale con el residente elegido, y al volver liquida y resuelve el Atardecer", async ({
+	page,
+}) => {
+	await salirConElPrimero(page, "m-exp");
+	const mapa = (await page.evaluate("window.__santuario.mapa.estado()")) as {
+		especies: string[];
+		dinero: number;
+	};
+	expect(mapa.especies).toEqual(["bulbasaur"]);
+	expect(mapa.dinero).toBeGreaterThanOrEqual(0);
+	await page.evaluate("window.__santuario.mapa.preparar({ dinero: 120 })");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.mapa?.estado().dinero"))
+		.toBe(120);
+	await page.evaluate(
+		"window.__santuario.mapa.terminar('victoria', ['zubat'])",
+	);
+	await expect
+		.poll(() => page.evaluate("window.__santuario.fin?.estado().resultado"))
+		.toBe("victoria");
+	await pulsar(page, "Enter"); // volver
+	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
+	await expect.poll(async () => (await actual(page)).panel).toBe(true);
+	const s = await actual(page);
+	expect(s.momento).toBe("noche"); // volver cierra el día: el Atardecer ya se resolvió
+	expect(s.recursos.pokedolares).toBe(120);
+	expect(s.residentes.map((r) => r.especie)).toContain("zubat"); // el capturado se une
+	expect(s.residentes.filter((r) => r.especie === "bulbasaur")).toHaveLength(1);
+});
+
+test("expedición desde el Santuario: Esc pide confirmación y abandonar cuenta como derrota (mitad del dinero)", async ({
+	page,
+}) => {
+	await salirConElPrimero(page, "m-exp-esc");
+	await page.evaluate("window.__santuario.mapa.preparar({ dinero: 100 })");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.mapa?.estado().dinero"))
+		.toBe(100);
+	await pulsar(page, "Escape");
+	// la primera pulsación solo avisa: seguimos en el mapa
+	expect(
+		await page.evaluate("window.__santuario.mapa?.estado().piso ?? 0"),
+	).toBe(1);
+	await pulsar(page, "Escape");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.fin?.estado().resultado"))
+		.toBe("derrota");
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
+	await expect.poll(async () => (await actual(page)).panel).toBe(true);
+	expect((await actual(page)).recursos.pokedolares).toBe(50);
+});
+
+test("la expedición en curso se guarda: al recargar, E junto al Árbol la retoma", async ({
+	page,
+}) => {
+	await salirConElPrimero(page, "m-exp-guardada");
+	await page.evaluate("window.__santuario.mapa.preparar({ dinero: 77 })");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.mapa?.estado().dinero"))
+		.toBe(77);
+	await page.waitForTimeout(300); // el mapa guarda al mostrarse
+	await page.reload();
+	await page.locator('[data-estado="listo"]').waitFor();
+	await page.keyboard.press("s");
+	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
+	await pulsar(page, "Enter");
+	const arbol = (await page.evaluate(
+		"window.__santuario.santuario.arbol()",
+	)) as {
+		x: number;
+		y: number;
+	};
+	await page.evaluate(
+		`window.__santuario.santuario.colocar(${arbol.x}, ${arbol.y})`,
+	);
+	await expect.poll(async () => (await actual(page)).cercaDelArbol).toBe(true);
+	await pulsar(page, "e");
+	await expect
+		.poll(() => page.evaluate("window.__santuario.mapa?.estado().dinero"))
+		.toBe(77);
 });

@@ -71,8 +71,16 @@ export class FinExpedicion extends Phaser.Scene {
 				)
 				.setOrigin(0.5, 0);
 		});
-		const volver = (): void => {
-			this.scene.start("ListaEspecies");
+		let volviendo = false;
+		/** Si la expedición salió del Santuario, se liquida allí y se vuelve; si no, a la lista de especies. */
+		const volver = async (): Promise<void> => {
+			if (volviendo) return;
+			volviendo = true;
+			const enlace = await import("../santuario/enlace.js");
+			if (enlace.esDeSantuario()) {
+				enlace.volverAlSantuario(e);
+				this.scene.start("Santuario");
+			} else this.scene.start("ListaEspecies");
 		};
 		this.add
 			.text(240, 232, t("fin.volver"), {
@@ -84,9 +92,9 @@ export class FinExpedicion extends Phaser.Scene {
 			})
 			.setOrigin(0.5, 0)
 			.setInteractive({ useHandCursor: true })
-			.on("pointerdown", volver);
+			.on("pointerdown", () => void volver());
 		alPulsarTecla(this, (ev) => {
-			if (ev.key === "Enter" || ev.key === "Escape") volver();
+			if (ev.key === "Enter" || ev.key === "Escape") void volver();
 		});
 
 		if (new URLSearchParams(location.search).get("test") === "1") {

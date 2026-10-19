@@ -24,7 +24,10 @@ export function expedicionInicial(
 }
 
 /** Las bolas con las que se sale: del tipo más barato del catálogo. */
-function bolasIniciales(balance: ExpedicionBalance): Record<string, number> {
+/** Bolas con las que empieza una expedición: la más barata del catálogo, tantas como diga el balance. */
+export function bolasIniciales(
+	balance: ExpedicionBalance,
+): Record<string, number> {
 	const bola = balance.catalogoTienda
 		.filter((a) => a.tipo === "ball")
 		.sort((a, b) => a.precio - b.precio)[0];

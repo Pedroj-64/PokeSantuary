@@ -1,4 +1,4 @@
-import { expedicionInicial } from "@santuario/battle";
+import { bolasIniciales } from "@santuario/battle";
 import type {
 	AccionPartida,
 	EstadoPartida,
@@ -10,7 +10,6 @@ import losetasPng from "../assets/santuario/losetas.png?url";
 import protagonistaPng from "../assets/santuario/protagonista.png?url";
 import { musica } from "../audio/gestor.js";
 import { MUSICA } from "../audio/sonidos.js";
-import { cargarDatosCombate } from "../combate/datosPack.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import { t } from "../i18n/index.js";
 import { asegurarSprite } from "../oficial/recursos.js";
@@ -32,8 +31,10 @@ import {
 import { type ItemMenu, PanelMenu } from "../santuario/panelMenu.js";
 import { type LineaResumen, resumenDeJornada } from "../santuario/resumen.js";
 import type { Sesion } from "../santuario/sesion.js";
-import { obtenerSesion } from "../santuario/sesionGlobal.js";
-import { obtenerSemilla } from "../semilla.js";
+import {
+	obtenerSesion,
+	tomarResumenPendiente,
+} from "../santuario/sesionGlobal.js";
 import { alPulsarTecla } from "../teclado.js";
 
 const FUENTE = "monospace";
@@ -101,6 +102,8 @@ export class SantuarioMundo extends Phaser.Scene {
 	private generacion = 0;
 	private lineasPanel: LineaResumen[] = [];
 	private menu!: PanelMenu;
+	/** Residentes marcados para la expedición mientras se elige el equipo. */
+	private elegidos = new Set<string>();
 	/** Modo de colocar un kit: el cursor sobre la isla y su rectángulo de vista previa. */
 	private colocando?: {
 		tipo: string;
@@ -226,6 +229,7 @@ export class SantuarioMundo extends Phaser.Scene {
 			this.repintar();
 			void musica(MUSICA.mapa);
 			this.exponerGancho();
+			this.mostrarResumenPendiente();
 		} catch (e) {
 			if (gen !== this.generacion) return;
 			this.ayuda.setText(t("santuario.error.volver"));
@@ -456,7 +460,7 @@ export class SantuarioMundo extends Phaser.Scene {
 		}
 		if (k === "enter" || k === " ") this.avanzarMomento();
 		else if (k === "g") this.abrirGestion();
-		else if (k === "e" && this.cerca) this.salirALaFisura();
+		else if (k === "e" && this.cerca) this.alPulsarArbol();
 		else if (k === "escape") this.scene.start("ListaEspecies");
 	}
 
@@ -932,7 +936,11 @@ export class SantuarioMundo extends Phaser.Scene {
 					(rectanguloDeEdificio(arbol.edificio, b).ancho * LADO) / 2;
 		if (cerca !== this.cerca) {
 			this.cerca = cerca;
-			this.aviso.setText(t("santuario.salir")).setVisible(cerca);
+			this.aviso
+				.setText(
+					t(this.p.expedicion ? "santuario.continuar" : "santuario.salir"),
+				)
+				.setVisible(cerca);
 		}
 	}
 
@@ -955,11 +963,92 @@ export class SantuarioMundo extends Phaser.Scene {
 		}
 	}
 
-	private salirALaFisura(): void {
-		const { sets } = cargarDatosCombate();
-		this.scene.start("Mapa", {
-			estado: expedicionInicial(obtenerSemilla(), sets, cargarBalance()),
+	/** E junto al Árbol: continuar la expedición en curso o elegir el equipo para una nueva. */
+	private alPulsarArbol(): void {
+		const x = this.p.expedicion;
+		if (x) {
+			this.irALaExpedicion(x);
+			return;
+		}
+		const descansados = this.p.santuario.residentes.filter(
+			(r) => r.estado === "descansado",
+		);
+		if (descansados.length === 0) {
+			this.mostrarAviso(t("equipo.vacio"));
+			return;
+		}
+		this.aviso.setVisible(false);
+		this.cerca = false;
+		this.ayuda.setText("");
+		this.elegidos = new Set();
+		this.menuEquipo();
+	}
+
+	private menuEquipo(indice = 0): void {
+		const descansados = this.p.santuario.residentes.filter(
+			(r) => r.estado === "descansado",
+		);
+		const items: ItemMenu[] = descansados.map((r, i) => ({
+			texto: `${this.elegidos.has(r.uid) ? "[x]" : "[ ]"} ${nombreDeEspecie(r.especie)}`,
+			alElegir: () => {
+				if (this.elegidos.has(r.uid)) this.elegidos.delete(r.uid);
+				else if (this.elegidos.size < 6) this.elegidos.add(r.uid);
+				this.menuEquipo(i);
+			},
+		}));
+		items.push({
+			texto: t("equipo.salir", { n: this.elegidos.size }),
+			activo: this.elegidos.size >= 1,
+			alElegir: () => this.salirConEquipo(),
 		});
+		this.menu.mostrar(
+			t("equipo.titulo"),
+			items,
+			t("gestion.pie"),
+			() => this.cerrarGestion(),
+			indice,
+		);
+	}
+
+	private salirConEquipo(): void {
+		const s = this.p.santuario;
+		const balance = cargarBalance();
+		const ok = this.gestionar({
+			tipo: "salirAExpedicion",
+			uids: [...this.elegidos],
+			semilla: `${s.semilla}:exp:${s.jornada}`,
+			dinero: balance.dineroInicial,
+			mochila: bolasIniciales(balance),
+		});
+		if (!ok) return;
+		this.menu.cerrar();
+		const x = this.p.expedicion;
+		if (x) this.irALaExpedicion(x);
+	}
+
+	/** Mapa si la expedición sigue en curso; si ya terminó (se cerró el juego en el último combate), su pantalla final. */
+	private irALaExpedicion(x: NonNullable<EstadoPartida["expedicion"]>): void {
+		this.scene.start(x.estado === "en-curso" ? "Mapa" : "FinExpedicion", {
+			estado: x,
+		});
+	}
+
+	/** Al volver de una expedición, el resumen de lo que trajo y del Atardecer. */
+	private mostrarResumenPendiente(): void {
+		const r = tomarResumenPendiente();
+		if (!r) return;
+		const nombre = (uid: string) => {
+			const q = this.p.santuario.residentes.find((x) => x.uid === uid);
+			return q ? nombreDeEspecie(q.especie) : uid;
+		};
+		this.abrirPanel(
+			resumenDeJornada(
+				r.eventos,
+				r.recursosAntes,
+				this.p.santuario.recursos,
+				nombre,
+			),
+		);
 	}
 
 	// ---------------------------------------------------------------- pruebas

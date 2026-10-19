@@ -52,6 +52,9 @@ export class Mapa extends Phaser.Scene {
 	private etiqueta?: Phaser.GameObjects.Text;
 	/** Cerrojo: un clic y una tecla en el mismo fotograma no encolan dos cambios de escena. */
 	private cambiando = false;
+	/** Esc pide confirmación cuando la expedición salió del Santuario (hay partida que guardar). */
+	private confirmandoSalida = false;
+	private enlace?: typeof import("../santuario/enlace.js");
 
 	constructor() {
 		super("Mapa");
@@ -60,6 +63,8 @@ export class Mapa extends Phaser.Scene {
 	init(datos: DatosMapa): void {
 		this.estado = datos.estado;
 		this.cambiando = false;
+		this.confirmandoSalida = false;
+		this.enlace = undefined;
 	}
 
 	preload(): void {
@@ -123,12 +128,15 @@ export class Mapa extends Phaser.Scene {
 			const id = ids[Number(ev.key) - 1];
 			if (id !== undefined) this.elegir(id);
 			else if (ev.key.toLowerCase() === "b") this.darBaya();
-			else if (ev.key === "Escape" && !this.cambiando) {
-				this.cambiando = true;
-				this.scene.start("ListaEspecies");
-			}
+			else if (ev.key === "Escape") this.escape();
 		});
 		void musica(MUSICA.mapa);
+		// La partida guarda la expedición tras cada nodo (si salió del Santuario).
+		void import("../santuario/enlace.js").then((m) => {
+			if (!this.sys.isActive()) return;
+			this.enlace = m;
+			m.guardarExpedicion(this.estado);
+		});
 		this.exponerGancho();
 	}
 
@@ -182,6 +190,29 @@ export class Mapa extends Phaser.Scene {
 				`${nombres.especie(m.especie)}\n${m.psPct}%`,
 				{ ...estilo, color: m.psPct === 0 ? "#ff8b8b" : "#7dff9a" },
 			);
+		});
+	}
+
+	/** Esc: sale a la lista de especies; si la expedición viene del Santuario, pide confirmar y cuenta como derrota. */
+	private escape(): void {
+		if (this.cambiando) return;
+		if (!this.enlace?.esDeSantuario()) {
+			this.cambiando = true;
+			this.scene.start("ListaEspecies");
+			return;
+		}
+		if (this.confirmandoSalida) {
+			this.cambiando = true;
+			this.scene.start("FinExpedicion", {
+				estado: { ...this.estado, estado: "derrota" },
+			});
+			return;
+		}
+		this.confirmandoSalida = true;
+		this.etiqueta?.setText(t("mapa.abandonar"));
+		this.time.delayedCall(3000, () => {
+			this.confirmandoSalida = false;
+			this.etiqueta?.setText(t("mapa.ayuda"));
 		});
 	}
 
@@ -276,6 +307,21 @@ export class Mapa extends Phaser.Scene {
 						nodoId: id,
 					},
 				),
+			/** Termina la expedición como lo haría el último combate; los `capturados` entran al equipo sin residente de origen. */
+			terminar: (
+				resultado: "victoria" | "derrota",
+				capturados: string[] = [],
+			) =>
+				this.scene.start("FinExpedicion", {
+					estado: {
+						...this.estado,
+						estado: resultado,
+						equipo: [
+							...this.estado.equipo,
+							...capturados.map((especie) => ({ especie, psPct: 60 })),
+						],
+					},
+				}),
 			/** Solo para pruebas: cambia dinero y runas del estado y repinta el mapa. */
 			preparar: (cambios: {
 				dinero?: number;

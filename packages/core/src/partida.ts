@@ -62,7 +62,14 @@ export type AccionPartida =
 	| { tipo: "colocarDecoracion"; id: string; x: number; y: number }
 	| { tipo: "pasarDia" }
 	| { tipo: "dormir" }
-	| { tipo: "salirAExpedicion"; uids: string[]; semilla: string }
+	| {
+			tipo: "salirAExpedicion";
+			uids: string[];
+			semilla: string;
+			/** Dinero y mochila con los que empieza la expedición (los pone el balance de la expedición). */
+			dinero?: number;
+			mochila?: Record<string, number>;
+	  }
 	/** La escena avanza la expedición con las funciones de `expedicion.ts` y la deja aquí. */
 	| { tipo: "actualizarExpedicion"; expedicion: EstadoExpedicion }
 	| { tipo: "volverDeExpedicion" };
@@ -174,7 +181,11 @@ export function reducir(
 					"salirAExpedicion: ya salió una expedición en esta jornada",
 				);
 			}
-			const expedicion = iniciarDesdeSantuario(s, a.uids, a.semilla);
+			const expedicion = {
+				...iniciarDesdeSantuario(s, a.uids, a.semilla),
+				dinero: a.dinero ?? 0,
+				mochila: a.mochila ?? {},
+			};
 			return {
 				partida: { ...p, expedicion, expedicionJornada: s.jornada },
 				eventos: [],

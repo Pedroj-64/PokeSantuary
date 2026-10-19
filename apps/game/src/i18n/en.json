@@ -256,5 +256,11 @@
 	"gestion.aviso.soloDia": "Management is only available during the day.",
 	"gestion.aviso.sinOpciones": "There is nothing to choose.",
 	"gestion.aviso.hecho": "Done.",
-	"gestion.vacio": "(nothing available)"
+	"gestion.vacio": "(nothing available)",
+	"equipo.titulo": "Expedition team (1 to 6)",
+	"equipo.salir": "Enter the Rift with {n}",
+	"equipo.vacio": "No rested residents to send out.",
+	"santuario.continuar": "E: continue the expedition",
+	"santuario.resumen.sinSitio": "No room in the Sanctuary: {especie}.",
+	"mapa.abandonar": "Esc again: abandon the expedition (counts as a defeat)"
 }

@@ -2,7 +2,7 @@ import especialidades from "@packs/kanto/especialidades.json";
 import especiesCrudas from "@packs/kanto/especies.json";
 import habitats from "@packs/kanto/habitats.json";
 import balance from "@packs/kanto/santuario.json";
-import type { ContextoPartida } from "@santuario/core";
+import type { ContextoPartida, EventoSantuario } from "@santuario/core";
 import type { Especie } from "@santuario/data";
 import { abrirAlmacen } from "../guardado/almacen.js";
 import { obtenerSemilla } from "../semilla.js";
@@ -53,8 +53,36 @@ export function obtenerSesion(): Promise<Abierta> {
 			iniciales: INICIALES,
 		}))();
 	abierta = { ranura, promesa };
+	actual = undefined;
+	promesa.then(({ sesion }) => {
+		if (abierta?.promesa === promesa) actual = sesion;
+	});
 	promesa.catch(() => {
 		if (abierta?.promesa === promesa) abierta = undefined;
 	});
 	return promesa;
 }
+
+let actual: Sesion | undefined;
+
+/**
+ * La sesión ya abierta, si la hay. Las escenas de la expedición la usan sin forzar
+ * su carga: si nadie entró al Santuario (expedición de prueba), no hay nada que guardar.
+ */
+export const sesionAbierta = (): Sesion | undefined => actual;
+
+/** Lo que pasó al volver de una expedición, para mostrarlo en el resumen del Santuario. */
+export interface ResumenPendiente {
+	eventos: EventoSantuario[];
+	recursosAntes: Record<string, number>;
+}
+let pendiente: ResumenPendiente | undefined;
+export const guardarResumenPendiente = (r: ResumenPendiente): void => {
+	pendiente = r;
+};
+/** Entrega el resumen pendiente una sola vez. */
+export const tomarResumenPendiente = (): ResumenPendiente | undefined => {
+	const r = pendiente;
+	pendiente = undefined;
+	return r;
+};

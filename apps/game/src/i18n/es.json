@@ -256,5 +256,11 @@
 	"gestion.aviso.soloDia": "La gestión solo está disponible de día.",
 	"gestion.aviso.sinOpciones": "No hay nada que elegir.",
 	"gestion.aviso.hecho": "Hecho.",
-	"gestion.vacio": "(nada disponible)"
+	"gestion.vacio": "(nada disponible)",
+	"equipo.titulo": "Equipo de expedición (de 1 a 6)",
+	"equipo.salir": "Salir a la Fisura con {n}",
+	"equipo.vacio": "No hay residentes descansados para salir.",
+	"santuario.continuar": "E: continuar la expedición",
+	"santuario.resumen.sinSitio": "No cupo en el Santuario: {especie}.",
+	"mapa.abandonar": "Esc otra vez: abandonar la expedición (cuenta como derrota)"
 }
