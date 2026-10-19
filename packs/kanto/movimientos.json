@@ -1,5 +1,77 @@
 [
 	{
+		"id": "absorb",
+		"nombre": {
+			"es": "Absorber",
+			"en": "Absorb"
+		},
+		"tipo": "grass",
+		"categoria": "especial",
+		"potencia": 20,
+		"precision": 100,
+		"pp": 25
+	},
+	{
+		"id": "agility",
+		"nombre": {
+			"es": "Agilidad",
+			"en": "Agility"
+		},
+		"tipo": "psychic",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 30
+	},
+	{
+		"id": "air-cutter",
+		"nombre": {
+			"es": "Aire Afilado",
+			"en": "Air Cutter"
+		},
+		"tipo": "flying",
+		"categoria": "especial",
+		"potencia": 60,
+		"precision": 95,
+		"pp": 25
+	},
+	{
+		"id": "air-slash",
+		"nombre": {
+			"es": "Tajo Aéreo",
+			"en": "Air Slash"
+		},
+		"tipo": "flying",
+		"categoria": "especial",
+		"potencia": 75,
+		"precision": 95,
+		"pp": 15
+	},
+	{
+		"id": "aqua-tail",
+		"nombre": {
+			"es": "Acua Cola",
+			"en": "Aqua Tail"
+		},
+		"tipo": "water",
+		"categoria": "fisico",
+		"potencia": 90,
+		"precision": 90,
+		"pp": 10
+	},
+	{
+		"id": "astonish",
+		"nombre": {
+			"es": "Impresionar",
+			"en": "Astonish"
+		},
+		"tipo": "ghost",
+		"categoria": "fisico",
+		"potencia": 30,
+		"precision": 100,
+		"pp": 15
+	},
+	{
 		"id": "aura-sphere",
 		"nombre": {
 			"es": "Esfera Aural",
@@ -10,6 +82,42 @@
 		"potencia": 80,
 		"precision": null,
 		"pp": 20
+	},
+	{
+		"id": "baby-doll-eyes",
+		"nombre": {
+			"es": "Ojitos Tiernos",
+			"en": "Baby-Doll Eyes"
+		},
+		"tipo": "fairy",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "baton-pass",
+		"nombre": {
+			"es": "Relevo",
+			"en": "Baton Pass"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 40
+	},
+	{
+		"id": "bite",
+		"nombre": {
+			"es": "Mordisco",
+			"en": "Bite"
+		},
+		"tipo": "dark",
+		"categoria": "fisico",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 25
 	},
 	{
 		"id": "body-slam",
@@ -48,6 +156,30 @@
 		"pp": 15
 	},
 	{
+		"id": "bulk-up",
+		"nombre": {
+			"es": "Corpulencia",
+			"en": "Bulk Up"
+		},
+		"tipo": "fighting",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "bulldoze",
+		"nombre": {
+			"es": "Terratemblor",
+			"en": "Bulldoze"
+		},
+		"tipo": "ground",
+		"categoria": "fisico",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 20
+	},
+	{
 		"id": "bullet-punch",
 		"nombre": {
 			"es": "Puño Bala",
@@ -58,6 +190,18 @@
 		"potencia": 40,
 		"precision": 100,
 		"pp": 30
+	},
+	{
+		"id": "charm",
+		"nombre": {
+			"es": "Encanto",
+			"en": "Charm"
+		},
+		"tipo": "fairy",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 20
 	},
 	{
 		"id": "close-combat",
@@ -72,6 +216,78 @@
 		"pp": 5
 	},
 	{
+		"id": "confuse-ray",
+		"nombre": {
+			"es": "Rayo Confuso",
+			"en": "Confuse Ray"
+		},
+		"tipo": "ghost",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "copycat",
+		"nombre": {
+			"es": "Copión",
+			"en": "Copycat"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "covet",
+		"nombre": {
+			"es": "Antojo",
+			"en": "Covet"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 25
+	},
+	{
+		"id": "cross-chop",
+		"nombre": {
+			"es": "Tajo Cruzado",
+			"en": "Cross Chop"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 100,
+		"precision": 80,
+		"pp": 5
+	},
+	{
+		"id": "curse",
+		"nombre": {
+			"es": "Maldición",
+			"en": "Curse"
+		},
+		"tipo": "ghost",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 10
+	},
+	{
+		"id": "dark-pulse",
+		"nombre": {
+			"es": "Pulso Umbrío",
+			"en": "Dark Pulse"
+		},
+		"tipo": "dark",
+		"categoria": "especial",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
 		"id": "dazzling-gleam",
 		"nombre": {
 			"es": "Brillo Mágico",
@@ -82,6 +298,78 @@
 		"potencia": 80,
 		"precision": 100,
 		"pp": 10
+	},
+	{
+		"id": "defense-curl",
+		"nombre": {
+			"es": "Rizo Defensa",
+			"en": "Defense Curl"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 40
+	},
+	{
+		"id": "destiny-bond",
+		"nombre": {
+			"es": "Mismo Destino",
+			"en": "Destiny Bond"
+		},
+		"tipo": "ghost",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 5
+	},
+	{
+		"id": "discharge",
+		"nombre": {
+			"es": "Chispazo",
+			"en": "Discharge"
+		},
+		"tipo": "electric",
+		"categoria": "especial",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "double-edge",
+		"nombre": {
+			"es": "Doble Filo",
+			"en": "Double-Edge"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "double-team",
+		"nombre": {
+			"es": "Doble Equipo",
+			"en": "Double Team"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 15
+	},
+	{
+		"id": "dragon-breath",
+		"nombre": {
+			"es": "Dragoaliento",
+			"en": "Dragon Breath"
+		},
+		"tipo": "dragon",
+		"categoria": "especial",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 20
 	},
 	{
 		"id": "dragon-claw",
@@ -96,6 +384,42 @@
 		"pp": 15
 	},
 	{
+		"id": "dream-eater",
+		"nombre": {
+			"es": "Comesueños",
+			"en": "Dream Eater"
+		},
+		"tipo": "psychic",
+		"categoria": "especial",
+		"potencia": 100,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "dual-chop",
+		"nombre": {
+			"es": "Golpe Bis",
+			"en": "Dual Chop"
+		},
+		"tipo": "dragon",
+		"categoria": "fisico",
+		"potencia": 40,
+		"precision": 90,
+		"pp": 15
+	},
+	{
+		"id": "dynamic-punch",
+		"nombre": {
+			"es": "Puño Dinámico",
+			"en": "Dynamic Punch"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 100,
+		"precision": 50,
+		"pp": 5
+	},
+	{
 		"id": "earthquake",
 		"nombre": {
 			"es": "Terremoto",
@@ -106,6 +430,78 @@
 		"potencia": 100,
 		"precision": 100,
 		"pp": 10
+	},
+	{
+		"id": "electro-ball",
+		"nombre": {
+			"es": "Bola Voltio",
+			"en": "Electro Ball"
+		},
+		"tipo": "electric",
+		"categoria": "especial",
+		"potencia": null,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "ember",
+		"nombre": {
+			"es": "Ascuas",
+			"en": "Ember"
+		},
+		"tipo": "fire",
+		"categoria": "especial",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 25
+	},
+	{
+		"id": "explosion",
+		"nombre": {
+			"es": "Explosión",
+			"en": "Explosion"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 250,
+		"precision": 100,
+		"pp": 5
+	},
+	{
+		"id": "feint",
+		"nombre": {
+			"es": "Amago",
+			"en": "Feint"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 30,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "fire-fang",
+		"nombre": {
+			"es": "Colmillo Ígneo",
+			"en": "Fire Fang"
+		},
+		"tipo": "fire",
+		"categoria": "fisico",
+		"potencia": 65,
+		"precision": 95,
+		"pp": 15
+	},
+	{
+		"id": "fire-spin",
+		"nombre": {
+			"es": "Giro Fuego",
+			"en": "Fire Spin"
+		},
+		"tipo": "fire",
+		"categoria": "especial",
+		"potencia": 35,
+		"precision": 85,
+		"pp": 15
 	},
 	{
 		"id": "flamethrower",
@@ -120,6 +516,30 @@
 		"pp": 15
 	},
 	{
+		"id": "flare-blitz",
+		"nombre": {
+			"es": "Envite Ígneo",
+			"en": "Flare Blitz"
+		},
+		"tipo": "fire",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "focus-energy",
+		"nombre": {
+			"es": "Foco Energía",
+			"en": "Focus Energy"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 30
+	},
+	{
 		"id": "giga-drain",
 		"nombre": {
 			"es": "Gigadrenado",
@@ -130,6 +550,78 @@
 		"potencia": 75,
 		"precision": 100,
 		"pp": 10
+	},
+	{
+		"id": "growl",
+		"nombre": {
+			"es": "Gruñido",
+			"en": "Growl"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 40
+	},
+	{
+		"id": "growth",
+		"nombre": {
+			"es": "Desarrollo",
+			"en": "Growth"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "haze",
+		"nombre": {
+			"es": "Niebla",
+			"en": "Haze"
+		},
+		"tipo": "ice",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 30
+	},
+	{
+		"id": "helping-hand",
+		"nombre": {
+			"es": "Refuerzo",
+			"en": "Helping Hand"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "hex",
+		"nombre": {
+			"es": "Infortunio",
+			"en": "Hex"
+		},
+		"tipo": "ghost",
+		"categoria": "especial",
+		"potencia": 65,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "hydro-pump",
+		"nombre": {
+			"es": "Hidrobomba",
+			"en": "Hydro Pump"
+		},
+		"tipo": "water",
+		"categoria": "especial",
+		"potencia": 110,
+		"precision": 80,
+		"pp": 5
 	},
 	{
 		"id": "hypnosis",
@@ -156,6 +648,42 @@
 		"pp": 10
 	},
 	{
+		"id": "inferno",
+		"nombre": {
+			"es": "Infierno",
+			"en": "Inferno"
+		},
+		"tipo": "fire",
+		"categoria": "especial",
+		"potencia": 100,
+		"precision": 50,
+		"pp": 5
+	},
+	{
+		"id": "iron-defense",
+		"nombre": {
+			"es": "Defensa Férrea",
+			"en": "Iron Defense"
+		},
+		"tipo": "steel",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 15
+	},
+	{
+		"id": "iron-tail",
+		"nombre": {
+			"es": "Cola Férrea",
+			"en": "Iron Tail"
+		},
+		"tipo": "steel",
+		"categoria": "fisico",
+		"potencia": 100,
+		"precision": 75,
+		"pp": 15
+	},
+	{
 		"id": "knock-off",
 		"nombre": {
 			"es": "Desarme",
@@ -165,6 +693,150 @@
 		"categoria": "fisico",
 		"potencia": 65,
 		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "leech-seed",
+		"nombre": {
+			"es": "Drenadoras",
+			"en": "Leech Seed"
+		},
+		"tipo": "grass",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 90,
+		"pp": 10
+	},
+	{
+		"id": "leer",
+		"nombre": {
+			"es": "Malicioso",
+			"en": "Leer"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "lick",
+		"nombre": {
+			"es": "Lengüetazo",
+			"en": "Lick"
+		},
+		"tipo": "ghost",
+		"categoria": "fisico",
+		"potencia": 30,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "light-screen",
+		"nombre": {
+			"es": "Pantalla de Luz",
+			"en": "Light Screen"
+		},
+		"tipo": "psychic",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 30
+	},
+	{
+		"id": "low-kick",
+		"nombre": {
+			"es": "Patada Baja",
+			"en": "Low Kick"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": null,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "low-sweep",
+		"nombre": {
+			"es": "Puntapié",
+			"en": "Low Sweep"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 65,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "mean-look",
+		"nombre": {
+			"es": "Mal de Ojo",
+			"en": "Mean Look"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 5
+	},
+	{
+		"id": "nasty-plot",
+		"nombre": {
+			"es": "Maquinación",
+			"en": "Nasty Plot"
+		},
+		"tipo": "dark",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "night-shade",
+		"nombre": {
+			"es": "Tinieblas",
+			"en": "Night Shade"
+		},
+		"tipo": "ghost",
+		"categoria": "especial",
+		"potencia": null,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "nuzzle",
+		"nombre": {
+			"es": "Moflete Estático",
+			"en": "Nuzzle"
+		},
+		"tipo": "electric",
+		"categoria": "fisico",
+		"potencia": 20,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "payback",
+		"nombre": {
+			"es": "Vendetta",
+			"en": "Payback"
+		},
+		"tipo": "dark",
+		"categoria": "fisico",
+		"potencia": 50,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "play-nice",
+		"nombre": {
+			"es": "Camaradería",
+			"en": "Play Nice"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
 		"pp": 20
 	},
 	{
@@ -178,6 +850,30 @@
 		"potencia": 50,
 		"precision": 100,
 		"pp": 15
+	},
+	{
+		"id": "poison-powder",
+		"nombre": {
+			"es": "Polvo Veneno",
+			"en": "Poison Powder"
+		},
+		"tipo": "poison",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 75,
+		"pp": 35
+	},
+	{
+		"id": "power-whip",
+		"nombre": {
+			"es": "Latigazo",
+			"en": "Power Whip"
+		},
+		"tipo": "grass",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 85,
+		"pp": 10
 	},
 	{
 		"id": "protect",
@@ -216,6 +912,30 @@
 		"pp": 30
 	},
 	{
+		"id": "quick-guard",
+		"nombre": {
+			"es": "Anticipo",
+			"en": "Quick Guard"
+		},
+		"tipo": "fighting",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 15
+	},
+	{
+		"id": "rain-dance",
+		"nombre": {
+			"es": "Danza Lluvia",
+			"en": "Rain Dance"
+		},
+		"tipo": "water",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 5
+	},
+	{
 		"id": "rapid-spin",
 		"nombre": {
 			"es": "Giro Rápido",
@@ -226,6 +946,54 @@
 		"potencia": 50,
 		"precision": 100,
 		"pp": 40
+	},
+	{
+		"id": "razor-leaf",
+		"nombre": {
+			"es": "Hoja Afilada",
+			"en": "Razor Leaf"
+		},
+		"tipo": "grass",
+		"categoria": "fisico",
+		"potencia": 55,
+		"precision": 95,
+		"pp": 25
+	},
+	{
+		"id": "revenge",
+		"nombre": {
+			"es": "Desquite",
+			"en": "Revenge"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "rock-blast",
+		"nombre": {
+			"es": "Pedrada",
+			"en": "Rock Blast"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 25,
+		"precision": 90,
+		"pp": 10
+	},
+	{
+		"id": "rock-polish",
+		"nombre": {
+			"es": "Pulimento",
+			"en": "Rock Polish"
+		},
+		"tipo": "rock",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
 	},
 	{
 		"id": "rock-slide",
@@ -240,6 +1008,30 @@
 		"pp": 10
 	},
 	{
+		"id": "rock-throw",
+		"nombre": {
+			"es": "Lanzarrocas",
+			"en": "Rock Throw"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 50,
+		"precision": 90,
+		"pp": 15
+	},
+	{
+		"id": "rollout",
+		"nombre": {
+			"es": "Rodar",
+			"en": "Rollout"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 30,
+		"precision": 90,
+		"pp": 20
+	},
+	{
 		"id": "roost",
 		"nombre": {
 			"es": "Respiro",
@@ -249,6 +1041,78 @@
 		"categoria": "estado",
 		"potencia": null,
 		"precision": null,
+		"pp": 5
+	},
+	{
+		"id": "sand-attack",
+		"nombre": {
+			"es": "Ataque Arena",
+			"en": "Sand Attack"
+		},
+		"tipo": "ground",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "scary-face",
+		"nombre": {
+			"es": "Cara Susto",
+			"en": "Scary Face"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "scratch",
+		"nombre": {
+			"es": "Arañazo",
+			"en": "Scratch"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 35
+	},
+	{
+		"id": "seed-bomb",
+		"nombre": {
+			"es": "Bomba Germen",
+			"en": "Seed Bomb"
+		},
+		"tipo": "grass",
+		"categoria": "fisico",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "seismic-toss",
+		"nombre": {
+			"es": "Sísmico",
+			"en": "Seismic Toss"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": null,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "self-destruct",
+		"nombre": {
+			"es": "Autodestrucción",
+			"en": "Self-Destruct"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 200,
+		"precision": 100,
 		"pp": 5
 	},
 	{
@@ -262,6 +1126,30 @@
 		"potencia": 80,
 		"precision": 100,
 		"pp": 15
+	},
+	{
+		"id": "shell-smash",
+		"nombre": {
+			"es": "Rompecoraza",
+			"en": "Shell Smash"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 15
+	},
+	{
+		"id": "slash",
+		"nombre": {
+			"es": "Cuchillada",
+			"en": "Slash"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 70,
+		"precision": 100,
+		"pp": 20
 	},
 	{
 		"id": "sleep-powder",
@@ -288,6 +1176,66 @@
 		"pp": 10
 	},
 	{
+		"id": "smack-down",
+		"nombre": {
+			"es": "Antiaéreo",
+			"en": "Smack Down"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 50,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "smokescreen",
+		"nombre": {
+			"es": "Pantalla de Humo",
+			"en": "Smokescreen"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "solar-beam",
+		"nombre": {
+			"es": "Rayo Solar",
+			"en": "Solar Beam"
+		},
+		"tipo": "grass",
+		"categoria": "especial",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "spark",
+		"nombre": {
+			"es": "Chispa",
+			"en": "Spark"
+		},
+		"tipo": "electric",
+		"categoria": "fisico",
+		"potencia": 65,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "spite",
+		"nombre": {
+			"es": "Rencor",
+			"en": "Spite"
+		},
+		"tipo": "ghost",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 10
+	},
+	{
 		"id": "stealth-rock",
 		"nombre": {
 			"es": "Trampa Rocas",
@@ -297,6 +1245,54 @@
 		"categoria": "estado",
 		"potencia": null,
 		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "stone-edge",
+		"nombre": {
+			"es": "Roca Afilada",
+			"en": "Stone Edge"
+		},
+		"tipo": "rock",
+		"categoria": "fisico",
+		"potencia": 100,
+		"precision": 80,
+		"pp": 5
+	},
+	{
+		"id": "strength",
+		"nombre": {
+			"es": "Fuerza",
+			"en": "Strength"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 80,
+		"precision": 100,
+		"pp": 15
+	},
+	{
+		"id": "sucker-punch",
+		"nombre": {
+			"es": "Golpe Bajo",
+			"en": "Sucker Punch"
+		},
+		"tipo": "dark",
+		"categoria": "fisico",
+		"potencia": 70,
+		"precision": 100,
+		"pp": 5
+	},
+	{
+		"id": "supersonic",
+		"nombre": {
+			"es": "Supersónico",
+			"en": "Supersonic"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 55,
 		"pp": 20
 	},
 	{
@@ -312,6 +1308,114 @@
 		"pp": 15
 	},
 	{
+		"id": "sweet-kiss",
+		"nombre": {
+			"es": "Beso Dulce",
+			"en": "Sweet Kiss"
+		},
+		"tipo": "fairy",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 75,
+		"pp": 10
+	},
+	{
+		"id": "sweet-scent",
+		"nombre": {
+			"es": "Dulce Aroma",
+			"en": "Sweet Scent"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "swift",
+		"nombre": {
+			"es": "Meteoros",
+			"en": "Swift"
+		},
+		"tipo": "normal",
+		"categoria": "especial",
+		"potencia": 60,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "synthesis",
+		"nombre": {
+			"es": "Fotosíntesis",
+			"en": "Synthesis"
+		},
+		"tipo": "grass",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 5
+	},
+	{
+		"id": "tackle",
+		"nombre": {
+			"es": "Placaje",
+			"en": "Tackle"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 35
+	},
+	{
+		"id": "tail-whip",
+		"nombre": {
+			"es": "Agitacola",
+			"en": "Tail Whip"
+		},
+		"tipo": "normal",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 30
+	},
+	{
+		"id": "take-down",
+		"nombre": {
+			"es": "Derribo",
+			"en": "Take Down"
+		},
+		"tipo": "normal",
+		"categoria": "fisico",
+		"potencia": 90,
+		"precision": 85,
+		"pp": 20
+	},
+	{
+		"id": "teleport",
+		"nombre": {
+			"es": "Teletransporte",
+			"en": "Teleport"
+		},
+		"tipo": "psychic",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 20
+	},
+	{
+		"id": "thunder",
+		"nombre": {
+			"es": "Trueno",
+			"en": "Thunder"
+		},
+		"tipo": "electric",
+		"categoria": "especial",
+		"potencia": 110,
+		"precision": 70,
+		"pp": 10
+	},
+	{
 		"id": "thunder-punch",
 		"nombre": {
 			"es": "Puño Trueno",
@@ -322,6 +1426,18 @@
 		"potencia": 75,
 		"precision": 100,
 		"pp": 15
+	},
+	{
+		"id": "thunder-shock",
+		"nombre": {
+			"es": "Impactrueno",
+			"en": "Thunder Shock"
+		},
+		"tipo": "electric",
+		"categoria": "especial",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 30
 	},
 	{
 		"id": "thunder-wave",
@@ -360,6 +1476,78 @@
 		"pp": 20
 	},
 	{
+		"id": "venoshock",
+		"nombre": {
+			"es": "Carga Tóxica",
+			"en": "Venoshock"
+		},
+		"tipo": "poison",
+		"categoria": "especial",
+		"potencia": 65,
+		"precision": 100,
+		"pp": 10
+	},
+	{
+		"id": "vine-whip",
+		"nombre": {
+			"es": "Látigo Cepa",
+			"en": "Vine Whip"
+		},
+		"tipo": "grass",
+		"categoria": "fisico",
+		"potencia": 45,
+		"precision": 100,
+		"pp": 25
+	},
+	{
+		"id": "vital-throw",
+		"nombre": {
+			"es": "Llave Vital",
+			"en": "Vital Throw"
+		},
+		"tipo": "fighting",
+		"categoria": "fisico",
+		"potencia": 70,
+		"precision": null,
+		"pp": 10
+	},
+	{
+		"id": "water-gun",
+		"nombre": {
+			"es": "Pistola Agua",
+			"en": "Water Gun"
+		},
+		"tipo": "water",
+		"categoria": "especial",
+		"potencia": 40,
+		"precision": 100,
+		"pp": 25
+	},
+	{
+		"id": "water-pulse",
+		"nombre": {
+			"es": "Hidropulso",
+			"en": "Water Pulse"
+		},
+		"tipo": "water",
+		"categoria": "especial",
+		"potencia": 60,
+		"precision": 100,
+		"pp": 20
+	},
+	{
+		"id": "wave-crash",
+		"nombre": {
+			"es": "Envite Acuático",
+			"en": "Wave Crash"
+		},
+		"tipo": "water",
+		"categoria": "fisico",
+		"potencia": 120,
+		"precision": 100,
+		"pp": 10
+	},
+	{
 		"id": "will-o-wisp",
 		"nombre": {
 			"es": "Fuego Fatuo",
@@ -370,5 +1558,29 @@
 		"potencia": null,
 		"precision": 85,
 		"pp": 15
+	},
+	{
+		"id": "withdraw",
+		"nombre": {
+			"es": "Refugio",
+			"en": "Withdraw"
+		},
+		"tipo": "water",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": null,
+		"pp": 40
+	},
+	{
+		"id": "worry-seed",
+		"nombre": {
+			"es": "Abatidoras",
+			"en": "Worry Seed"
+		},
+		"tipo": "grass",
+		"categoria": "estado",
+		"potencia": null,
+		"precision": 100,
+		"pp": 10
 	}
 ]

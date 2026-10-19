@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+	AprendizajeSchema,
 	type Elites,
 	ElitesSchema,
 	EspecieSchema,
@@ -16,6 +17,7 @@ import {
 	TrabajosPorTipoSchema,
 } from "@santuario/data";
 import { z } from "zod";
+import { aprendizajePorNivel } from "./aprendizaje.js";
 import { archivosDelPack } from "./construir.js";
 import { resolverEnPack, sha256 } from "./manifiesto.js";
 import { erroresDeSets, unirMovimiento } from "./movimientos.js";
@@ -116,6 +118,42 @@ export async function verificar(
 		for (const m of lista)
 			if (JSON.stringify(unirMovimiento(m)) !== JSON.stringify(m))
 				throw new Error(`${m.id}: difiere de @pkmn/data`);
+	});
+	await intentar(async () => {
+		if (!existsSync(join(dirPack, "aprendizaje.json")))
+			throw new Error("aprendizaje.json: no existe");
+		const resultado = AprendizajeSchema.safeParse(
+			leer(dirPack, "aprendizaje.json"),
+		);
+		if (!resultado.success)
+			throw new Error(`aprendizaje.json: ${resultado.error.message}`);
+		const aprendizaje = resultado.data;
+		for (const especie of especies)
+			if (!(especie in aprendizaje))
+				errores.push(`aprendizaje.json: falta ${especie}`);
+		const ids = new Set(movs.map((m) => m.id));
+		for (const [especie, entradas] of Object.entries(aprendizaje)) {
+			if (!especies.includes(especie))
+				errores.push(`aprendizaje.json: ${especie} no está en especies.json`);
+			for (const entrada of entradas)
+				if (!ids.has(entrada.movimiento))
+					errores.push(
+						`aprendizaje.json: ${especie}: ${entrada.movimiento} no está en movimientos.json`,
+					);
+			let esperado: { nivel: number; movimiento: string }[];
+			try {
+				esperado = await aprendizajePorNivel(especie);
+			} catch (e) {
+				errores.push(
+					`aprendizaje.json: ${especie}: ${e instanceof Error ? e.message : String(e)}`,
+				);
+				continue;
+			}
+			if (JSON.stringify(esperado) !== JSON.stringify(entradas))
+				errores.push(
+					`aprendizaje.json: ${especie}: no coincide con @pkmn/data`,
+				);
+		}
 	});
 	await intentar(async () => {
 		const sets = z.array(SetCombateSchema).parse(leer(dirPack, "sets.json"));

@@ -8,18 +8,78 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Oficial } from "@santuario/data";
+import type { Movimiento, Oficial } from "@santuario/data";
 import { describe, expect, it } from "vitest";
+import { aprendizajePorNivel } from "./aprendizaje.js";
 import { sha256 } from "./manifiesto.js";
+import {
+	type MovimientoApi,
+	recortarMovimiento,
+	unirMovimiento,
+} from "./movimientos.js";
+import { gen9 } from "./unir.js";
 import { verificar } from "./verificar.js";
 
 const PACK_REAL = fileURLToPath(
 	new URL("../../../packs/kanto", import.meta.url),
 );
 
+const ESPECIES_PACK: string[] = (
+	JSON.parse(readFileSync(join(PACK_REAL, "especies.json"), "utf8")) as {
+		id: string;
+	}[]
+).map((e) => e.id);
+
+// El pack real todavía no trae aprendizaje.json ni los movimientos que se
+// aprenden (los genera `pnpm data:build`); la copia temporal los sintetiza con
+// el mismo canal para probar verificar.
+const APRENDIZAJE: Record<string, { nivel: number; movimiento: string }[]> = {};
+for (const especie of [...ESPECIES_PACK].sort())
+	APRENDIZAJE[especie] = await aprendizajePorNivel(especie);
+const APRENDIZAJE_TEXTO = `${JSON.stringify(APRENDIZAJE, null, "\t")}\n`;
+
+/** Respuesta de PokeAPI `move/{slug}` mínima, derivada de @pkmn/data. */
+const recorte = (id: string): MovimientoApi => {
+	const m = gen9.moves.get(id);
+	if (!m?.exists) throw new Error(`${id}: no existe en @pkmn/data`);
+	return {
+		name: id,
+		type: { name: m.type.toLowerCase() },
+		damage_class: { name: m.category.toLowerCase() },
+		power: m.basePower > 0 ? m.basePower : null,
+		accuracy: m.accuracy === true ? null : m.accuracy,
+		pp: m.pp,
+		names: [
+			{ language: { name: "es" }, name: m.name },
+			{ language: { name: "en" }, name: m.name },
+		],
+	};
+};
+
+const MOVIMIENTOS_PACK: Movimiento[] = JSON.parse(
+	readFileSync(join(PACK_REAL, "movimientos.json"), "utf8"),
+);
+const idsPack = new Set(MOVIMIENTOS_PACK.map((m) => m.id));
+for (const slug of JSON.parse(
+	readFileSync(
+		fileURLToPath(new URL("../movimientos.json", import.meta.url)),
+		"utf8",
+	),
+) as string[]) {
+	if (!idsPack.has(slug))
+		MOVIMIENTOS_PACK.push(unirMovimiento(recortarMovimiento(recorte(slug))));
+}
+const MOVIMIENTOS_TEXTO = `${JSON.stringify(MOVIMIENTOS_PACK, null, "\t")}\n`;
+
 const copia = () => {
 	const dir = mkdtempSync(join(tmpdir(), "pack-"));
 	cpSync(PACK_REAL, dir, { recursive: true });
+	writeFileSync(join(dir, "aprendizaje.json"), APRENDIZAJE_TEXTO);
+	writeFileSync(join(dir, "movimientos.json"), MOVIMIENTOS_TEXTO);
+	const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
+	for (const f of ["aprendizaje.json", "movimientos.json"])
+		m.archivos[f] = sha256(join(dir, f));
+	writeFileSync(join(dir, "manifest.json"), JSON.stringify(m));
 	return dir;
 };
 
@@ -151,6 +211,67 @@ describe("verificar", () => {
 			writeFileSync(lista, "[]");
 			expect((await verificar(copia(), lista)).join("\n")).toMatch(
 				/no está en tools\/pipeline\/movimientos\.json/,
+			);
+		});
+	});
+
+	describe("aprendizaje.json", () => {
+		type Niveles = Record<string, { nivel: number; movimiento: string }[]>;
+		const editar = (cambio: (a: Niveles) => void) => {
+			const dir = copia();
+			const ruta = join(dir, "aprendizaje.json");
+			const a = JSON.parse(readFileSync(ruta, "utf8")) as Niveles;
+			cambio(a);
+			writeFileSync(ruta, JSON.stringify(a));
+			resellar(dir);
+			return dir;
+		};
+
+		it("falla si falta una especie", async () => {
+			const dir = editar((a) => delete a.charmander);
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/aprendizaje\.json: falta charmander/,
+			);
+		});
+
+		it("falla si sobra una especie", async () => {
+			const dir = editar((a) => {
+				a.mew = [{ nivel: 1, movimiento: "pound" }];
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/aprendizaje\.json: mew no está en especies\.json/,
+			);
+		});
+
+		it("falla si un movimiento no está en movimientos.json del pack", async () => {
+			const dir = editar((a) => {
+				const lista = a.charmander;
+				if (!lista) throw new Error("el pack no trae charmander");
+				lista[0] = { nivel: 1, movimiento: "pound" };
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/aprendizaje\.json: charmander: pound no está en movimientos\.json/,
+			);
+		});
+
+		it("falla si se altera una entrada a mano", async () => {
+			const dir = editar((a) => {
+				const lista = a.charmander;
+				const entrada = lista?.[2];
+				if (!lista || !entrada)
+					throw new Error("el pack no trae la tercera entrada");
+				lista[2] = { ...entrada, nivel: 5 };
+			});
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/aprendizaje\.json: charmander: no coincide con @pkmn\/data/,
+			);
+		});
+
+		it("falla si falta en el pack", async () => {
+			const dir = copia();
+			rmSync(join(dir, "aprendizaje.json"));
+			expect((await verificar(dir)).join("\n")).toMatch(
+				/aprendizaje\.json: no existe/,
 			);
 		});
 	});

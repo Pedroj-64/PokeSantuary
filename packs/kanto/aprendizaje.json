@@ -1,0 +1,546 @@
+{
+	"abra": [
+		{
+			"nivel": 1,
+			"movimiento": "teleport"
+		}
+	],
+	"bulbasaur": [
+		{
+			"nivel": 1,
+			"movimiento": "growl"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tackle"
+		},
+		{
+			"nivel": 3,
+			"movimiento": "vine-whip"
+		},
+		{
+			"nivel": 6,
+			"movimiento": "growth"
+		},
+		{
+			"nivel": 9,
+			"movimiento": "leech-seed"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "razor-leaf"
+		},
+		{
+			"nivel": 15,
+			"movimiento": "poison-powder"
+		},
+		{
+			"nivel": 15,
+			"movimiento": "sleep-powder"
+		},
+		{
+			"nivel": 18,
+			"movimiento": "seed-bomb"
+		},
+		{
+			"nivel": 21,
+			"movimiento": "take-down"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "sweet-scent"
+		},
+		{
+			"nivel": 27,
+			"movimiento": "synthesis"
+		},
+		{
+			"nivel": 30,
+			"movimiento": "worry-seed"
+		},
+		{
+			"nivel": 33,
+			"movimiento": "power-whip"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "solar-beam"
+		}
+	],
+	"charmander": [
+		{
+			"nivel": 1,
+			"movimiento": "growl"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "scratch"
+		},
+		{
+			"nivel": 4,
+			"movimiento": "ember"
+		},
+		{
+			"nivel": 8,
+			"movimiento": "smokescreen"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "dragon-breath"
+		},
+		{
+			"nivel": 17,
+			"movimiento": "fire-fang"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "slash"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "flamethrower"
+		},
+		{
+			"nivel": 28,
+			"movimiento": "scary-face"
+		},
+		{
+			"nivel": 32,
+			"movimiento": "fire-spin"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "inferno"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "flare-blitz"
+		}
+	],
+	"eevee": [
+		{
+			"nivel": 1,
+			"movimiento": "covet"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "growl"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "helping-hand"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tackle"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tail-whip"
+		},
+		{
+			"nivel": 5,
+			"movimiento": "sand-attack"
+		},
+		{
+			"nivel": 10,
+			"movimiento": "quick-attack"
+		},
+		{
+			"nivel": 15,
+			"movimiento": "baby-doll-eyes"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "swift"
+		},
+		{
+			"nivel": 25,
+			"movimiento": "bite"
+		},
+		{
+			"nivel": 30,
+			"movimiento": "copycat"
+		},
+		{
+			"nivel": 35,
+			"movimiento": "baton-pass"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "take-down"
+		},
+		{
+			"nivel": 45,
+			"movimiento": "charm"
+		},
+		{
+			"nivel": 50,
+			"movimiento": "double-edge"
+		}
+	],
+	"gastly": [
+		{
+			"nivel": 1,
+			"movimiento": "confuse-ray"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "lick"
+		},
+		{
+			"nivel": 4,
+			"movimiento": "hypnosis"
+		},
+		{
+			"nivel": 8,
+			"movimiento": "mean-look"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "payback"
+		},
+		{
+			"nivel": 16,
+			"movimiento": "spite"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "curse"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "hex"
+		},
+		{
+			"nivel": 28,
+			"movimiento": "night-shade"
+		},
+		{
+			"nivel": 32,
+			"movimiento": "sucker-punch"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "dark-pulse"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "shadow-ball"
+		},
+		{
+			"nivel": 44,
+			"movimiento": "destiny-bond"
+		},
+		{
+			"nivel": 48,
+			"movimiento": "dream-eater"
+		}
+	],
+	"geodude": [
+		{
+			"nivel": 1,
+			"movimiento": "defense-curl"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tackle"
+		},
+		{
+			"nivel": 6,
+			"movimiento": "rock-polish"
+		},
+		{
+			"nivel": 10,
+			"movimiento": "rollout"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "bulldoze"
+		},
+		{
+			"nivel": 16,
+			"movimiento": "rock-throw"
+		},
+		{
+			"nivel": 18,
+			"movimiento": "smack-down"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "self-destruct"
+		},
+		{
+			"nivel": 28,
+			"movimiento": "stealth-rock"
+		},
+		{
+			"nivel": 30,
+			"movimiento": "rock-blast"
+		},
+		{
+			"nivel": 34,
+			"movimiento": "earthquake"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "explosion"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "double-edge"
+		},
+		{
+			"nivel": 42,
+			"movimiento": "stone-edge"
+		}
+	],
+	"machop": [
+		{
+			"nivel": 1,
+			"movimiento": "leer"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "low-kick"
+		},
+		{
+			"nivel": 4,
+			"movimiento": "focus-energy"
+		},
+		{
+			"nivel": 8,
+			"movimiento": "revenge"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "low-sweep"
+		},
+		{
+			"nivel": 16,
+			"movimiento": "knock-off"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "scary-face"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "vital-throw"
+		},
+		{
+			"nivel": 29,
+			"movimiento": "strength"
+		},
+		{
+			"nivel": 32,
+			"movimiento": "dual-chop"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "bulk-up"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "seismic-toss"
+		},
+		{
+			"nivel": 44,
+			"movimiento": "dynamic-punch"
+		},
+		{
+			"nivel": 48,
+			"movimiento": "cross-chop"
+		}
+	],
+	"pikachu": [
+		{
+			"nivel": 1,
+			"movimiento": "charm"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "growl"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "nasty-plot"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "nuzzle"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "play-nice"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "quick-attack"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "sweet-kiss"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tail-whip"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "thunder-shock"
+		},
+		{
+			"nivel": 4,
+			"movimiento": "thunder-wave"
+		},
+		{
+			"nivel": 8,
+			"movimiento": "double-team"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "electro-ball"
+		},
+		{
+			"nivel": 16,
+			"movimiento": "feint"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "spark"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "agility"
+		},
+		{
+			"nivel": 28,
+			"movimiento": "iron-tail"
+		},
+		{
+			"nivel": 32,
+			"movimiento": "discharge"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "thunderbolt"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "light-screen"
+		},
+		{
+			"nivel": 44,
+			"movimiento": "thunder"
+		}
+	],
+	"squirtle": [
+		{
+			"nivel": 1,
+			"movimiento": "tackle"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "tail-whip"
+		},
+		{
+			"nivel": 3,
+			"movimiento": "water-gun"
+		},
+		{
+			"nivel": 6,
+			"movimiento": "withdraw"
+		},
+		{
+			"nivel": 9,
+			"movimiento": "rapid-spin"
+		},
+		{
+			"nivel": 12,
+			"movimiento": "bite"
+		},
+		{
+			"nivel": 15,
+			"movimiento": "water-pulse"
+		},
+		{
+			"nivel": 18,
+			"movimiento": "protect"
+		},
+		{
+			"nivel": 21,
+			"movimiento": "rain-dance"
+		},
+		{
+			"nivel": 24,
+			"movimiento": "aqua-tail"
+		},
+		{
+			"nivel": 27,
+			"movimiento": "shell-smash"
+		},
+		{
+			"nivel": 30,
+			"movimiento": "iron-defense"
+		},
+		{
+			"nivel": 33,
+			"movimiento": "hydro-pump"
+		},
+		{
+			"nivel": 36,
+			"movimiento": "wave-crash"
+		}
+	],
+	"zubat": [
+		{
+			"nivel": 1,
+			"movimiento": "absorb"
+		},
+		{
+			"nivel": 1,
+			"movimiento": "supersonic"
+		},
+		{
+			"nivel": 5,
+			"movimiento": "astonish"
+		},
+		{
+			"nivel": 10,
+			"movimiento": "mean-look"
+		},
+		{
+			"nivel": 15,
+			"movimiento": "poison-fang"
+		},
+		{
+			"nivel": 20,
+			"movimiento": "quick-guard"
+		},
+		{
+			"nivel": 25,
+			"movimiento": "air-cutter"
+		},
+		{
+			"nivel": 30,
+			"movimiento": "bite"
+		},
+		{
+			"nivel": 35,
+			"movimiento": "haze"
+		},
+		{
+			"nivel": 40,
+			"movimiento": "venoshock"
+		},
+		{
+			"nivel": 45,
+			"movimiento": "confuse-ray"
+		},
+		{
+			"nivel": 50,
+			"movimiento": "air-slash"
+		}
+	]
+}

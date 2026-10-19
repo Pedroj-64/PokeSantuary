@@ -1,11 +1,14 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+	type Aprendizaje,
+	AprendizajeSchema,
 	MovimientoSchema,
 	SetCombateSchema,
 	TrabajosPorTipoSchema,
 } from "@santuario/data";
 import { z } from "zod";
+import { type AprendizajeNivel, aprendizajePorNivel } from "./aprendizaje.js";
 import { descargar, descargarMovimiento, type Red } from "./descargar.js";
 import { sha256 } from "./manifiesto.js";
 import {
@@ -33,6 +36,33 @@ export const archivosDelPack = (dirPack: string) =>
 		.sort();
 
 export const aJson = (v: unknown) => `${JSON.stringify(v, null, "\t")}\n`;
+
+// Movimientos por nivel de todas las especies, con las claves ordenadas. Exige
+// que el pipeline descargue todos los movimientos que hacen falta.
+async function generarAprendizaje(
+	especies: string[],
+	movimientosDisponibles: string[],
+): Promise<Aprendizaje> {
+	const crudo: Record<string, AprendizajeNivel[]> = {};
+	for (const especie of [...especies].sort())
+		crudo[especie] = await aprendizajePorNivel(especie);
+	const aprendizaje = AprendizajeSchema.parse(crudo);
+	const disponibles = new Set(movimientosDisponibles);
+	const faltan = [
+		...new Set(
+			Object.values(aprendizaje).flatMap((lista) =>
+				lista.map((e) => e.movimiento),
+			),
+		),
+	]
+		.filter((m) => !disponibles.has(m))
+		.sort();
+	if (faltan.length > 0)
+		throw new Error(
+			`aprendizaje.json: faltan movimientos en tools/pipeline/movimientos.json: ${faltan.join(", ")}`,
+		);
+	return aprendizaje;
+}
 
 export async function construir(o: OpcionesConstruir): Promise<number> {
 	const slugs: string[] = JSON.parse(readFileSync(o.especies, "utf8"));
@@ -69,6 +99,15 @@ export async function construir(o: OpcionesConstruir): Promise<number> {
 		aJson(z.array(MovimientoSchema).parse(movs)),
 	);
 	writeFileSync(join(o.dirPack, "especies.json"), aJson(lista));
+	writeFileSync(
+		join(o.dirPack, "aprendizaje.json"),
+		aJson(
+			await generarAprendizaje(
+				lista.map((e) => e.id),
+				slugsMov,
+			),
+		),
+	);
 	writeFileSync(join(o.dirPack, "oficial.json"), aJson(oficialDe(fuentes)));
 	const archivos = Object.fromEntries(
 		archivosDelPack(o.dirPack).map((f) => [f, sha256(join(o.dirPack, f))]),

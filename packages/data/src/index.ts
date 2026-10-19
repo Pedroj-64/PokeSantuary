@@ -1,3 +1,4 @@
+export * from "./aprendizaje.js";
 export * from "./elites.js";
 export * from "./especie.js";
 export * from "./evento.js";
