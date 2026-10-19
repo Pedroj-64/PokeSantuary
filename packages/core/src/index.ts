@@ -77,6 +77,14 @@ export {
 	type TipoLoseta,
 } from "./santuario/estado.js";
 export {
+	admitir,
+	asignarLecho,
+	asignarTarea,
+	capacidadResidentes,
+	colocarKit,
+	mejorarEdificio,
+} from "./santuario/gestion.js";
+export {
 	amanecer,
 	calcularArmonia,
 	confortDeZona,
@@ -90,6 +98,7 @@ export {
 	resolverAtardecer,
 	zonaDe,
 } from "./santuario/jornada.js";
+export { pasoObra, pasoProduccion } from "./santuario/produccion.js";
 export {
 	type Articulo,
 	comprar,

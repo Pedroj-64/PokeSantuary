@@ -132,8 +132,10 @@ function ejecutar(id: string, e: EstadoSantuario) {
 }
 
 describe("PASOS", () => {
-	it("el Atardecer resuelve comida, ánimo, confort-armonía, inquietud y cierre, en ese orden", () => {
+	it("el Atardecer resuelve obra, producción, comida, ánimo, confort-armonía, inquietud y cierre, en ese orden", () => {
 		expect(PASOS_ATARDECER.map((p) => p.id)).toEqual([
+			"obra",
+			"produccion",
 			"comida",
 			"animo",
 			"confort-armonia",
