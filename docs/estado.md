@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Actualizado el 19 de octubre de 2026: Fase 2 terminada, audio propio hecho y Fase 3 (Santuario) en marcha.
+Actualizado el 19 de octubre de 2026 (cierre del día): Fase 2 terminada, audio propio hecho y Fase 3 (Santuario) avanzada.
 
 ## Dónde estamos
 
@@ -10,14 +10,14 @@ Actualizado el 19 de octubre de 2026: Fase 2 terminada, audio propio hecho y Fas
 | 1, combate | Terminada | Movimientos y sets, adaptador de `@pkmn/sim`, IA rival, combate en Web Worker, sprites, escena de combate, e2e y presupuesto de carga |
 | 2, expedición | Terminada | Mapa de nodos con semilla de tres pisos, estado de la expedición, tienda con mochila, runas, manantial, cofre y eventos, captura de salvajes y equipo de seis, Alfa y Sombrío, jefe del primer bioma con terreno de hierba, balance en datos y simulador de balance (44,8 % de victorias en 500 expediciones) |
 | Audio | Hecho | Motor de cuatro canales con notación MML, siete canciones y 58 efectos; música por escena y efectos por tipo de movimiento |
-| 3, Santuario | En marcha | Hecho: prototipo caminable, arte original (losetas, edificios, paleta en `packs/comun/paleta.json`), assets oficiales fuera de git y núcleo puro en `packages/core/src/santuario/` (estado, jornada, balance). Falta: trabajos y producción, terreno, hábitats, guardado y la escena de gestión |
+| 3, Santuario | Avanzada | Hecho: núcleo puro del Santuario (jornadas, producción, obra, terreno, Especialidades, hábitats, visitantes, Charla del Alba), estado de la partida con su reductor, guardado con versión y suma de control, escena jugable con gestión (residentes, construcción, mejoras, terreno, caminos, decoración) y salida a la expedición con equipo elegido. También hechas las piezas puras de niveles (tablas, movimientos por nivel, evoluciones, progresión tras una victoria, llamas del Farol, elegir 3 de 6, naturalezas e IV). Falta: llevar niveles, IV y movimientos al combate, las llamas en la expedición, el Prólogo y el simulador de balance |
 | 4 en adelante | Pendiente | Ver la hoja de ruta del diseño (local) |
 
 Qué se puede hacer hoy: abrir el juego, ver las 10 especies de Kanto en español o inglés, lanzar un combate de prueba 3 contra 3 (tecla B) o abrir una expedición (tecla E): elegir ruta en el mapa de tres pisos, pelear (entran los tres primeros del equipo), capturar salvajes con las bolas que quedan (tecla K en combate), comprar bolas y bayas en la tienda, usar bayas en el mapa (tecla B), elegir en manantiales, cofres y eventos, y vencer a los Alfa (dan una runa) y al jefe del piso 3. Al perder, o al ganar el jefe del piso 3, sale la pantalla final con el dinero conservado y los Sombríos rescatados. Todo es repetible con `?semilla=`.
 
 ## Siguiente paso
 
-Terminar el núcleo del Santuario (trabajos, producción, terreno y hábitats), el guardado de la partida y la escena de gestión; después el flujo Santuario ↔ expedición.
+Integrar en el combate lo que ya existe como piezas puras: nivel por Pokémon, naturaleza, IV y movimientos aprendidos (`packages/battle` y el Worker), lo que obliga a volver a fijar a propósito las semillas y el hash de los e2e. Después, las llamas del Farol en la expedición, el puente de progresión entre residentes y expedición, las ceremonias, el Prólogo y el simulador de balance con niveles y capturas.
 
 ## Decisiones de la Fase 3
 
@@ -25,6 +25,9 @@ Terminar el núcleo del Santuario (trabajos, producción, terreno y hábitats), 
 - **Necesidades.** Hambre y Ánimo de 0 a 100, Confort por zona (la isla se divide en 12 zonas de 10×10) y Armonía global calculada. No hay Energía aparte.
 - **Recursos enteros.** Cada edificio guarda el resto decimal de su producción para no perderlo por redondeo.
 - **Assets oficiales fuera de git.** El repositorio no contiene sprites, sonidos ni música de Pokémon. `packs/kanto/oficial.json` solo guarda las URL de los sprites de combate de un repositorio público de terceros; con `?oficial=o1` (o `VITE_OFICIAL=o1` al compilar) el juego los pide en ejecución, y por defecto (`ninguno`) dibuja una silueta original por tipo. Si un sprite no llega, usa la silueta. `pnpm data:verify` falla si git versiona algún archivo oficial.
+- **Partida y guardado.** `EstadoPartida` agrupa el Santuario, la expedición en curso y lo que no cupo al volver; todo cambio pasa por `reducir`, una función pura y determinista. Se guarda en IndexedDB con versión, suma SHA-256 y copia del guardado anterior; un guardado ilegible sin copia no se sustituye por una partida vacía. Si IndexedDB no está disponible el juego sigue en memoria y avisa.
+- **Carga bajo demanda.** La escena del Santuario (con el núcleo de gestión y los datos del pack) se pide solo al entrar, para mantener el chunk principal por debajo de 450 KB comprimido (hoy unos 427 KB).
+- **Datos del pack para los niveles.** `niveles.json` (tablas de nivel de los rivales y de subida), `aprendizaje.json` (movimientos por nivel, generación más reciente de cada especie, hasta el nivel 50) y `evoluciones.json` (a qué evoluciona cada especie y con qué condición, y su nivel de etapa). Se generan con `pnpm data:build`.
 - **Arte.** Losetas de 16 px, vista a escala entera. La paleta vive en `packs/comun/paleta.json` y una prueba exige que todo el arte original la respete (`pnpm arte:build` regenera los PNG con Aseprite).
 
 ## Decisiones tomadas al cerrar la Fase 2
