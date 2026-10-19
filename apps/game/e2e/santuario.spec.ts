@@ -9,7 +9,21 @@ type EstadoSantuario = {
 	momento: string;
 	armonia: number;
 	recursos: Record<string, number>;
-	residentes: { uid: string; especie: string; estado: string }[];
+	residentes: {
+		uid: string;
+		especie: string;
+		estado: string;
+		tarea: { tipo: string; edificio?: string };
+		lecho: string | null;
+	}[];
+	edificios: {
+		uid: string;
+		tipo: string;
+		obraRestante: number;
+		nivel: number;
+	}[];
+	menu: boolean;
+	colocando: boolean;
 	panel: boolean;
 	lineasPanel: string[];
 	guardadoOk: boolean;
@@ -59,6 +73,9 @@ test("los edificios bloquean el paso y junto al Árbol se puede salir a la Fisur
 	page,
 }) => {
 	await entrar(page);
+	// salir a la Fisura solo se puede de día
+	await page.keyboard.press("Enter");
+	await expect.poll(async () => (await estado(page))?.momento).toBe("dia");
 	const arbol = (await page.evaluate(
 		"window.__santuario.santuario.arbol()",
 	)) as { x: number; y: number };
@@ -156,4 +173,78 @@ test("carga diferida: la escena del Santuario solo se pide al entrar", async ({
 	await page.keyboard.press("s");
 	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
 	expect(pedidos.some((u) => u.includes("SantuarioMundo"))).toBe(true);
+});
+
+const pulsar = async (page: Page, ...teclas: string[]) => {
+	for (const k of teclas) await page.keyboard.press(k);
+};
+const actual = async (page: Page) => (await estado(page)) as EstadoSantuario;
+
+test("gestión: se construye un lecho, un residente lo levanta y luego duerme en él", async ({
+	page,
+}) => {
+	await entrar(page, "m-gestion");
+	// de noche o de madrugada la gestión no está disponible
+	await pulsar(page, "g");
+	expect((await actual(page)).menu).toBe(false);
+	await pulsar(page, "Enter"); // comenzar el día
+	await expect.poll(async () => (await actual(page)).momento).toBe("dia");
+
+	// G → Construir → primer kit (lecho de hojas) → colocar donde está el protagonista
+	await pulsar(page, "g");
+	await expect.poll(async () => (await actual(page)).menu).toBe(true);
+	await pulsar(page, "ArrowDown", "Enter", "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(true);
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(false);
+	let s = await actual(page);
+	const lecho = s.edificios.find((e) => e.tipo === "lecho-hojas");
+	expect(lecho?.obraRestante).toBeGreaterThan(0);
+	expect(s.recursos.madera).toBe(8); // 10 - 2 del kit
+	expect(s.menu).toBe(true); // vuelve al menú de construir
+	await pulsar(page, "Escape", "Escape"); // atrás y cerrar
+	await expect.poll(async () => (await actual(page)).menu).toBe(false);
+
+	// G → Residentes → el primero → Cambiar tarea → Construir lecho
+	await pulsar(page, "g", "Enter", "Enter", "Enter");
+	await pulsar(page, "ArrowDown", "Enter"); // 0 = descansar, 1 = construir el lecho
+	await expect
+		.poll(async () => (await actual(page)).residentes[0]?.tarea.tipo)
+		.toBe("construir");
+	await pulsar(page, "Escape", "Escape", "Escape");
+	await expect.poll(async () => (await actual(page)).menu).toBe(false);
+
+	// pasar el día: la obra (2) la termina un constructor (2 por jornada)
+	await pulsar(page, "Enter"); // pasar el día
+	await expect.poll(async () => (await actual(page)).panel).toBe(true);
+	await pulsar(page, "Enter", "Enter"); // cerrar resumen y dormir
+	await expect.poll(async () => (await actual(page)).jornada).toBe(2);
+	await pulsar(page, "Enter", "Enter"); // el panel del Alba (visitantes) y comenzar el día
+	await expect.poll(async () => (await actual(page)).momento).toBe("dia");
+	s = await actual(page);
+	expect(s.edificios.find((e) => e.tipo === "lecho-hojas")?.obraRestante).toBe(
+		0,
+	);
+
+	// G → Residentes → el primero → Asignar lecho → el lecho
+	await pulsar(page, "g", "Enter", "Enter", "ArrowDown", "Enter", "Enter");
+	await expect
+		.poll(async () => (await actual(page)).residentes[0]?.lecho)
+		.not.toBeNull();
+});
+
+test("gestión: Esc cancela la colocación sin gastar materiales ni construir nada", async ({
+	page,
+}) => {
+	await entrar(page, "m-gestion-2");
+	await pulsar(page, "Enter", "g", "ArrowDown", "Enter");
+	// el huerto de bayas cuesta 6 madera y 4 piedra: con 10 y 6 se puede; el almacén
+	// y el resto también; cancelar la colocación no gasta nada
+	await pulsar(page, "Enter");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(true);
+	await pulsar(page, "Escape");
+	await expect.poll(async () => (await actual(page)).colocando).toBe(false);
+	const s = await actual(page);
+	expect(s.recursos.madera).toBe(10);
+	expect(s.edificios.filter((e) => e.tipo !== "arbol-cenit")).toEqual([]);
 });

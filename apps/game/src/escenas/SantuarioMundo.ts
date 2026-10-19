@@ -1,5 +1,9 @@
 import { expedicionInicial } from "@santuario/battle";
-import type { EstadoPartida, EventoSantuario } from "@santuario/core";
+import type {
+	AccionPartida,
+	EstadoPartida,
+	EventoSantuario,
+} from "@santuario/core";
 import { crearRng } from "@santuario/core";
 import Phaser from "phaser";
 import losetasPng from "../assets/santuario/losetas.png?url";
@@ -17,6 +21,15 @@ import {
 	rectanguloDeEdificio,
 	varianteDeLoseta,
 } from "../santuario/colisiones.js";
+import { nombreDeEspecie } from "../santuario/nombres.js";
+import {
+	kitsDisponibles,
+	lechosPosibles,
+	mejorasPosibles,
+	puedeColocar,
+	tareasPosibles,
+} from "../santuario/opciones.js";
+import { type ItemMenu, PanelMenu } from "../santuario/panelMenu.js";
 import { type LineaResumen, resumenDeJornada } from "../santuario/resumen.js";
 import type { Sesion } from "../santuario/sesion.js";
 import { obtenerSesion } from "../santuario/sesionGlobal.js";
@@ -87,6 +100,15 @@ export class SantuarioMundo extends Phaser.Scene {
 	/** Evita que una carga lenta pinte sobre una escena ya cerrada. */
 	private generacion = 0;
 	private lineasPanel: LineaResumen[] = [];
+	private menu!: PanelMenu;
+	/** Modo de colocar un kit: el cursor sobre la isla y su rectángulo de vista previa. */
+	private colocando?: {
+		tipo: string;
+		x: number;
+		y: number;
+		marco: Phaser.GameObjects.Rectangle;
+		texto: Phaser.GameObjects.Text;
+	};
 
 	constructor() {
 		super("SantuarioMundo");
@@ -111,6 +133,9 @@ export class SantuarioMundo extends Phaser.Scene {
 		this.listo = false;
 		this.panel = undefined;
 		this.capaMundo = undefined;
+		this.colocando = undefined;
+		this.menu = new PanelMenu(this);
+		this.menu.alElegirInactivo(() => this.mostrarAviso(t("gestion.faltan")));
 		this.cerca = false;
 		const gen = ++this.generacion;
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -147,6 +172,15 @@ export class SantuarioMundo extends Phaser.Scene {
 
 	private crearHud(): void {
 		const base = { fontFamily: FUENTE, fontSize: "10px" };
+		for (const [y, alto] of [
+			[0, 32],
+			[250, 20],
+		] as const)
+			this.add
+				.rectangle(0, y, 480, alto, 0x12122b, 0.78)
+				.setOrigin(0, 0)
+				.setScrollFactor(0)
+				.setDepth(PROFUNDIDAD_UI - 1);
 		const fija = (o: Phaser.GameObjects.Text) =>
 			o.setScrollFactor(0).setDepth(PROFUNDIDAD_UI);
 		this.hud = fija(this.add.text(8, 6, "", { ...base, color: "#ffd866" }));
@@ -411,11 +445,17 @@ export class SantuarioMundo extends Phaser.Scene {
 			if (k === "escape") this.scene.start("ListaEspecies");
 			return;
 		}
+		if (this.colocando) {
+			this.teclaColocar(k);
+			return;
+		}
+		if (this.menu.tecla(tecla)) return;
 		if (this.panel) {
 			if (k === "enter" || k === " ") this.cerrarPanel();
 			return;
 		}
 		if (k === "enter" || k === " ") this.avanzarMomento();
+		else if (k === "g") this.abrirGestion();
 		else if (k === "e" && this.cerca) this.salirALaFisura();
 		else if (k === "escape") this.scene.start("ListaEspecies");
 	}
@@ -441,16 +481,341 @@ export class SantuarioMundo extends Phaser.Scene {
 		if (accion.tipo !== "comenzarDia") {
 			const nombre = (uid: string) => {
 				const r = this.p.santuario.residentes.find((x) => x.uid === uid);
-				return r ? t(`especie.${r.especie}`) : uid;
+				return r ? nombreDeEspecie(r.especie) : uid;
 			};
 			this.abrirPanel(
 				resumenDeJornada(eventos, antes, this.p.santuario.recursos, nombre),
 			);
 		}
+		this.vigilarGuardado();
+	}
+
+	private vigilarGuardado(): void {
 		void this.sesion.guardada().then(() => {
 			if (!this.sesion.guardadoOk())
 				this.avisoGuardado.setText(t("santuario.aviso.errorGuardado"));
 		});
+	}
+
+	/** Aplica una acción de gestión; si el núcleo la rechaza, avisa con su motivo. */
+	private gestionar(accion: AccionPartida): boolean {
+		try {
+			this.sesion.despachar(accion);
+		} catch (e) {
+			this.mostrarAviso(e instanceof Error ? e.message : String(e));
+			return false;
+		}
+		this.repintar();
+		this.vigilarGuardado();
+		return true;
+	}
+
+	// ----------------------------------------------------------------- gestión
+
+	private get balance() {
+		return this.sesion.ctx.balance;
+	}
+
+	private abrirGestion(): void {
+		if (this.p.santuario.momento !== "dia" || this.p.expedicion) {
+			this.mostrarAviso(t("gestion.aviso.soloDia"));
+			return;
+		}
+		this.aviso.setVisible(false);
+		this.cerca = false;
+		this.ayuda.setText("");
+		this.menuPrincipal();
+	}
+
+	private cerrarGestion(): void {
+		this.menu.cerrar();
+		this.actualizarHud();
+	}
+
+	private menuPrincipal(indice = 0): void {
+		const items: ItemMenu[] = [
+			{
+				texto: t("gestion.principal.residentes"),
+				alElegir: () => this.menuResidentes(),
+			},
+			{
+				texto: t("gestion.principal.construir"),
+				alElegir: () => this.menuConstruir(),
+			},
+			{
+				texto: t("gestion.principal.mejorar"),
+				alElegir: () => this.menuMejoras(),
+			},
+			{
+				texto: t("gestion.principal.cerrar"),
+				alElegir: () => this.cerrarGestion(),
+			},
+		];
+		this.menu.mostrar(
+			t("gestion.titulo"),
+			items,
+			t("gestion.pie"),
+			() => this.cerrarGestion(),
+			indice,
+		);
+	}
+
+	private nombreEdificio = (tipo: string) => t(`edificio.${tipo}`);
+
+	private textoCoste(coste: Record<string, number>): string {
+		return Object.entries(coste)
+			.map(([r, n]) => `${n} ${nombreRecurso(r)}`)
+			.join(", ");
+	}
+
+	private textoTarea(uid: string): string {
+		const s = this.p.santuario;
+		const r = s.residentes.find((x) => x.uid === uid);
+		if (!r) return "";
+		const tarea = r.tarea;
+		const edificio =
+			"edificio" in tarea
+				? s.edificios.find((e) => e.uid === tarea.edificio)?.tipo
+				: undefined;
+		return t(`gestion.tareaActual.${tarea.tipo}`, {
+			edificio: edificio ? this.nombreEdificio(edificio) : "",
+		});
+	}
+
+	private menuResidentes(indice = 0): void {
+		const items: ItemMenu[] = this.p.santuario.residentes.map((r) => ({
+			texto: t("gestion.fila", {
+				nombre: nombreDeEspecie(r.especie),
+				tarea: this.textoTarea(r.uid),
+				lecho: t(r.lecho ? "gestion.lecho.con" : "gestion.lecho.sin"),
+			}),
+			alElegir: () => this.menuResidente(r.uid, indice),
+		}));
+		this.menu.mostrar(
+			t("gestion.principal.residentes"),
+			items,
+			t("gestion.pie"),
+			() => this.menuPrincipal(0),
+			indice,
+		);
+	}
+
+	private menuResidente(uid: string, volverA: number): void {
+		const r = this.p.santuario.residentes.find((x) => x.uid === uid);
+		if (!r) {
+			this.menuResidentes();
+			return;
+		}
+		const items: ItemMenu[] = [
+			{
+				texto: t("gestion.residente.tarea"),
+				alElegir: () => this.menuTareas(uid, volverA),
+			},
+			{
+				texto: t("gestion.residente.lecho"),
+				alElegir: () => this.menuLechos(uid, volverA),
+			},
+			{
+				texto: t("gestion.residente.sinLecho"),
+				activo: r.lecho !== undefined,
+				alElegir: () => {
+					if (this.gestionar({ tipo: "asignarLecho", uid }))
+						this.menuResidente(uid, volverA);
+				},
+			},
+		];
+		this.menu.mostrar(
+			`${nombreDeEspecie(r.especie)}  ·  ${this.textoTarea(uid)}`,
+			items,
+			t("gestion.pie"),
+			() => this.menuResidentes(volverA),
+		);
+	}
+
+	private menuTareas(uid: string, volverA: number): void {
+		const items: ItemMenu[] = tareasPosibles(
+			this.p.santuario,
+			uid,
+			this.balance,
+		).map((o) => ({
+			texto: t(o.etiqueta.clave, {
+				edificio: this.nombreEdificio(o.etiqueta.params?.edificio ?? ""),
+			}),
+			alElegir: () => {
+				if (this.gestionar({ tipo: "asignarTarea", uid, tarea: o.tarea }))
+					this.menuResidente(uid, volverA);
+			},
+		}));
+		this.menu.mostrar(
+			t("gestion.residente.tarea"),
+			items,
+			t("gestion.pie"),
+			() => this.menuResidente(uid, volverA),
+		);
+	}
+
+	private menuLechos(uid: string, volverA: number): void {
+		const s = this.p.santuario;
+		const lechos = lechosPosibles(s, uid, this.balance);
+		const items: ItemMenu[] =
+			lechos.length === 0
+				? [{ texto: t("gestion.vacio"), activo: false, alElegir: () => {} }]
+				: lechos.map((edificio, i) => ({
+						texto: t("gestion.lecho.opcion", {
+							edificio: this.nombreEdificio(
+								s.edificios.find((e) => e.uid === edificio)?.tipo ?? "",
+							),
+							n: i + 1,
+						}),
+						alElegir: () => {
+							if (this.gestionar({ tipo: "asignarLecho", uid, edificio }))
+								this.menuResidente(uid, volverA);
+						},
+					}));
+		this.menu.mostrar(
+			t("gestion.residente.lecho"),
+			items,
+			t("gestion.pie"),
+			() => this.menuResidente(uid, volverA),
+		);
+	}
+
+	private menuConstruir(indice = 0): void {
+		const items: ItemMenu[] = kitsDisponibles(
+			this.p.santuario,
+			this.balance,
+		).map((k) => ({
+			texto: `${t("gestion.kit", {
+				edificio: this.nombreEdificio(k.tipo),
+				coste: this.textoCoste(k.coste),
+			})}${k.asequible ? "" : `  [${t("gestion.faltan")}]`}`,
+			activo: k.asequible,
+			alElegir: () => this.iniciarColocacion(k.tipo),
+		}));
+		this.menu.mostrar(
+			t("gestion.principal.construir"),
+			items.length
+				? items
+				: [{ texto: t("gestion.vacio"), activo: false, alElegir: () => {} }],
+			t("gestion.pie"),
+			() => this.menuPrincipal(1),
+			indice,
+		);
+	}
+
+	private menuMejoras(indice = 0): void {
+		const items: ItemMenu[] = mejorasPosibles(
+			this.p.santuario,
+			this.balance,
+		).map((m) => ({
+			texto: `${t("gestion.mejora", {
+				edificio: this.nombreEdificio(m.tipo),
+				nivel: m.nivel,
+				siguiente: m.nivel + 1,
+				coste: this.textoCoste(m.coste),
+			})}${m.asequible ? "" : `  [${t("gestion.faltan")}]`}`,
+			activo: m.asequible,
+			alElegir: () => {
+				if (this.gestionar({ tipo: "mejorarEdificio", uid: m.uid }))
+					this.menuMejoras(indice);
+			},
+		}));
+		this.menu.mostrar(
+			t("gestion.principal.mejorar"),
+			items.length
+				? items
+				: [{ texto: t("gestion.vacio"), activo: false, alElegir: () => {} }],
+			t("gestion.pie"),
+			() => this.menuPrincipal(2),
+			indice,
+		);
+	}
+
+	// -------------------------------------------------------------- colocación
+
+	private iniciarColocacion(tipo: string): void {
+		this.menu.cerrar();
+		this.aviso.setVisible(false);
+		this.cerca = false;
+		const def = this.balance.edificios.find((d) => d.id === tipo);
+		const marco = this.add
+			.rectangle(
+				0,
+				0,
+				(def?.tamano.w ?? 1) * LADO,
+				(def?.tamano.h ?? 1) * LADO,
+				0x7dff9a,
+				0.4,
+			)
+			.setOrigin(0, 0)
+			.setStrokeStyle(1, 0xffffff)
+			.setDepth(PROFUNDIDAD_UI - 2);
+		const texto = this.add
+			.text(240, 240, "", {
+				fontFamily: FUENTE,
+				fontSize: "10px",
+				color: "#ffffff",
+				backgroundColor: "#12122b",
+				padding: { x: 4, y: 3 },
+			})
+			.setOrigin(0.5, 1)
+			.setScrollFactor(0)
+			.setDepth(PROFUNDIDAD_UI);
+		this.colocando = {
+			tipo,
+			x: Math.floor(this.jugador.x / LADO),
+			y: Math.floor((this.jugador.y - 4) / LADO),
+			marco,
+			texto,
+		};
+		this.ayuda.setText("");
+		this.actualizarColocacion();
+	}
+
+	private actualizarColocacion(): void {
+		const c = this.colocando;
+		if (!c) return;
+		const r = puedeColocar(this.p.santuario, c.tipo, c.x, c.y, this.balance);
+		c.marco.setPosition(c.x * LADO, c.y * LADO);
+		c.marco.setFillStyle(r.ok ? 0x7dff9a : 0xff8b8b, 0.4);
+		c.texto.setText(
+			`${t("gestion.colocar.titulo", { edificio: this.nombreEdificio(c.tipo) })}\n${
+				r.ok ? t("gestion.colocar.ayuda") : r.motivo
+			}`,
+		);
+	}
+
+	private teclaColocar(k: string): void {
+		const c = this.colocando;
+		if (!c) return;
+		const { ancho, alto } = this.p.santuario.terreno;
+		const mover = (dx: number, dy: number) => {
+			c.x = Math.max(0, Math.min(ancho - 1, c.x + dx));
+			c.y = Math.max(0, Math.min(alto - 1, c.y + dy));
+			this.actualizarColocacion();
+		};
+		if (k === "arrowleft" || k === "a") mover(-1, 0);
+		else if (k === "arrowright" || k === "d") mover(1, 0);
+		else if (k === "arrowup" || k === "w") mover(0, -1);
+		else if (k === "arrowdown" || k === "s") mover(0, 1);
+		else if (k === "escape") {
+			this.terminarColocacion();
+			this.menuConstruir();
+		} else if (k === "enter" || k === " ") {
+			const tipo = c.tipo;
+			if (
+				this.gestionar({ tipo: "colocarKit", edificio: tipo, x: c.x, y: c.y })
+			) {
+				this.terminarColocacion();
+				this.menuConstruir();
+			}
+		}
+	}
+
+	private terminarColocacion(): void {
+		this.colocando?.marco.destroy();
+		this.colocando?.texto.destroy();
+		this.colocando = undefined;
 	}
 
 	private abrirPanel(lineas: LineaResumen[]): void {
@@ -508,7 +873,7 @@ export class SantuarioMundo extends Phaser.Scene {
 		if (typeof params.habitat === "string")
 			params.habitat = t(`habitat.${params.habitat}.nombre`);
 		if (typeof params.especie === "string")
-			params.especie = t(`especie.${params.especie}`);
+			params.especie = nombreDeEspecie(params.especie);
 		if (typeof params.motivo === "string")
 			params.motivo = t(`santuario.motivo.${params.motivo}`);
 		return t(l.clave, params);
@@ -522,7 +887,8 @@ export class SantuarioMundo extends Phaser.Scene {
 	// ------------------------------------------------------------- movimiento
 
 	update(_: number, dt: number): void {
-		if (!this.listo || this.panel) return;
+		if (!this.listo || this.panel || this.menu.abierto || this.colocando)
+			return;
 		const seg = dt / 1000;
 		const ti = this.teclas;
 		const dx =
@@ -559,6 +925,7 @@ export class SantuarioMundo extends Phaser.Scene {
 			this.jugador.y,
 		);
 		const cerca =
+			s.momento === "dia" &&
 			arbol !== undefined &&
 			arbol.distancia <=
 				ALCANCE_ARBOL +
@@ -622,7 +989,19 @@ export class SantuarioMundo extends Phaser.Scene {
 					estado: r.estado,
 					hambre: r.hambre,
 					animo: r.animo,
+					tarea: r.tarea,
+					lecho: r.lecho ?? null,
 				})),
+				edificios: this.p.santuario.edificios.map((e) => ({
+					uid: e.uid,
+					tipo: e.tipo,
+					x: e.x,
+					y: e.y,
+					nivel: e.nivel,
+					obraRestante: e.obraRestante,
+				})),
+				menu: this.menu.abierto,
+				colocando: this.colocando !== undefined,
 				panel: this.panel !== undefined,
 				lineasPanel: this.lineasPanel.map((l) => l.clave),
 				guardadoOk: this.sesion.guardadoOk(),
