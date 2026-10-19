@@ -15,6 +15,8 @@ import {
 
 /** Miembro del equipo durante la expedición; `psPct` 0 significa debilitado. */
 export interface MiembroExp {
+	/** Residente del Santuario que sale en este puesto; ausente en los capturados durante la expedición. */
+	uid?: string;
 	especie: string;
 	/** PS en porcentaje, entero de 0 a 100. */
 	psPct: number;

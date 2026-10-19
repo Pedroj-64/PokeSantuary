@@ -77,6 +77,13 @@ export {
 	type TipoLoseta,
 } from "./santuario/estado.js";
 export {
+	equipoDeExpedicion,
+	type Fabricar,
+	iniciarDesdeSantuario,
+	liquidarEnSantuario,
+	type ResultadoLiquidacion,
+} from "./santuario/expedicion.js";
+export {
 	admitir,
 	asignarLecho,
 	asignarTarea,
