@@ -2,6 +2,8 @@ import { TipoIdSchema } from "@santuario/data";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import audio from "../../../../packages/audio/datos/audio.json";
 import elites from "../../../../packs/kanto/elites.json";
+import eventos from "../../../../packs/kanto/eventos.json";
+import expedicion from "../../../../packs/kanto/expedicion.json";
 import en from "./en.json";
 import es from "./es.json";
 
@@ -61,6 +63,20 @@ describe("i18n", () => {
 			...audio.canciones.map((c: { nombre: string }) => c.nombre),
 		];
 		expect(citadas.length).toBeGreaterThan(1);
+		const faltan = citadas.filter((k) => !(k in es) || !(k in en));
+		expect(faltan).toEqual([]);
+	});
+
+	it("cada evento y cada artículo de la tienda tienen su texto en es y en", () => {
+		const citadas: string[] = [
+			...eventos.flatMap((e) => [
+				e.titulo,
+				e.texto,
+				...e.opciones.map((o) => o.texto),
+			]),
+			...expedicion.catalogoTienda.map((a) => `articulo.${a.id}`),
+		];
+		expect(citadas.length).toBeGreaterThan(20);
 		const faltan = citadas.filter((k) => !(k in es) || !(k in en));
 		expect(faltan).toEqual([]);
 	});
