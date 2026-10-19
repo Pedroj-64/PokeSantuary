@@ -24,12 +24,24 @@ function hashUtf8(texto: string): number {
  * dan la misma secuencia; toda semilla pasa por el mismo hash UTF-8.
  *
  * @param semilla Cadena (cualquier Unicode, incluso vacía) o número.
- * @param estadoInicial Estado devuelto antes por `estado()`; si se da, ignora la semilla.
+ * @param estadoInicial Estado devuelto antes por `estado()`; si se da, ignora la semilla. Lanza `RangeError` si no es un entero uint32.
  */
 export function crearRng(
 	semilla: string | number,
 	estadoInicial?: number,
 ): Rng {
+	if (
+		estadoInicial !== undefined &&
+		!(
+			Number.isInteger(estadoInicial) &&
+			estadoInicial >= 0 &&
+			estadoInicial < 2 ** 32
+		)
+	) {
+		throw new RangeError(
+			`crearRng: estadoInicial debe ser un entero uint32, recibió ${estadoInicial}`,
+		);
+	}
 	let a = (estadoInicial ?? hashUtf8(String(semilla))) >>> 0;
 	const siguiente = (): number => {
 		a = (a + 0x6d2b79f5) >>> 0;

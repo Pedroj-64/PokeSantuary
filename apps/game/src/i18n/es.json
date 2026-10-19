@@ -139,5 +139,13 @@
 	"articulo.ultra-ball": "Ultra Ball",
 	"santuario.titulo": "Santuario (prototipo)  ·  Flechas o WASD  ·  Esc: salir",
 	"santuario.salir": "E: salir a la Fisura desde el Árbol Cenit",
-	"botonSantuario": "Santuario  [S]"
+	"botonSantuario": "Santuario  [S]",
+	"jefe.verdemar.nombre": "Guardián del Verdemar",
+	"audio.mapa.nombre": "Mapa de la Fisura",
+	"audio.combate.nombre": "Combate",
+	"audio.combate-salvaje.nombre": "Combate salvaje",
+	"audio.combate-entrenador.nombre": "Duelo de entrenadores",
+	"audio.victoria.nombre": "Victoria",
+	"audio.victoria-salvaje.nombre": "Victoria salvaje",
+	"audio.victoria-entrenador.nombre": "Victoria en duelo"
 }

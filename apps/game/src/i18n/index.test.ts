@@ -1,5 +1,7 @@
 import { TipoIdSchema } from "@santuario/data";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import audio from "../../../../packages/audio/datos/audio.json";
+import elites from "../../../../packs/kanto/elites.json";
 import en from "./en.json";
 import es from "./es.json";
 
@@ -51,6 +53,16 @@ describe("i18n", () => {
 
 	it("es.json y en.json tienen las mismas claves", () => {
 		expect(Object.keys(es).sort()).toEqual(Object.keys(en).sort());
+	});
+
+	it("toda clave de texto que citan los datos y el audio existe en es y en", () => {
+		const citadas: string[] = [
+			elites.jefe.nombre,
+			...audio.canciones.map((c: { nombre: string }) => c.nombre),
+		];
+		expect(citadas.length).toBeGreaterThan(1);
+		const faltan = citadas.filter((k) => !(k in es) || !(k in en));
+		expect(faltan).toEqual([]);
 	});
 
 	it("cada TipoId tiene texto en es y en", () => {

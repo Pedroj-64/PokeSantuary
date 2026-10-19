@@ -32,6 +32,16 @@ describe("crearRng", () => {
 			expect(reanudado.siguiente()).toBe(rng.siguiente());
 	});
 
+	it("rechaza un estado inicial que no es uint32", () => {
+		for (const malo of [Number.NaN, -1, 1.5, 2 ** 32, Number.POSITIVE_INFINITY])
+			expect(() => crearRng("x", malo)).toThrow(RangeError);
+	});
+
+	it("acepta los extremos 0 y 2^32 - 1 como estado inicial", () => {
+		expect(() => crearRng("x", 0)).not.toThrow();
+		expect(() => crearRng("x", 2 ** 32 - 1)).not.toThrow();
+	});
+
 	it("semillas '' y 'ñandú' son estables entre ejecuciones", () => {
 		expect(tomar("", 3)).toEqual(VACIA);
 		expect(tomar("ñandú", 3)).toEqual(ENIE);

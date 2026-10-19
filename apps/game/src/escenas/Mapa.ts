@@ -50,6 +50,8 @@ export class Mapa extends Phaser.Scene {
 	private estado!: EstadoExpedicion;
 	private posiciones: Record<string, { x: number; y: number }> = {};
 	private etiqueta?: Phaser.GameObjects.Text;
+	/** Cerrojo: un clic y una tecla en el mismo fotograma no encolan dos cambios de escena. */
+	private cambiando = false;
 
 	constructor() {
 		super("Mapa");
@@ -57,6 +59,7 @@ export class Mapa extends Phaser.Scene {
 
 	init(datos: DatosMapa): void {
 		this.estado = datos.estado;
+		this.cambiando = false;
 	}
 
 	preload(): void {
@@ -120,7 +123,10 @@ export class Mapa extends Phaser.Scene {
 			const id = ids[Number(ev.key) - 1];
 			if (id !== undefined) this.elegir(id);
 			else if (ev.key.toLowerCase() === "b") this.darBaya();
-			else if (ev.key === "Escape") this.scene.start("ListaEspecies");
+			else if (ev.key === "Escape" && !this.cambiando) {
+				this.cambiando = true;
+				this.scene.start("ListaEspecies");
+			}
 		});
 		void musica(MUSICA.mapa);
 		this.exponerGancho();
@@ -181,13 +187,17 @@ export class Mapa extends Phaser.Scene {
 
 	/** Tecla B: una baya al miembro más herido. */
 	private darBaya(): void {
+		if (this.cambiando) return;
 		const siguiente = usarBayaAlMasHerido(this.estado);
-		if (siguiente !== this.estado)
-			this.scene.restart({ estado: siguiente } satisfies DatosMapa);
+		if (siguiente === this.estado) return;
+		this.cambiando = true;
+		this.scene.restart({ estado: siguiente } satisfies DatosMapa);
 	}
 
 	private elegir(id: string): void {
+		if (this.cambiando) return;
 		const estado = entrar(this.estado, id);
+		this.cambiando = true;
 		const nodo = estado.mapa.capas.flat().find((n) => n.id === id);
 		void efecto(
 			nodo?.tipo === "alfa"

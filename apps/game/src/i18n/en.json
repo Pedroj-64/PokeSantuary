@@ -139,5 +139,13 @@
 	"articulo.ultra-ball": "Ultra Ball",
 	"santuario.titulo": "Sanctuary (prototype)  ·  Arrows or WASD  ·  Esc: exit",
 	"santuario.salir": "E: head into the Rift from the Heart Tree",
-	"botonSantuario": "Sanctuary  [S]"
+	"botonSantuario": "Sanctuary  [S]",
+	"jefe.verdemar.nombre": "Verdemar Guardian",
+	"audio.mapa.nombre": "Rift Map",
+	"audio.combate.nombre": "Battle",
+	"audio.combate-salvaje.nombre": "Wild Battle",
+	"audio.combate-entrenador.nombre": "Trainer Duel",
+	"audio.victoria.nombre": "Victory",
+	"audio.victoria-salvaje.nombre": "Wild Victory",
+	"audio.victoria-entrenador.nombre": "Duel Victory"
 }
