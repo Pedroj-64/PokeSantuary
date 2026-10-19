@@ -77,6 +77,20 @@ export {
 	type TipoLoseta,
 } from "./santuario/estado.js";
 export {
+	amanecer,
+	calcularArmonia,
+	confortDeZona,
+	type EventoSantuario,
+	inquietos,
+	PASOS_ALBA,
+	PASOS_ATARDECER,
+	type Paso,
+	puntosDecoracion,
+	type Resultado,
+	resolverAtardecer,
+	zonaDe,
+} from "./santuario/jornada.js";
+export {
 	type Articulo,
 	comprar,
 	ofertaTienda,
