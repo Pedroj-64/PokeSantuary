@@ -144,3 +144,16 @@ test("el progreso se guarda: al recargar la página sigue la misma jornada", asy
 	expect(despues.recursos).toEqual(antes.recursos);
 	expect(despues.guardadoOk).toBe(true);
 });
+
+test("carga diferida: la escena del Santuario solo se pide al entrar", async ({
+	page,
+}) => {
+	const pedidos: string[] = [];
+	page.on("request", (r) => pedidos.push(r.url()));
+	await page.goto("/?test=1&semilla=m-diferida");
+	await page.locator('[data-estado="listo"]').waitFor();
+	expect(pedidos.some((u) => u.includes("SantuarioMundo"))).toBe(false);
+	await page.keyboard.press("s");
+	await expect.poll(async () => (await estado(page)) !== null).toBe(true);
+	expect(pedidos.some((u) => u.includes("SantuarioMundo"))).toBe(true);
+});
