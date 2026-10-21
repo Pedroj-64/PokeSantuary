@@ -379,3 +379,42 @@ describe("Combate: terreno de fisura", () => {
 		expect(c.registro()).not.toContain("-fieldstart");
 	});
 });
+
+describe("Combate: individuo propio", () => {
+	const conPropio = (extra: Partial<MiembroEquipo>) =>
+		Combate.crear({
+			semilla: "s1",
+			jugador: [{ ...(equipo("pikachu")[0] as MiembroEquipo), ...extra }],
+			rival: equipo("geodude"),
+		});
+
+	it("usa los movimientos propios en lugar de los del set", async () => {
+		const c = await conPropio({ movimientos: ["growl", "tackle"] });
+		const p = c.peticion("jugador");
+		expect(p?.movimientos.map((m) => m.movimiento)).toEqual([
+			"growl",
+			"tackle",
+		]);
+	});
+
+	it("los IV propios cambian los PS máximos", async () => {
+		const base = (await conPropio({})).peticion("jugador")?.equipo[0]?.hpMax;
+		const sin = (
+			await conPropio({ iv: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 } })
+		).peticion("jugador")?.equipo[0]?.hpMax;
+		expect(sin).toBeLessThan(base as number);
+	});
+
+	it.each([
+		["movimientos vacíos", { movimientos: [] }],
+		["movimientos repetidos", { movimientos: ["tackle", "tackle"] }],
+		["movimiento inexistente", { movimientos: ["noexiste"] }],
+		["naturaleza inexistente", { naturaleza: "Feliz" }],
+		[
+			"IV fuera de rango",
+			{ iv: { hp: 32, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 } },
+		],
+	])("rechaza %s", async (_n, extra) => {
+		await expect(conPropio(extra)).rejects.toThrow();
+	});
+});

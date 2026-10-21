@@ -1,3 +1,4 @@
+import type { IV } from "./individuo.js";
 import {
 	generarPiso,
 	type MapaPiso,
@@ -22,6 +23,10 @@ export interface MiembroExp {
 	psPct: number;
 	/** Nivel del miembro; si falta, la progresión lo ignora (expediciones de prueba sin niveles). */
 	nivel?: number;
+	/** IV propios (0 a 31); si faltan, el combate usa 31 en todo. */
+	iv?: IV;
+	/** Naturaleza propia; si falta, el combate usa la del set. */
+	naturaleza?: string;
 	/** Movimientos activos (hasta 4). */
 	movimientos?: string[];
 	/** Movimientos olvidados que se pueden recordar. */

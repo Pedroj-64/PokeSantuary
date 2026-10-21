@@ -1,5 +1,5 @@
 import { BattleStreams, Dex, Teams } from "@pkmn/sim";
-import { crearRng } from "@santuario/core";
+import { crearRng, type IV } from "@santuario/core";
 import type { SetCombate } from "@santuario/data";
 import { eleccionIlegal } from "./errores.js";
 import {
@@ -20,6 +20,12 @@ export interface MiembroEquipo {
 	psPct?: number;
 	/** Nivel de 1 a 100 (por defecto 50); es la palanca de escalado de los rivales. */
 	nivel?: number;
+	/** IV propios del individuo (por defecto 31 en todo). */
+	iv?: IV;
+	/** Naturaleza propia del individuo (por defecto la del set). */
+	naturaleza?: string;
+	/** Movimientos propios del individuo, de 1 a 4 (por defecto los del set). */
+	movimientos?: string[];
 }
 
 /**
@@ -111,7 +117,34 @@ function validarEquipo(lado: Lado, equipo: MiembroEquipo[]): void {
 			`El equipo del ${lado} debe tener entre 1 y ${MAX_EQUIPO} Pokémon`,
 		);
 	}
-	for (const { especie, set, psPct, nivel } of equipo) {
+	for (const {
+		especie,
+		set,
+		psPct,
+		nivel,
+		movimientos,
+		iv,
+		naturaleza,
+	} of equipo) {
+		if (
+			movimientos !== undefined &&
+			(movimientos.length < 1 ||
+				movimientos.length > 4 ||
+				new Set(movimientos).size !== movimientos.length)
+		) {
+			throw new Error(
+				`movimientos debe tener de 1 a 4 sin repetir en ${especie}`,
+			);
+		}
+		if (naturaleza !== undefined && !Dex.natures.get(naturaleza).exists) {
+			throw new Error(`Naturaleza inexistente en el simulador: ${naturaleza}`);
+		}
+		if (
+			iv !== undefined &&
+			Object.values(iv).some((v) => !Number.isInteger(v) || v < 0 || v > 31)
+		) {
+			throw new Error(`iv debe ser entero de 0 a 31 en ${especie}`);
+		}
 		if (
 			nivel !== undefined &&
 			(!Number.isInteger(nivel) || nivel < 1 || nivel > 100)
@@ -138,7 +171,7 @@ function validarEquipo(lado: Lado, equipo: MiembroEquipo[]): void {
 				`Habilidad inexistente en el simulador: ${set.habilidad}`,
 			);
 		}
-		for (const m of set.movimientos) {
+		for (const m of movimientos ?? set.movimientos) {
 			if (!Dex.moves.get(m).exists) {
 				throw new Error(`Movimiento inexistente en el simulador: ${m}`);
 			}
@@ -199,7 +232,8 @@ export class Combate {
 		const conocidos = new Map<string, string>();
 		for (const m of [...op.jugador, ...op.rival]) {
 			conocidos.set(idPlano(m.especie), m.especie);
-			for (const mov of m.set.movimientos) conocidos.set(idPlano(mov), mov);
+			for (const mov of m.movimientos ?? m.set.movimientos)
+				conocidos.set(idPlano(mov), mov);
 		}
 		// El simulador entrega cada mensaje por `push`; lo capturamos para leerlo sin esperas.
 		const salida: string[] = [];
@@ -219,12 +253,12 @@ export class Combate {
 				e.map((m) => ({
 					name: "",
 					species: m.especie,
-					moves: m.set.movimientos,
+					moves: m.movimientos ?? m.set.movimientos,
 					ability: m.set.habilidad,
 					item: "",
-					nature: m.set.naturaleza,
+					nature: m.naturaleza ?? m.set.naturaleza,
 					evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-					ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
+					ivs: m.iv ?? { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
 					level: m.nivel ?? NIVEL,
 					gender: "",
 				})),

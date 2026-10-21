@@ -84,6 +84,34 @@ describe("prepararCombate", () => {
 		]);
 	});
 
+	it("el miembro entra con su nivel, IV, naturaleza y movimientos propios", () => {
+		const [e0, id] = dentroDe("s1");
+		const iv = { hp: 0, atk: 1, def: 2, spa: 3, spd: 4, spe: 5 };
+		const e = {
+			...e0,
+			equipo: [
+				{
+					especie: "a",
+					psPct: 100,
+					nivel: 7,
+					iv,
+					naturaleza: "Timid",
+					movimientos: ["ember", "growl"],
+				},
+				{ especie: "b", psPct: 100, movimientos: [] },
+			],
+		};
+		const [a, b] = prepararCombate(e, id, SETS).jugador;
+		expect(a).toMatchObject({
+			nivel: 7,
+			iv,
+			naturaleza: "Timid",
+			movimientos: ["ember", "growl"],
+		});
+		// Sin datos propios (o con lista vacía) no se pisa el set.
+		expect(b).toEqual({ especie: "b", set: set("b"), psPct: 100 });
+	});
+
 	it("el rival no repite especies del equipo mientras haya otras", () => {
 		for (let i = 0; i < 30; i++) {
 			const [e, id] = dentroDe(`s${i}`);

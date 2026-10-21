@@ -4,6 +4,7 @@ import {
 	curarAlMasHerido,
 	type EstadoExpedicion,
 	esNodoDeCombate,
+	type MiembroExp,
 	modificadores,
 	type NodoMapa,
 	type ResultadoCombate,
@@ -105,13 +106,21 @@ export function prepararCombate(
 		.slice(0, MAX_EN_COMBATE);
 	if (vivos.length === 0) throw new RangeError("no queda ningún miembro vivo");
 	const jugador = vivos.map((i): MiembroEquipo => {
-		const { especie, psPct } = e.equipo[i] as {
-			especie: string;
-			psPct: number;
-		};
+		const { especie, psPct, nivel, iv, naturaleza, movimientos } = e.equipo[
+			i
+		] as MiembroExp;
 		const set = sets.find((s) => s.especie === especie);
 		if (set === undefined) throw new RangeError(`sin set para ${especie}`);
-		return { especie, set, psPct };
+		return {
+			especie,
+			set,
+			psPct,
+			...(nivel !== undefined && { nivel }),
+			...(iv !== undefined && { iv }),
+			...(naturaleza !== undefined && { naturaleza }),
+			...(movimientos !== undefined &&
+				movimientos.length > 0 && { movimientos }),
+		};
 	});
 	return {
 		semilla: `${e.semilla}:p${e.piso}:${nodoId}:combate`,
