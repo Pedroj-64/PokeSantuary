@@ -65,6 +65,10 @@ export interface Residente {
 	animo: number;
 	/** Amistad de 0 a 5. */
 	amistad: number;
+	/** Movimientos activos que conserva del paso por la expedición. */
+	movimientos?: string[];
+	/** Movimientos olvidados que se pueden recordar. */
+	recordables?: string[];
 	estado: EstadoResidente;
 	/** Medidor sombrío de 0 a 100, solo para los Sombríos. */
 	sombrio?: number;

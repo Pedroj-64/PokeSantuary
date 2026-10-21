@@ -185,6 +185,15 @@ export {
 } from "./santuario/jornada.js";
 export { pasoObra, pasoProduccion } from "./santuario/produccion.js";
 export {
+	aplicarRetorno,
+	aplicarRetornoACapturado,
+	type CatalogoProgresion,
+	type DatosEspecieProgresion,
+	miembroDeResidente,
+	miembroNuevoDeCaptura,
+	nivelDeSalida,
+} from "./santuario/puente.js";
+export {
 	accionesPosibles,
 	colocarCamino,
 	colocarDecoracion,
