@@ -222,6 +222,16 @@ const ceremonias = z
 	})
 	.strict();
 
+// Gimnasio (GDD §11): coste de cada nivel y lo que abre Sable.
+const gimnasio = z
+	.object({
+		fragmentos: z.array(enteroPositivo).min(1),
+		pokedolares: enteroPositivo,
+		maximoSinSable: enteroNoNegativo,
+		descuentoSable: z.number().min(0).max(1),
+	})
+	.strict();
+
 export const SantuarioBalanceSchema = z
 	.object({
 		isla,
@@ -238,6 +248,7 @@ export const SantuarioBalanceSchema = z
 		decoraciones: z.array(decoracion),
 		camino: z.object({ costePiedra: enteroPositivo }).strict(),
 		ceremonias,
+		gimnasio,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {

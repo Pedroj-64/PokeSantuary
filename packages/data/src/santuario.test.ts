@@ -764,3 +764,36 @@ describe("ceremonias del Altar", () => {
 		).toBe(false);
 	});
 });
+
+describe("Gimnasio", () => {
+	const pack = SantuarioBalanceSchema.parse(LEIDO).gimnasio;
+
+	it("el pack trae las cifras del GDD §11.5 y de Sable", () => {
+		expect(pack).toEqual({
+			fragmentos: [2, 3, 4, 5, 6],
+			pokedolares: 100,
+			maximoSinSable: 3,
+			descuentoSable: 0.25,
+		});
+	});
+
+	it("rechaza un descuento fuera de 0 a 1 o un nivel sin coste", () => {
+		const roto = (cambio: (g: Record<string, unknown>) => void) => {
+			const crudo = structuredClone(LEIDO) as {
+				gimnasio: Record<string, unknown>;
+			};
+			cambio(crudo.gimnasio);
+			return SantuarioBalanceSchema.safeParse(crudo).success;
+		};
+		expect(
+			roto((g) => {
+				g.descuentoSable = 1.5;
+			}),
+		).toBe(false);
+		expect(
+			roto((g) => {
+				g.fragmentos = [2, 0];
+			}),
+		).toBe(false);
+	});
+});

@@ -1,4 +1,5 @@
 import type { TablaCeremonias } from "./ceremonias.js";
+import type { TablaGimnasio } from "./gimnasio.js";
 import { terrenoInicial } from "./terreno.js";
 
 /** Momento del día; la jornada avanza alba → dia → atardecer → noche. */
@@ -260,6 +261,8 @@ export interface SantuarioBalance {
 	camino: { costePiedra: number };
 	/** Ceremonias del Altar; la forma es la de `TablaCeremonias`. */
 	ceremonias: TablaCeremonias;
+	/** Costes de subir el Gimnasio (GDD §11.5). */
+	gimnasio: TablaGimnasio;
 }
 
 /**

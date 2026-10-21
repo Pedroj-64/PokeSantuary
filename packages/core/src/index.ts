@@ -184,6 +184,15 @@ export {
 	mejorarEdificio,
 } from "./santuario/gestion.js";
 export {
+	type CosteGimnasio,
+	costeDeSubir,
+	motivoNoPuedeSubir,
+	nivelMaximo,
+	type OpcionesGimnasio,
+	subirGimnasio,
+	type TablaGimnasio,
+} from "./santuario/gimnasio.js";
+export {
 	type ContextoJornada,
 	detectarHabitats,
 	type HabitatData,
