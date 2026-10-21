@@ -1,4 +1,5 @@
 import {
+	bolasIniciales,
 	cerrarCombate,
 	dineroDeNodo,
 	type Eleccion,
@@ -17,6 +18,7 @@ import {
 	elegirEvento,
 	entrar,
 	esNodoDeCombate,
+	iniciarExpedicion,
 	precioEnPiso,
 	type ResultadoCombate,
 	totalBayas,
@@ -50,6 +52,13 @@ const UMBRAL_CURA = 75;
 const UMBRAL_BAYA = 50;
 const MAX_BAYAS_POR_TIENDA = 3;
 
+/** Tamaño mínimo y máximo del equipo inicial. */
+const MIN_TAMANO_EQUIPO = 1;
+const MAX_TAMANO_EQUIPO = 6;
+
+/** Tope de seguridad del bucle de una expedición (evita bucles infinitos). */
+const MAX_ITERACIONES_EXPEDICION = 10_000;
+
 /** Datos de la partida simulada. */
 export interface DatosSimulacion {
 	/** Sets del jugador (y de los rivales, si no se da `setsRival`). */
@@ -68,6 +77,16 @@ export interface DatosSimulacion {
 	 * con PP, como antes.
 	 */
 	politica?: DatosPolitica;
+	/**
+	 * Llamas iniciales del Farol. Si se da, una derrota puede dejar la
+	 * expedición en curso (ver `fallidos`/`repetir` en `@santuario/core`).
+	 */
+	llamas?: number;
+	/**
+	 * Tamaño del equipo inicial (1..6). Si falta se conserva el equipo de tres
+	 * especies de `expedicionInicial`.
+	 */
+	tamanoEquipo?: number;
 }
 
 export interface ResumenSimulacion {
@@ -118,6 +137,7 @@ async function jugarCombate(
 		setsRival: datos.setsRival ?? datos.sets,
 		tamanos: datos.balance.tamanoRival,
 		niveles: datos.balance.nivelRival,
+		tablaNiveles: datos.progresion?.niveles.nivel,
 		elites: datos.elites,
 	});
 	const sesion = new SesionCombate();
@@ -228,6 +248,72 @@ function curarConBayas(e: EstadoExpedicion): EstadoExpedicion {
 	return estado;
 }
 
+/** Valida las llamas del Farol del simulador. */
+function validarLlamas(llamas: number | undefined): void {
+	if (llamas !== undefined && (!Number.isInteger(llamas) || llamas < 0)) {
+		throw new RangeError(
+			`simularExpedicion(): 'llamas' debe ser un entero mayor o igual que 0 (recibido ${String(llamas)})`,
+		);
+	}
+}
+
+/** Valida el tamaño de equipo del simulador. */
+function validarTamanoEquipo(tamano: number | undefined): void {
+	if (
+		tamano !== undefined &&
+		(!Number.isInteger(tamano) ||
+			tamano < MIN_TAMANO_EQUIPO ||
+			tamano > MAX_TAMANO_EQUIPO)
+	) {
+		throw new RangeError(
+			`simularExpedicion(): 'tamanoEquipo' debe ser un entero entre ${MIN_TAMANO_EQUIPO} y ${MAX_TAMANO_EQUIPO} (recibido ${String(tamano)})`,
+		);
+	}
+}
+
+/**
+ * Especies distintas de `sets`, barajadas con la semilla (Fisher-Yates) y
+ * recortadas al tamaño pedido. Usa el mismo generador que `crearEquipos` para
+ * que un equipo de tres sea equivalente al de `expedicionInicial`.
+ */
+function especiesIniciales(
+	semilla: string,
+	sets: readonly SetCombate[],
+	tamano: number,
+): string[] {
+	const especies = [...new Set(sets.map((s) => s.especie))];
+	if (especies.length < tamano) {
+		throw new RangeError(
+			`simularExpedicion(): no hay suficientes especies distintas para un equipo de ${tamano} (hay ${especies.length})`,
+		);
+	}
+	const rng = crearRng(semilla);
+	for (let i = especies.length - 1; i > 0; i--) {
+		const j = rng.entero(0, i);
+		const a = especies[i] as string;
+		const b = especies[j] as string;
+		especies[i] = b;
+		especies[j] = a;
+	}
+	return especies.slice(0, tamano);
+}
+
+/** Expedición inicial con un tamaño de equipo elegido por el simulador. */
+function expedicionConTamano(
+	semilla: string,
+	datos: DatosSimulacion,
+	tamano: number,
+): EstadoExpedicion {
+	return {
+		...iniciarExpedicion(
+			semilla,
+			especiesIniciales(semilla, datos.sets, tamano),
+		),
+		dinero: datos.balance.dineroInicial,
+		mochila: bolasIniciales(datos.balance),
+	};
+}
+
 /** Estado final de una expedición y nivel medio al jefe de cada piso. */
 export interface ResultadoExpedicion {
 	estado: EstadoExpedicion;
@@ -253,7 +339,16 @@ export async function simularExpedicion(
 	semilla: string,
 	datos: DatosSimulacion,
 ): Promise<ResultadoExpedicion> {
-	let e = expedicionInicial(semilla, datos.sets, datos.balance);
+	validarLlamas(datos.llamas);
+	validarTamanoEquipo(datos.tamanoEquipo);
+	let e =
+		datos.tamanoEquipo === undefined
+			? expedicionInicial(semilla, datos.sets, datos.balance)
+			: expedicionConTamano(semilla, datos, datos.tamanoEquipo);
+	if (datos.llamas !== undefined) {
+		e = { ...e, llamas: datos.llamas, fallidos: [] };
+	}
+	const farol = datos.llamas === undefined ? undefined : datos.balance.farol;
 	const progresion = datos.progresion;
 	if (progresion !== undefined) e = equipoConNiveles(e, progresion);
 	const ctx =
@@ -273,8 +368,20 @@ export async function simularExpedicion(
 	} = { 1: null, 2: null, 3: null };
 
 	const ruta = crearRng(`${semilla}:balance:ruta`);
+	let iteraciones = 0;
 	while (e.estado === "en-curso") {
+		if (iteraciones >= MAX_ITERACIONES_EXPEDICION) {
+			throw new RangeError(
+				`simularExpedicion(): la expedición '${semilla}' superó el tope de ${MAX_ITERACIONES_EXPEDICION} iteraciones sin terminar`,
+			);
+		}
+		iteraciones++;
 		const opciones = elegibles(e);
+		if (opciones.length === 0) {
+			throw new RangeError(
+				`simularExpedicion(): la expedición '${semilla}' se quedó sin nodos elegibles en el piso ${e.piso}`,
+			);
+		}
 		const id = elegirRuta(e, opciones, () =>
 			ruta.entero(0, opciones.length - 1),
 		);
@@ -292,6 +399,7 @@ export async function simularExpedicion(
 				e,
 				combate.resultado,
 				datos.balance.curaTrasVictoriaPct,
+				farol,
 			);
 			if (combate.resultado.victoria && ctx !== undefined) {
 				e = trasVictoria(e, tipo, combate.vivos, ctx, pisoCombate);

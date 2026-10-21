@@ -1,6 +1,8 @@
+import { expedicionInicial, prepararCombate } from "@santuario/battle";
 import type { Aprendizaje, SetCombate } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import { cargarDatosPack } from "./datos.js";
+import { equipoConNiveles } from "./niveles.js";
 import { simular, simularExpedicion } from "./simular.js";
 
 const SEMILLAS = ["b0", "b1", "b2", "b3"];
@@ -187,5 +189,85 @@ describe("simular con política inteligente", () => {
 		expect(await simular(SEMILLAS, datosCompletos)).toEqual(a);
 		expect(a.victorias).toBe(SEMILLAS.length);
 		expect(a.nivelMedioAlJefe).toHaveLength(3);
+	});
+});
+
+describe("simular con tabla de niveles, llamas y tamaño de equipo", () => {
+	const conProgresion = cargarDatosPack({ progresion: true }).progresion;
+	if (conProgresion === undefined)
+		throw new Error("el pack no cargó la progresión");
+
+	it("con tablaNiveles los rivales del piso 1 están entre 8 y 11", () => {
+		const e = equipoConNiveles(
+			expedicionInicial("b0", datos.sets, datos.balance),
+			conProgresion,
+		);
+		const nodo = e.mapa.capas
+			.flat()
+			.find((n) => n.tipo === "salvaje" || n.tipo === "entrenador");
+		if (nodo === undefined)
+			throw new Error("el mapa no tiene combate corriente");
+		const prep = prepararCombate(e, nodo.id, datos.sets, {
+			setsRival: datos.sets,
+			tamanos: datos.balance.tamanoRival,
+			niveles: datos.balance.nivelRival,
+			tablaNiveles: conProgresion.niveles.nivel,
+		});
+		expect(prep.rival.length).toBeGreaterThan(0);
+		for (const miembro of prep.rival) {
+			expect(miembro.nivel).toBeGreaterThanOrEqual(8);
+			expect(miembro.nivel).toBeLessThanOrEqual(11);
+		}
+	});
+
+	it("con llamas 0 una derrota termina como siempre", async () => {
+		const r = await simularExpedicion("b0", {
+			...datos,
+			sets: inofensivos(datos.sets),
+			setsRival: datos.sets,
+			elites: undefined,
+			llamas: 0,
+		});
+		expect(r.estado.estado).toBe("derrota");
+		expect(r.estado.llamas).toBe(0);
+		expect(r.estado.fallidos).toEqual([]);
+	});
+
+	it("con llamas una derrota sigue en curso, gasta una llama y luego termina", async () => {
+		const r = await simularExpedicion("b0", {
+			...datos,
+			sets: inofensivos(datos.sets),
+			setsRival: datos.sets,
+			elites: undefined,
+			llamas: 1,
+			tamanoEquipo: 6,
+		});
+		expect(r.estado.estado).toBe("derrota");
+		expect(r.estado.llamas).toBe(0);
+		expect(r.estado.fallidos).toHaveLength(1);
+	});
+
+	it("tamanoEquipo forma equipos distintos y deterministas", async () => {
+		const datosConSeis = { ...datos, tamanoEquipo: 6 };
+		const a = await simularExpedicion("b0", datosConSeis);
+		expect(await simularExpedicion("b0", datosConSeis)).toEqual(a);
+		expect(a.estado.equipo).toHaveLength(6);
+		expect(new Set(a.estado.equipo.map((m) => m.especie)).size).toBe(6);
+	});
+
+	it("tamanoEquipo fuera de 1..6 lanza RangeError", async () => {
+		for (const tamanoEquipo of [0, 7, 1.5]) {
+			await expect(
+				simularExpedicion("b0", { ...datos, tamanoEquipo }),
+			).rejects.toThrow(RangeError);
+		}
+	});
+
+	it("llamas inválidas lanzan RangeError", async () => {
+		for (const llamas of [-1, 1.5]) {
+			await expect(
+				simularExpedicion("b0", { ...datos, llamas }),
+			).rejects.toThrow(RangeError);
+		}
 	});
 });

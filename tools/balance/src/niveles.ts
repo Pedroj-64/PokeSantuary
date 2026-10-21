@@ -1,3 +1,4 @@
+import { techoDelPiso as techoDelPisoPack } from "@santuario/battle";
 import {
 	type ContextoProgresion,
 	crearRng,
@@ -9,7 +10,6 @@ import {
 	type MiembroExp,
 	movimientosIniciales,
 	nivelInicial,
-	nivelRival,
 	type Rng,
 	registrarVictoria,
 	type TablaNiveles,
@@ -145,16 +145,17 @@ export function tipoRivalDeNodo(tipoNodo: string): TipoRival {
 }
 
 /**
- * Nivel del as del jefe de `piso`: `nivelRival(tabla, {tipo:"jefe", piso,
- * as:true}, rng)`. El rng no se consume para el jefe, pero se exige por la
- * firma de `nivelRival`.
+ * Nivel del as del jefe de `piso`. Delega en `techoDelPiso` de
+ * `@santuario/battle` (el jefe no consume RNG, así que el resultado es el
+ * mismo); se conserva esta firma con `Rng` por compatibilidad con el
+ * simulador y sus pruebas.
  */
 export function techoDelPiso(
 	tablaNiveles: TablaNiveles,
 	piso: number,
-	rng: Rng,
+	_rng: Rng,
 ): number {
-	return nivelRival(tablaNiveles, { tipo: "jefe", piso, as: true }, rng);
+	return techoDelPisoPack(tablaNiveles, piso as 1 | 2 | 3);
 }
 
 /**
