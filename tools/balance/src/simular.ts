@@ -42,6 +42,7 @@ import {
 	elegirJugadaInteligente,
 	poderDeMovimientos,
 } from "./politica.js";
+import { elegirJugadaConTipos, rivalActivoTras } from "./politicaTipos.js";
 
 /** Tope de turnos de un combate: pasado, se da por perdido (nadie hace daño). */
 const MAX_TURNOS = 300;
@@ -77,6 +78,8 @@ export interface DatosSimulacion {
 	 * con PP, como antes.
 	 */
 	politica?: DatosPolitica;
+	/** Con `politica`, además usa los tipos del rival (efectividad y cambio si no daña). */
+	usarTipos?: boolean;
 	/**
 	 * Llamas iniciales del Farol. Si se da, una derrota puede dejar la
 	 * expedición en curso (ver `fallidos`/`repetir` en `@santuario/core`).
@@ -147,6 +150,9 @@ async function jugarCombate(
 		rival: prep.rival,
 		terreno: prep.terreno,
 	});
+	let rival = datos.usarTipos
+		? rivalActivoTras(r.eventos, undefined)
+		: undefined;
 	for (let turno = 0; r.terminado === null; turno++) {
 		if (turno >= MAX_TURNOS || r.peticion === null) {
 			return {
@@ -161,8 +167,11 @@ async function jugarCombate(
 		const eleccion =
 			datos.politica === undefined
 				? elegirJugada(r.peticion)
-				: elegirJugadaInteligente(r.peticion, datos.politica);
+				: datos.usarTipos
+					? elegirJugadaConTipos(r.peticion, datos.politica, rival)
+					: elegirJugadaInteligente(r.peticion, datos.politica);
 		r = await sesion.elegirJugador(eleccion);
+		if (datos.usarTipos) rival = rivalActivoTras(r.eventos, rival);
 	}
 	return {
 		resultado: resultadoDeCombate(

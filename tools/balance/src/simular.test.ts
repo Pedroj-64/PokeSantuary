@@ -271,3 +271,41 @@ describe("simular con tabla de niveles, llamas y tamaño de equipo", () => {
 		}
 	});
 });
+
+describe("simular con política de tipos", () => {
+	const politica = cargarDatosPack({ politica: true }).politica;
+	if (politica === undefined) throw new Error("el pack no cargó la política");
+	const datosTipos = { ...datos, politica, usarTipos: true };
+
+	it("es determinista y reparte todas las expediciones entre victorias y derrotas", async () => {
+		const a = await simular(SEMILLAS, datosTipos);
+		expect(await simular(SEMILLAS, datosTipos)).toEqual(a);
+		expect(a.victorias + a.muertesPorPiso.reduce((n, m) => n + m, 0)).toBe(
+			a.total,
+		);
+	});
+
+	it("con rivales inofensivos la tasa es 1 y con un equipo inofensivo es 0", async () => {
+		const gana = await simular(SEMILLAS, {
+			...datosTipos,
+			setsRival: inofensivos(datos.sets),
+			elites: undefined,
+		});
+		expect(gana.tasa).toBe(1);
+		const pierde = await simular(SEMILLAS, {
+			...datosTipos,
+			sets: inofensivos(datos.sets),
+			setsRival: datos.sets,
+		});
+		expect(pierde.tasa).toBe(0);
+	});
+
+	it("sin `usarTipos` el resultado es el de la política inteligente", async () => {
+		const sinTipos = await simular(SEMILLAS, {
+			...datosTipos,
+			usarTipos: false,
+		});
+		const inteligente = await simular(SEMILLAS, { ...datos, politica });
+		expect(sinTipos).toEqual(inteligente);
+	});
+});

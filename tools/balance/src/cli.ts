@@ -11,7 +11,8 @@ if (!Number.isInteger(n) || n < 1) {
 
 const barrido = process.argv.includes("--barrido");
 const conNiveles = process.argv.includes("--niveles") || barrido;
-const inteligente = process.argv.includes("--inteligente") || barrido;
+const tipos = process.argv.includes("--tipos");
+const inteligente = process.argv.includes("--inteligente") || barrido || tipos;
 const argGimnasio = process.argv.indexOf("--gimnasio");
 const nivelGimnasio =
 	argGimnasio >= 0 ? Number(process.argv[argGimnasio + 1]) : 0;
@@ -62,6 +63,7 @@ const datosBase = cargarDatosPack({
 });
 const datos = {
 	...datosBase,
+	...(tipos ? { usarTipos: true } : {}),
 	...(llamas === undefined ? {} : { llamas }),
 	...(tamanoEquipo === undefined ? {} : { tamanoEquipo }),
 };
@@ -119,7 +121,8 @@ if (barrido) {
 	console.log(`Expediciones: ${r.total}`);
 	console.log(`Victorias: ${r.victorias} (${(r.tasa * 100).toFixed(1)} %)`);
 	console.log(`Derrotas por piso: ${r.muertesPorPiso.join(" / ")}`);
-	if (inteligente) console.log("Política: inteligente");
+	if (inteligente)
+		console.log(`Política: ${tipos ? "con tipos" : "inteligente"}`);
 	if (r.nivelMedioAlJefe !== undefined) {
 		console.log(
 			`Nivel medio al jefe: ${r.nivelMedioAlJefe
