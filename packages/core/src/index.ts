@@ -138,6 +138,18 @@ export {
 } from "./santuario/ceremonias.js";
 export { esTemaDelDia, TEMAS_CHARLA, temasDelDia } from "./santuario/charla.js";
 export {
+	codigoElegido,
+	type EfectoCodigo,
+	type EfectoTotal,
+	type EleccionesCodigos,
+	efectoDeCodigos,
+	elegirCodigo,
+	type IdCodigo,
+	nivelesPendientes,
+	type Opcion as OpcionCodigo,
+	type TablaCodigos,
+} from "./santuario/codigos.js";
+export {
 	type AccionMarcada,
 	crearSantuario,
 	type DecoracionBalance,
