@@ -9,6 +9,7 @@ import {
 import type { Mochila } from "./mochila.js";
 import { crearRng } from "./rng.js";
 import {
+	anadirRuna,
 	type IdRuna,
 	MAX_RUNAS,
 	modificadores,
@@ -63,6 +64,8 @@ export interface EstadoExpedicion {
 	fallidos?: string[];
 	/** Nodo perdido que se puede volver a intentar (jefes); lo borra `entrar`. */
 	repetir?: string;
+	/** Bendición del Viajero: runas entre las que hay que elegir una antes de empezar. */
+	runaPendiente?: IdRuna[];
 }
 
 /** Resultado de un combate: `psPct` va en el orden del equipo. */
@@ -294,6 +297,24 @@ export function resolverCombate(
 		equipo,
 		dinero,
 	};
+}
+
+/**
+ * Elige la runa de la Bendición del Viajero: la añade a la mochila y cierra la elección.
+ *
+ * @throws {RangeError} Si no hay elección pendiente o `runa` no es una de las ofrecidas.
+ */
+export function elegirRunaInicial(
+	e: EstadoExpedicion,
+	runa: IdRuna,
+): EstadoExpedicion {
+	if (e.runaPendiente === undefined || !e.runaPendiente.includes(runa)) {
+		throw new RangeError(
+			`elegirRunaInicial(): '${runa}' no está entre las runas ofrecidas`,
+		);
+	}
+	const { runaPendiente: _, ...resto } = e;
+	return { ...resto, runas: anadirRuna(e.runas, runa) };
 }
 
 /**

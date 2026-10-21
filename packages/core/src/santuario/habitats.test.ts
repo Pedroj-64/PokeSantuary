@@ -449,6 +449,52 @@ describe("visitantes del Alba", () => {
 		expect(conUna.estado.residentes.map((r) => r.especie)).toEqual(["pikachu"]);
 	});
 
+	it("con Bosque libre llega un visitante extra cada 4 jornadas, sin hábitat pendiente", () => {
+		const ctx = (): ContextoJornada => ({
+			...contexto("pradera-alta", ["pikachu"]),
+			especiesDisponibles: ["pikachu", "eevee", "abra"],
+		});
+		const jornadasConExtra = (codigos?: EstadoSantuario["codigos"]) => {
+			const hay: number[] = [];
+			for (let j = 1; j <= 8; j++) {
+				const e = estadoVisitantes([], {
+					momento: "noche",
+					jornada: j,
+					...(codigos !== undefined && { codigos }),
+				});
+				const r = amanecer(e, balance(), ctx());
+				if (r.eventos.some((x) => x.habitat === "bosque-libre")) hay.push(j);
+			}
+			return hay;
+		};
+		expect(jornadasConExtra()).toEqual([]);
+		expect(jornadasConExtra({ 3: "A" })).toEqual([]); // Cosecha abundante no trae visitantes
+		const hay = jornadasConExtra({ 3: "B" });
+		expect(hay).toHaveLength(2);
+		expect((hay[1] as number) - (hay[0] as number)).toBe(4);
+	});
+
+	it("el visitante extra de Bosque libre es determinista y es un visitante normal", () => {
+		const e = estadoVisitantes([], {
+			momento: "noche",
+			jornada: 3, // el Alba siguiente es la jornada 4
+			codigos: { 3: "B" },
+		});
+		const ctx: ContextoJornada = {
+			...contexto("pradera-alta", ["pikachu"]),
+			especiesDisponibles: ["pikachu", "eevee"],
+		};
+		const r1 = amanecer(congelar(e), balance(), ctx);
+		const r2 = amanecer(congelar(e), balance(), ctx);
+		expect(r1).toEqual(r2);
+		expect(r1.estado.residentes).toHaveLength(1);
+		expect(r1.estado.residentes[0]).toMatchObject({
+			estado: "visitante",
+			visitanteRestante: 3,
+			origen: "habitat",
+		});
+	});
+
 	it("crea un visitante determinista y prefiere las especies no vistas", () => {
 		const e = estadoVisitantes([], {
 			momento: "noche",

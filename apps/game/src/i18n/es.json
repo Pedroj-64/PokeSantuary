@@ -167,6 +167,8 @@
 	"gimnasio.subir": "Subir al nivel {n}",
 	"gimnasio.motivo.maximo": "nivel máximo",
 	"gimnasio.motivo.sable": "falta redimir a Sable",
+	"mapa.bendicion.titulo": "Bendición del Viajero: elige una runa",
+	"mapa.bendicion.pie": "Enter: elegir",
 	"mapa.sinRunas": "ninguna",
 	"captura.boton": "Capturar  [K]",
 	"captura.restantes": "Bolas: {n}",

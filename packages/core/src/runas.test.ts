@@ -9,6 +9,7 @@ import {
 	MAX_RUNAS,
 	type Modificadores,
 	modificadores,
+	opcionesDeRuna,
 	resolverMisterio,
 } from "./runas.js";
 
@@ -182,5 +183,34 @@ describe("resolverMisterio", () => {
 			const casiLleno = resolverMisterio(["A", "C", "F", "?", "?"], semilla, 1);
 			expect(casiLleno).toEqual(["A", "C", "F", "S", "?"]);
 		}
+	});
+});
+
+describe("opcionesDeRuna", () => {
+	it("ofrece hasta la cantidad pedida de runas con efecto que aún no tienes, sin repetir", () => {
+		const o = opcionesDeRuna("s1", [], 3);
+		expect(o).toHaveLength(3);
+		expect(new Set(o).size).toBe(3);
+		for (const r of o) expect(["A", "C", "F", "S"]).toContain(r);
+	});
+
+	it("excluye las que ya tienes y se queda corta si no hay más", () => {
+		const o = opcionesDeRuna("s1", ["A", "C"], 3);
+		expect(o).toHaveLength(2);
+		expect([...o].sort()).toEqual(["F", "S"]);
+		expect(opcionesDeRuna("s1", ["A", "C", "F", "S"], 3)).toEqual([]);
+	});
+
+	it("es determinista por semilla y no muta la mochila", () => {
+		const tengo = Object.freeze(["F"] as const);
+		expect(opcionesDeRuna("s1", tengo, 3)).toEqual(
+			opcionesDeRuna("s1", tengo, 3),
+		);
+		const distintas = new Set(
+			["a", "b", "c", "d", "e", "f"].map((s) =>
+				opcionesDeRuna(s, [], 3).join(""),
+			),
+		);
+		expect(distintas.size).toBeGreaterThan(1);
 	});
 });

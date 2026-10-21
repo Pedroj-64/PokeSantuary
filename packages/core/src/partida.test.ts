@@ -428,6 +428,28 @@ describe("Altar y Gimnasio", () => {
 		expect(p.santuario.recursos.recuerdos).toBe(0);
 	});
 
+	it("salir con la Bendición del Viajero la gasta y ofrece 3 runas para elegir", () => {
+		const base = con([edificio("altar")], {});
+		const conBendicion: typeof base = {
+			...base,
+			santuario: { ...base.santuario, bendicionViajero: true },
+		};
+		const p = ir(conBendicion, {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+		});
+		expect(p.santuario.bendicionViajero).toBeUndefined();
+		expect(p.expedicion?.runaPendiente).toHaveLength(3);
+		// sin Bendición no se ofrece nada
+		const sin = ir(base, {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+		});
+		expect(sin.expedicion?.runaPendiente).toBeUndefined();
+	});
+
 	it("no se celebra con una expedición en curso", () => {
 		const x = ir(con([edificio("altar")], { "baya:neutro": 30 }), {
 			tipo: "salirAExpedicion",

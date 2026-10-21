@@ -214,6 +214,10 @@ const Expedicion = z
 		llamas: noNegativo.optional(),
 		fallidos: z.array(z.string()).optional(),
 		repetir: z.string().optional(),
+		runaPendiente: z
+			.array(z.enum(["A", "C", "F", "S"]))
+			.max(3)
+			.optional(),
 	})
 	.strict();
 

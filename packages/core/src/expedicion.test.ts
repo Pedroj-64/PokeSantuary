@@ -4,6 +4,7 @@ import {
 	curarAlMasHerido,
 	type EstadoExpedicion,
 	elegibles,
+	elegirRunaInicial,
 	entrar,
 	esNodoDeCombate,
 	iniciarExpedicion,
@@ -661,5 +662,32 @@ describe("llamas del Farol", () => {
 		const antes = foto(jefe);
 		resolverCombate(jefe, pierde([50, 0]), FAROL);
 		expect(foto(jefe)).toBe(antes);
+	});
+});
+
+describe("Bendición del Viajero: elegirRunaInicial", () => {
+	const base = (): EstadoExpedicion => ({
+		...iniciarExpedicion("b1", ["a"]),
+		runaPendiente: ["A", "C", "S"],
+	});
+
+	it("añade la runa elegida a la mochila y cierra la elección", () => {
+		const e = elegirRunaInicial(base(), "C");
+		expect(e.runas).toEqual(["C"]);
+		expect(e.runaPendiente).toBeUndefined();
+	});
+
+	it("rechaza una runa que no se ofreció o si no hay elección pendiente", () => {
+		expect(() => elegirRunaInicial(base(), "F")).toThrow(RangeError);
+		expect(() =>
+			elegirRunaInicial(iniciarExpedicion("b1", ["a"]), "A"),
+		).toThrow(RangeError);
+	});
+
+	it("no muta el estado de entrada", () => {
+		const e = congelar(base());
+		const antes = foto(e);
+		elegirRunaInicial(e, "A");
+		expect(foto(e)).toBe(antes);
 	});
 });

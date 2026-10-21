@@ -1,4 +1,5 @@
 import { crearRng } from "../rng.js";
+import { efectoDeCodigos } from "./codigos.js";
 import type {
 	Edificio,
 	EstadoSantuario,
@@ -320,7 +321,7 @@ export const pasoVisitantesAtardecer: Paso = (e, b) => {
  * sorteo de `raro` decide si llega; si no pasa, el hábitat sigue pendiente.
  * Sin `ctx` no hace nada.
  */
-export const pasoVisitantesAlba: Paso = (e, _b, _rng, ctx) => {
+export const pasoVisitantesAlba: Paso = (e, b, _rng, ctx) => {
 	if (!ctx) return { estado: { ...e }, eventos: [] };
 	const { habitats, fabricar } = ctx;
 	const residentes = [...e.residentes];
@@ -370,6 +371,40 @@ export const pasoVisitantesAlba: Paso = (e, _b, _rng, ctx) => {
 		});
 		if (!yaVistas.has(especie)) vistas.push(especie);
 		eventos.push({ tipo: "visitanteLlega", uid, especie, habitat: id });
+	}
+
+	// Código "Bosque libre": cada N jornadas llega un visitante aunque no haya hábitat nuevo.
+	const cada = efectoDeCodigos(e.codigos ?? {}, b.codigos).visitanteCada;
+	if (cada !== undefined && e.jornada % cada === 0) {
+		const presentes = new Set(residentes.map((r) => r.especie));
+		const candidatas = (ctx.especiesDisponibles ?? []).filter(
+			(s) => !presentes.has(s),
+		);
+		if (candidatas.length > 0) {
+			const yaVistas = new Set(vistas);
+			const noVistas = candidatas.filter((s) => !yaVistas.has(s));
+			const pool = noVistas.length > 0 ? noVistas : candidatas;
+			const rng = crearRng(`${e.semilla}:bosque-libre:${e.jornada}`);
+			const especie = pool[rng.entero(0, pool.length - 1)] ?? pool[0] ?? "";
+			const uid = `r${siguienteUid}`;
+			siguienteUid++;
+			const nuevo = fabricar({ especie, rng, uid, origen: "habitat" });
+			residentes.push({
+				...nuevo,
+				uid,
+				especie,
+				estado: "visitante",
+				visitanteRestante: JORNADAS_VISITANTE,
+				origen: "habitat",
+			});
+			if (!yaVistas.has(especie)) vistas.push(especie);
+			eventos.push({
+				tipo: "visitanteLlega",
+				uid,
+				especie,
+				habitat: "bosque-libre",
+			});
+		}
 	}
 
 	return {

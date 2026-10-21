@@ -41,6 +41,7 @@ export {
 	curarAlMasHerido,
 	type EstadoExpedicion,
 	elegibles,
+	elegirRunaInicial,
 	entrar,
 	esNodoDeCombate,
 	iniciarExpedicion,
@@ -125,6 +126,7 @@ export {
 	MAX_RUNAS,
 	type Modificadores,
 	modificadores,
+	opcionesDeRuna,
 	resolverMisterio,
 } from "./runas.js";
 export {

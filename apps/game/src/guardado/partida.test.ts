@@ -114,6 +114,7 @@ describe("guardado de la partida", () => {
 				...x,
 				fallidos: ["1-0"],
 				repetir: "1-0",
+				runaPendiente: ["A", "F"],
 				equipo: [
 					{
 						...(m as NonNullable<typeof m>),

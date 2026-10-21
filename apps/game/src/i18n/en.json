@@ -167,6 +167,8 @@
 	"gimnasio.subir": "Raise to level {n}",
 	"gimnasio.motivo.maximo": "max level",
 	"gimnasio.motivo.sable": "Sable must be redeemed first",
+	"mapa.bendicion.titulo": "Traveler's Blessing: choose a rune",
+	"mapa.bendicion.pie": "Enter: choose",
 	"mapa.sinRunas": "none",
 	"captura.boton": "Catch  [K]",
 	"captura.restantes": "Balls: {n}",

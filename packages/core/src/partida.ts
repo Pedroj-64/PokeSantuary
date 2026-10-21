@@ -3,6 +3,7 @@ import type {
 	EstadoExpedicion as Expedicion,
 	MiembroExp,
 } from "./expedicion.js";
+import { opcionesDeRuna } from "./runas.js";
 import { celebrar, type IdCeremonia } from "./santuario/ceremonias.js";
 import { elegirCodigo, type Opcion } from "./santuario/codigos.js";
 import type {
@@ -224,8 +225,21 @@ export function reducir(
 				mochila: a.mochila ?? {},
 				...(a.llamas !== undefined && { llamas: a.llamas, fallidos: [] }),
 			};
+			// Bendición del Viajero: se gasta al salir y ofrece 3 runas para elegir.
+			const bendicion = s.bendicionViajero === true;
+			const { bendicionViajero: _, ...sinBendicion } = s;
 			return {
-				partida: { ...p, expedicion, expedicionJornada: s.jornada },
+				partida: {
+					...p,
+					santuario: bendicion ? sinBendicion : s,
+					expedicion: bendicion
+						? {
+								...expedicion,
+								runaPendiente: opcionesDeRuna(a.semilla, expedicion.runas, 3),
+							}
+						: expedicion,
+					expedicionJornada: s.jornada,
+				},
 				eventos: [],
 			};
 		}

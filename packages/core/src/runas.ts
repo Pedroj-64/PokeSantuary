@@ -92,6 +92,25 @@ export function modificadores(runas: readonly IdRuna[]): Modificadores {
 }
 
 /**
+ * Hasta `cantidad` runas con efecto (A, C, F, S) que aún no tienes, para elegir una
+ * (Bendición del Viajero). Orden y selección deterministas por `semilla`.
+ */
+export function opcionesDeRuna(
+	semilla: string,
+	tengo: readonly IdRuna[],
+	cantidad: number,
+): IdRuna[] {
+	const libres = CANDIDATAS.filter((r) => !tengo.includes(r));
+	const rng = crearRng(`${semilla}:bendicion`);
+	const orden: IdRuna[] = [];
+	while (libres.length > 0 && orden.length < cantidad) {
+		const i = rng.entero(0, libres.length - 1);
+		orden.push(libres.splice(i, 1)[0] as IdRuna);
+	}
+	return orden;
+}
+
+/**
  * Añade una runa a la lista.
  *
  * @returns Arreglo nuevo; no toca el recibido.

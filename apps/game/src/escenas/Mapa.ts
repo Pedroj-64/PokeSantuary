@@ -2,6 +2,7 @@ import type { DatosCombate } from "@santuario/battle";
 import {
 	type EstadoExpedicion,
 	elegibles,
+	elegirRunaInicial,
 	entrar,
 	esNodoDeCombate,
 	necesitaElegir,
@@ -134,6 +135,7 @@ export class Mapa extends Phaser.Scene {
 		if (e.actual !== null && e.fallidos?.includes(e.actual)) {
 			this.etiqueta.setText(t("mapa.llamaGastada"));
 		}
+		if (e.runaPendiente !== undefined) this.menuBendicion();
 		const ids = elegibles(e);
 		alPulsarTecla(this, (ev) => {
 			if (this.menu.abierto) {
@@ -246,8 +248,29 @@ export class Mapa extends Phaser.Scene {
 		this.scene.restart({ estado: siguiente } satisfies DatosMapa);
 	}
 
+	/** Bendición del Viajero: hay que elegir una de las runas ofrecidas antes de empezar. */
+	private menuBendicion(): void {
+		const e = this.estado;
+		const items: ItemMenu[] = (e.runaPendiente ?? []).map((runa) => ({
+			texto: t(`runa.${runa}`),
+			alElegir: () => {
+				this.menu.cerrar();
+				this.cambiando = true;
+				this.scene.restart({
+					estado: elegirRunaInicial(e, runa),
+				} satisfies DatosMapa);
+			},
+		}));
+		this.menu.mostrar(
+			t("mapa.bendicion.titulo"),
+			items,
+			t("mapa.bendicion.pie"),
+			() => {},
+		);
+	}
+
 	private elegir(id: string): void {
-		if (this.cambiando) return;
+		if (this.cambiando || this.menu.abierto) return;
 		const estado = entrar(this.estado, id);
 		this.cambiando = true;
 		const nodo = estado.mapa.capas.flat().find((n) => n.id === id);
