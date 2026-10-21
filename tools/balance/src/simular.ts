@@ -3,6 +3,7 @@ import {
 	cerrarCombate,
 	dineroDeNodo,
 	type Eleccion,
+	esEleccionIlegal,
 	expedicionInicial,
 	type Peticion,
 	prepararCombate,
@@ -141,6 +142,14 @@ async function jugarCombate(
 		tamanos: datos.balance.tamanoRival,
 		niveles: datos.balance.nivelRival,
 		tablaNiveles: datos.progresion?.niveles.nivel,
+		// Unos sets de rival explícitos mandan sobre los movimientos por nivel.
+		movimientosPorNivel:
+			datos.progresion === undefined || datos.setsRival !== undefined
+				? undefined
+				: {
+						aprendizaje: datos.progresion.aprendizaje,
+						poder: datos.progresion.poder,
+					},
 		elites: datos.elites,
 	});
 	const sesion = new SesionCombate();
@@ -170,7 +179,16 @@ async function jugarCombate(
 				: datos.usarTipos
 					? elegirJugadaConTipos(r.peticion, datos.politica, rival)
 					: elegirJugadaInteligente(r.peticion, datos.politica);
-		r = await sesion.elegirJugador(eleccion);
+		const peticion = r.peticion;
+		try {
+			r = await sesion.elegirJugador(eleccion);
+		} catch (error) {
+			// Un cambio voluntario puede ser ilegal (el activo está atrapado): se ataca.
+			const indice = peticion.movimientos.findIndex((m) => !m.deshabilitado);
+			if (!esEleccionIlegal(error) || eleccion.tipo !== "cambio" || indice < 0)
+				throw error;
+			r = await sesion.elegirJugador({ tipo: "movimiento", indice });
+		}
 		if (datos.usarTipos) rival = rivalActivoTras(r.eventos, rival);
 	}
 	return {

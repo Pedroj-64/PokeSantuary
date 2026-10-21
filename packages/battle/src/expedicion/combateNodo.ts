@@ -8,6 +8,7 @@ import {
 	esNodoDeCombate,
 	type MiembroExp,
 	modificadores,
+	movimientosIniciales,
 	type NodoMapa,
 	type ResultadoCombate,
 	recompensa,
@@ -60,6 +61,17 @@ export interface OpcionesRivales {
 	 * rival usa estos niveles en lugar de los de `niveles`.
 	 */
 	tablaNiveles?: TablaNiveles;
+	/**
+	 * Con `tablaNiveles`, los rivales comunes (salvaje, entrenador, Sombrío) usan los
+	 * movimientos que su especie aprende hasta su nivel, igual que el jugador, en vez
+	 * del set curado. El Alfa y el jefe conservan su set.
+	 */
+	movimientosPorNivel?: {
+		aprendizaje: Readonly<
+			Record<string, readonly { nivel: number; movimiento: string }[]>
+		>;
+		poder?: Readonly<Record<string, number>>;
+	};
 }
 
 /** Terreno del primer bioma (Bosque Verdemar). */
@@ -107,12 +119,26 @@ function conNivelesDeTabla(
 	nodo: NodoMapa,
 	rival: MiembroEquipo[],
 	tabla: TablaNiveles | undefined,
+	porNivel: OpcionesRivales["movimientosPorNivel"],
 ): MiembroEquipo[] {
 	if (tabla === undefined || !e.equipo.some((m) => m.nivel !== undefined)) {
 		return rival;
 	}
 	const niveles = nivelesDelRival(tabla, e.semilla, e.piso, nodo, rival.length);
-	return rival.map((m, i) => ({ ...m, nivel: niveles[i] as number }));
+	const comun =
+		nodo.tipo === "salvaje" ||
+		nodo.tipo === "entrenador" ||
+		nodo.tipo === "sombrio";
+	return rival.map((m, i) => {
+		const nivel = niveles[i] as number;
+		const lista = comun ? porNivel?.aprendizaje[m.especie] : undefined;
+		if (lista === undefined || lista.length === 0) return { ...m, nivel };
+		return {
+			...m,
+			nivel,
+			movimientos: movimientosIniciales(lista, nivel, porNivel?.poder),
+		};
+	});
 }
 
 /**
@@ -135,6 +161,7 @@ export function prepararCombate(
 		elites,
 		alineacion,
 		tablaNiveles,
+		movimientosPorNivel,
 	} = opciones;
 	const nodo = buscarNodo(e, nodoId);
 	const ps = e.equipo.map((m) => m.psPct);
@@ -170,6 +197,7 @@ export function prepararCombate(
 			nodo,
 			rivalDe(e, nodo, setsRival, tamanos, niveles, elites),
 			tablaNiveles,
+			movimientosPorNivel,
 		),
 		vivos,
 		...(nodo.tipo === "jefe" && e.piso === 3 && { terreno: TERRENO_VERDEMAR }),

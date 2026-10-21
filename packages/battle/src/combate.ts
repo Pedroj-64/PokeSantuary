@@ -62,6 +62,8 @@ export interface Peticion {
 	/** Vacío en un cambio forzado. */
 	movimientos: OpcionMovimiento[];
 	equipo: MiembroPeticion[];
+	/** El activo está atrapado (Mal de Ojo, Envolver...): no puede cambiar por su cuenta. */
+	atrapado?: boolean;
 }
 
 /** Terrenos que puede imponer la condición de fisura de un bioma. */
@@ -88,6 +90,7 @@ interface RequestJson {
 	forceSwitch?: boolean[];
 	active?: {
 		moves: { move: string; pp?: number; maxpp?: number; disabled: boolean }[];
+		trapped?: boolean;
 	}[];
 	side: {
 		pokemon: {
@@ -427,6 +430,10 @@ export class Combate {
 			throw eleccionIlegal(`${destino.especie} está debilitado`);
 		if (destino.activo)
 			throw eleccionIlegal(`${destino.especie} ya está activo`);
+		if (p.atrapado)
+			throw eleccionIlegal(
+				"El Pokémon activo está atrapado y no puede cambiar",
+			);
 	}
 
 	/** Consume lo que el simulador emitió desde la última vez: registro, eventos y peticiones. */
@@ -529,6 +536,7 @@ export class Combate {
 			tipo: forzado ? "cambio-forzado" : "movimiento",
 			movimientos,
 			equipo,
+			...(!forzado && r.active?.[0]?.trapped === true && { atrapado: true }),
 		};
 	}
 }

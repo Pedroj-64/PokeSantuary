@@ -9,6 +9,7 @@ import {
 	type MiembroEquipo,
 	type Peticion,
 } from "./combate.js";
+import { esEleccionIlegal } from "./errores.js";
 
 const leer = (ruta: string) =>
 	JSON.parse(readFileSync(new URL(ruta, import.meta.url), "utf8"));
@@ -416,5 +417,46 @@ describe("Combate: individuo propio", () => {
 		],
 	])("rechaza %s", async (_n, extra) => {
 		await expect(conPropio(extra)).rejects.toThrow();
+	});
+});
+
+describe("Combate: Pokémon atrapado", () => {
+	const atrapar = async () => {
+		const rival = equipo("geodude").map((m) => ({
+			...m,
+			movimientos: ["mean-look"],
+		}));
+		const c = await Combate.crear({
+			semilla: "s1",
+			jugador: equipo("pikachu", "machop"),
+			rival,
+		});
+		expect(c.peticion("jugador")?.atrapado).toBeUndefined();
+		await c.resolver(
+			{ tipo: "movimiento", indice: 0 },
+			{ tipo: "movimiento", indice: 0 },
+		);
+		return c;
+	};
+
+	it("la petición avisa de que el activo está atrapado", async () => {
+		const c = await atrapar();
+		expect(c.peticion("jugador")?.atrapado).toBe(true);
+	});
+
+	it("un cambio voluntario estando atrapado es una elección ilegal recuperable", async () => {
+		const c = await atrapar();
+		await expect(
+			c.resolver(
+				{ tipo: "cambio", indice: 1 },
+				{ tipo: "movimiento", indice: 0 },
+			),
+		).rejects.toSatisfy(esEleccionIlegal);
+		// el combate sigue válido: atacar funciona
+		await c.resolver(
+			{ tipo: "movimiento", indice: 0 },
+			{ tipo: "movimiento", indice: 0 },
+		);
+		expect(c.terminado()).toBeNull();
 	});
 });

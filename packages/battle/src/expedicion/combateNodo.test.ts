@@ -158,6 +158,49 @@ describe("prepararCombate", () => {
 		expect(prepararCombate(e, id, SETS).rival).toEqual(sinNivel.rival);
 	});
 
+	it("con movimientosPorNivel los rivales comunes usan lo que aprenden a su nivel y el jefe, su set", () => {
+		const tabla = {
+			basePorPiso: [8, 18, 28, 38],
+			desplazamiento: { salvaje: 0, rival: 3, alfa: 5, sombrio: 3, jefe: 4 },
+			desplazamientoAs: { jefe: 6 },
+			emboscada: 2,
+			salvajeExtra: 0,
+			porRangoFurioso: 2,
+		} as unknown as TablaNiveles;
+		const todas = ["a", "b", "c", "d", "e", "f", "g"];
+		const aprendizaje = Object.fromEntries(
+			todas.map((s) => [
+				s,
+				[
+					{ nivel: 1, movimiento: "growl" },
+					{ nivel: 5, movimiento: "tackle" },
+				],
+			]),
+		);
+		const porNivel = { aprendizaje, poder: { growl: 0, tackle: 40 } };
+		const jugador = (e: EstadoExpedicion) => ({
+			...e,
+			equipo: e.equipo.map((m) => ({ ...m, nivel: 8 })),
+		});
+		const [e0, id] = dentroDe("s1", "entrenador");
+		const comun = prepararCombate(jugador(e0), id, SETS, {
+			tablaNiveles: tabla,
+			movimientosPorNivel: porNivel,
+		});
+		for (const m of comun.rival)
+			expect(m.movimientos).toEqual(["growl", "tackle"]);
+		// sin la opción, el set curado
+		const sin = prepararCombate(jugador(e0), id, SETS, { tablaNiveles: tabla });
+		for (const m of sin.rival) expect(m.movimientos).toBeUndefined();
+		// el jefe conserva su set
+		const [e1, idJefe] = dentroDe("s1", "jefe");
+		const jefe = prepararCombate(jugador(e1), idJefe, SETS, {
+			tablaNiveles: tabla,
+			movimientosPorNivel: porNivel,
+		});
+		for (const m of jefe.rival) expect(m.movimientos).toBeUndefined();
+	});
+
 	it("el rival no repite especies del equipo mientras haya otras", () => {
 		for (let i = 0; i < 30; i++) {
 			const [e, id] = dentroDe(`s${i}`);

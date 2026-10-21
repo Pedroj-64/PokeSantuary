@@ -22,6 +22,8 @@ export interface DatosProgresion {
 	catalogo: CatalogoProgresion;
 	/** Para `registrarVictoria`, `elegirOlvido` y `evolucionar`. */
 	contexto: ContextoProgresion;
+	/** Potencia de cada movimiento (0 = sin daño directo). */
+	poder: Readonly<Record<string, number>>;
 }
 
 let memo: DatosProgresion | undefined;
@@ -62,6 +64,7 @@ export function cargarProgresion(): DatosProgresion {
 	memo = {
 		niveles,
 		catalogo,
+		poder,
 		contexto: {
 			tabla: niveles.subida,
 			aprendizaje,

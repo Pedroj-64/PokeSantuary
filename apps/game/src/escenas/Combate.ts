@@ -214,6 +214,10 @@ export class Combate extends Phaser.Scene {
 						elites: cargarElites(),
 						alineacion: this.datosExpedicion.alineacion,
 						tablaNiveles: cargarProgresion().niveles.nivel,
+						movimientosPorNivel: {
+							aprendizaje: cargarProgresion().contexto.aprendizaje,
+							poder: cargarProgresion().poder,
+						},
 					},
 				);
 				({ semilla, jugador, rival } = p);
