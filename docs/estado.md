@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Actualizado el 19 de octubre de 2026 (cierre del día): Fase 2 terminada, audio propio hecho y Fase 3 (Santuario) avanzada.
+Actualizado el 21 de octubre de 2026: Fase 2 terminada, audio propio hecho y Fase 3 (Santuario) casi completa; falta calibrar el balance y el Prólogo.
 
 ## Dónde estamos
 
@@ -10,14 +10,17 @@ Actualizado el 19 de octubre de 2026 (cierre del día): Fase 2 terminada, audio 
 | 1, combate | Terminada | Movimientos y sets, adaptador de `@pkmn/sim`, IA rival, combate en Web Worker, sprites, escena de combate, e2e y presupuesto de carga |
 | 2, expedición | Terminada | Mapa de nodos con semilla de tres pisos, estado de la expedición, tienda con mochila, runas, manantial, cofre y eventos, captura de salvajes y equipo de seis, Alfa y Sombrío, jefe del primer bioma con terreno de hierba, balance en datos y simulador de balance (44,8 % de victorias en 500 expediciones) |
 | Audio | Hecho | Motor de cuatro canales con notación MML, siete canciones y 58 efectos; música por escena y efectos por tipo de movimiento |
-| 3, Santuario | Avanzada | Hecho: núcleo puro del Santuario (jornadas, producción, obra, terreno, Especialidades, hábitats, visitantes, Charla del Alba), estado de la partida con su reductor, guardado con versión y suma de control, escena jugable con gestión (residentes, construcción, mejoras, terreno, caminos, decoración) y salida a la expedición con equipo elegido. También hechas las piezas puras de niveles (tablas, movimientos por nivel, evoluciones, progresión tras una victoria, llamas del Farol, elegir 3 de 6, naturalezas e IV). Falta: llevar niveles, IV y movimientos al combate, las llamas en la expedición, el Prólogo y el simulador de balance |
+| 3, Santuario | Casi completa | Núcleo puro del Santuario (jornadas, producción, obra, terreno, Especialidades, hábitats, visitantes, Charla del Alba), partida con reductor y guardado con versión y suma de control, y escena jugable con gestión completa. Progresión: nivel, naturaleza, IV y movimientos por individuo en el combate, subida de nivel tras cada victoria, pantalla para elegir qué movimiento olvidar, puente entre residentes y expedición (los residentes salen con su nivel y movimientos y vuelven con lo aprendido). Expedición desde el Santuario: llamas del Farol, elegir quiénes combaten cuando hay más de tres, Bendición del Viajero. Altar (ceremonias y Códigos), Gimnasio y Ramas del Árbol como edificios y menús, con sus efectos. Simulador de balance con niveles, política de tipos, llamas, tamaño de equipo y barrido contra los rangos objetivo. Falta: calibrar el balance (ver más abajo), el Prólogo, la curación entre pisos y la pantalla de evolución (espera a que el pack tenga especies evolucionadas) |
 | 4 en adelante | Pendiente | Ver la hoja de ruta del diseño (local) |
 
-Qué se puede hacer hoy: abrir el juego, ver las 10 especies de Kanto en español o inglés, lanzar un combate de prueba 3 contra 3 (tecla B) o abrir una expedición (tecla E): elegir ruta en el mapa de tres pisos, pelear (entran los tres primeros del equipo), capturar salvajes con las bolas que quedan (tecla K en combate), comprar bolas y bayas en la tienda, usar bayas en el mapa (tecla B), elegir en manantiales, cofres y eventos, y vencer a los Alfa (dan una runa) y al jefe del piso 3. Al perder, o al ganar el jefe del piso 3, sale la pantalla final con el dinero conservado y los Sombríos rescatados. Todo es repetible con `?semilla=`.
+Qué se puede hacer hoy: abrir el juego y, con la tecla S, entrar al Santuario (gestionar residentes, construir, mejorar, terreno, Altar, Gimnasio y Ramas; salir a la expedición junto al Árbol con la tecla E). También: ver las 10 especies de Kanto en español o inglés, lanzar un combate de prueba 3 contra 3 (tecla B) o abrir una expedición (tecla E): elegir ruta en el mapa de tres pisos, pelear (entran los tres primeros del equipo), capturar salvajes con las bolas que quedan (tecla K en combate), comprar bolas y bayas en la tienda, usar bayas en el mapa (tecla B), elegir en manantiales, cofres y eventos, y vencer a los Alfa (dan una runa) y al jefe del piso 3. Al perder, o al ganar el jefe del piso 3, sale la pantalla final con el dinero conservado y los Sombríos rescatados. Todo es repetible con `?semilla=`.
 
 ## Siguiente paso
 
-Integrar en el combate lo que ya existe como piezas puras: nivel por Pokémon, naturaleza, IV y movimientos aprendidos (`packages/battle` y el Worker), lo que obliga a volver a fijar a propósito las semillas y el hash de los e2e. Después, las llamas del Farol en la expedición, el puente de progresión entre residentes y expedición, las ceremonias, el Prólogo y el simulador de balance con niveles y capturas.
+1. **Calibrar el balance.** El barrido de `tools/balance` (`pnpm balance --barrido --tipos`) da 0 % de victorias en las tres configuraciones objetivo (25 a 40 %, 40 a 60 % y 75 a 85 %). Con la política de tipos el equipo llega a los pisos 2 y 3, pero los jefes ganan siempre, y los niveles suben más despacio de lo previsto (nivel 12 al jefe del piso 1, esperado 15 a 16). Hay que decidir qué ajustar con números: subida de nivel por victoria, dureza de los jefes o tamaño de los rivales. Son números de `packs/`, no de código.
+2. **Prólogo en greybox:** playa, elección de inicial, fisura corta y regreso, para tener una partida nueva jugable desde cero.
+3. **Cabos de la Fase 3:** curación entre pisos, pantalla de evolución, tests e2e de los menús del Altar, el Gimnasio y las Ramas (necesitan un gancho que prepare la partida), y que el nivel del Gimnasio pueda pasar de 3 cuando exista el vecino que abre los niveles 4 y 5.
+4. Después, la Fase 4 (expedición nueva) según la hoja de ruta del diseño (local).
 
 ## Decisiones de la Fase 3
 
@@ -30,9 +33,17 @@ Integrar en el combate lo que ya existe como piezas puras: nivel por Pokémon, n
 - **Datos del pack para los niveles.** `niveles.json` (tablas de nivel de los rivales y de subida), `aprendizaje.json` (movimientos por nivel, generación más reciente de cada especie, hasta el nivel 50) y `evoluciones.json` (a qué evoluciona cada especie y con qué condición, y su nivel de etapa). Se generan con `pnpm data:build`.
 - **Arte.** Losetas de 16 px, vista a escala entera. La paleta vive en `packs/comun/paleta.json` y una prueba exige que todo el arte original la respete (`pnpm arte:build` regenera los PNG con Aseprite).
 
+- **Niveles en el combate.** Un miembro de la expedición puede llevar nivel, IV, naturaleza y movimientos propios; sin ellos, el combate es el de siempre (nivel 50 y set del pack), así que las expediciones de prueba y los e2e antiguos no cambian. Los IV del residente no se guardan: salen de la semilla de la partida y su uid.
+- **Rivales con niveles.** Solo si el equipo trae niveles, el rival usa `niveles.json` (piso 1: 8 a 11; jefe 12, 12 y 14) y los rivales comunes (salvaje, entrenador, Sombrío) usan los movimientos que su especie aprende hasta su nivel, igual que el jugador. El Alfa y el jefe conservan su set curado.
+- **Movimientos iniciales.** Los cuatro últimos aprendidos por nivel, pero con al menos dos ataques si la lista los tiene (necesita la potencia de cada movimiento). Una especie sin ningún ataque en su lista (Abra) recibe a nivel 1 el primero de su set; lo aplica el generador del pack y lo comprueba `pnpm data:verify`.
+- **Llamas del Farol.** Una derrota con llamas gasta una, deja al jugador en el mismo nodo con los caídos debilitados y marca el nodo como fallido; el jefe se puede repetir. Sin llamas (expediciones de prueba), perder acaba la expedición como antes. Se sale con 1 llama más las de la Rama Farol.
+- **Pokémon atrapado.** La petición de combate avisa de `atrapado`; un cambio voluntario en ese estado es una elección ilegal recuperable, no un fallo fatal.
+- **Altar, Códigos, Gimnasio y Ramas.** Sus tablas (costes, requisitos, efectos) viven en `packs/kanto/santuario.json` con esquema estricto. Los Códigos multiplican la producción y el Ánimo por jornada y evitan que los debilitados queden agotados; "Disciplina" espera a los Ecos. Las Ramas se compran con Recuerdos y cambian el tamaño del equipo (3 sin la Rama, hasta 6), las opciones de runa, las llamas, las bolas y bayas de salida y la rendición sombría.
+- **Equipo de expedición.** Sin la Rama, el máximo es de 3 miembros (antes el menú admitía 6).
+
 ## Decisiones tomadas al cerrar la Fase 2
 
-- **Perder un combate acaba la expedición**, aunque haya Pokémon sanos en el banquillo. Al combate entran los tres primeros vivos (el motor admite tres por bando); el banquillo conserva sus PS. Cambiarlo (encadenar el banquillo o elegir quién entra) queda para la Fase 3.
+- **Perder un combate acaba la expedición** cuando no quedan llamas (las expediciones desde el Santuario salen con al menos una; ver Decisiones de la Fase 3), aunque haya Pokémon sanos en el banquillo. Al combate entran los tres primeros vivos (el motor admite tres por bando); el banquillo conserva sus PS. Cambiarlo (encadenar el banquillo o elegir quién entra) queda para la Fase 3.
 - **Lanzar una bola no gasta turno** y siempre se usa la mejor que queda. El simulador no captura, así que el 44,8 % no refleja la captura.
 - **Runas.** Solo cinco de las 28 (A, C, F, S, ?). La A (daño del primer movimiento) todavía no actúa en combate. El Alfa da una runa misterio que se revela al pasar de piso; si la mochila está llena o ya hay una, no da nada.
 - **Tienda.** Solo vende bolas y bayas (25 % y 50 % de PS). Las MT y los objetos esperan a la Fase 3.
@@ -42,13 +53,13 @@ Integrar en el combate lo que ya existe como piezas puras: nivel por Pokémon, n
 
 ## Mapa del repositorio
 
-- `packages/core`: reglas puras y deterministas (`crearRng`, `paso`, `reproducir`) y las de la expedición: `generarPiso` (mapa de nodos), estado inmutable de la expedición (`iniciarExpedicion`, `entrar`, `resolverCombate`, `curar`, `liquidar`), `runas`, `tienda`, `mochila` (compras y bayas), `equipo` (captura), `eventos` (efectos de manantial, cofre y eventos), `captura` y `recompensa`. Sin dependencias de motor.
+- `packages/core`: reglas puras y deterministas (`crearRng`, `paso`, `reproducir`), el núcleo del Santuario en `src/santuario` (estado, jornada, producción, terreno, hábitats, ceremonias, Códigos, Gimnasio, Ramas, puente de progresión), la partida con su reductor (`partida.ts`), los niveles y la progresión (`niveles`, `aprender`, `evolucionar`, `progresion`, `individuo`), las llamas del Farol (`farol`), la alineación de combate (`alineacion`) y las de la expedición: `generarPiso` (mapa de nodos), estado inmutable de la expedición (`iniciarExpedicion`, `entrar`, `resolverCombate`, `curar`, `liquidar`), `runas`, `tienda`, `mochila` (compras y bayas), `equipo` (captura), `eventos` (efectos de manantial, cofre y eventos), `captura` y `recompensa`. Sin dependencias de motor.
 - `packages/data`: esquemas Zod (especie, movimiento, set, balance de la expedición, eventos, élites, manifiesto, `oficial.json`, balance del Santuario) y sus tipos.
 - `packages/battle`: `Combate` sobre `@pkmn/sim`, IA rival, sesión de combate y cliente del Worker. También lleva la lógica de rivales y combates de nodo (`expedicion/`: `crearRival`, `prepararCombate`, `resultadoDeCombate`, `cerrarCombate`, `expedicionInicial`). Dos entradas: la del cliente (`@santuario/battle`, sin el simulador) y la del servidor (`@santuario/battle/servidor`).
-- `tools/balance`: simulador de expediciones completas con `@pkmn/sim` en Node (`pnpm balance --n 500`).
+- `tools/balance`: simulador de expediciones completas con `@pkmn/sim` en Node (`pnpm balance --n 500`). Banderas: `--niveles` y `--gimnasio <0..5>` (progresión), `--inteligente` y `--tipos` (política del jugador), `--llamas <n>`, `--equipo <1..6>` y `--barrido` (las tres configuraciones objetivo con su rango).
 - `tools/pipeline`: descarga con caché y pausa, recorte, unión con `@pkmn/data`, `oficial.json` (URL de sprites), verificación sin red y presupuesto de carga.
 - `packs/kanto`: datos del paquete. `trabajos.json`, `sets.json` y `expedicion.json` (recompensas, catálogo de la tienda, tasas de captura) se escriben a mano (entradas de diseño, validadas por esquema y por `pnpm data:verify`); `especies.json`, `movimientos.json`, `oficial.json` y `manifest.json` (con hashes) los genera `pnpm data:build` y no se editan a mano.
-- `apps/game`: juego con Phaser 4 y Vite; escenas `ListaEspecies`, `Combate`, `Mapa` y `FinExpedicion`, lógica de la expedición en `src/expedicion`, textos en `src/i18n`. El arte original (iconos de nodo) tiene su fuente de Aseprite en `apps/game/arte/`.
+- `apps/game`: juego con Phaser 4 y Vite; escenas `ListaEspecies`, `Combate`, `Mapa`, `Eleccion`, `Tienda`, `Captura`, `Progresion`, `Santuario`/`SantuarioMundo` y `FinExpedicion` (los menús de gestión del Santuario están en `src/santuario/menusGestion.ts`), lógica de la expedición en `src/expedicion`, textos en `src/i18n`. El arte original (iconos de nodo) tiene su fuente de Aseprite en `apps/game/arte/`.
 
 ## Decisiones técnicas vigentes
 
@@ -86,12 +97,19 @@ Pendiente de la Fase 2 (heredada):
 Detectada al cerrar la Fase 2:
 - El efecto `combate` de los eventos no se puede lanzar desde la escena; `verificar` debería rechazarlo mientras tanto.
 - Esc abandona la expedición sin confirmar (importará con partidas guardadas); las escenas de elección, tienda y captura no tienen panel de error si falla un pack.
-- El simulador no captura, no sustituye runas ni anota Sombríos: añadir una política más completa y volver a comprobar el 40 a 60 %.
+- El simulador no captura, no sustituye runas ni anota Sombríos, y su jugador no gestiona la curación como una persona: la calibración final necesita prueba con personas (ver Siguiente paso).
 - Validar `terreno` contra una lista en `Combate.crear` y dejarlo en el registro de entradas del simulador.
 - Prueba de que cada evento y cada artículo tiene su clave i18n: ya hay una para las claves del jefe y de las canciones; falta la de eventos y artículos.
 - Los e2e usan esperas fijas tras `preparar`; sustituirlas por esperas a un estado.
 - Un clic más una tecla en el mismo fotograma ya no encolan dos cambios de escena en el mapa; las demás escenas de elección siguen sin cerrojo.
 - El jefe de los pisos 1 y 2 sale del catálogo corriente; si debe tener set propio, va en `elites.json`.
+
+Detectada en la Fase 3:
+- La marca interna `#terminado-hoy` vive en `edificio.resto` (se borra en el mismo Atardecer y no llega al guardado); convertirla en campo propio exigiría migrar el guardado.
+- Cifras de terreno y los ids `cantera` y `almacen` siguen en el código del núcleo; deberían salir a `packs/`.
+- Los efectos de `Raíces firmes`, `Memoria del Eco` y de `Disciplina` (Código) están en los datos pero aún no actúan: dependen de la curación entre pisos y de los Ecos.
+- El nivel del Gimnasio se queda en 3 mientras no exista el vecino que abre el 4 y el 5.
+- Los menús del Altar, el Gimnasio y las Ramas, y el de elegir la runa de la Bendición, no tienen e2e.
 
 Fase 5:
 - Control de presupuesto: la exención por prefijo `worker-*`, etiquetas `<link>` solo con comillas dobles y solo se comprueba el primer chunk de Worker.
