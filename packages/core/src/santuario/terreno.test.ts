@@ -3,7 +3,6 @@ import { crearRng } from "../rng.js";
 import {
 	crearSantuario,
 	type EstadoSantuario,
-	esAreaUtil,
 	type Loseta,
 	type Residente,
 	type SantuarioBalance,
@@ -14,6 +13,7 @@ import {
 	colocarDecoracion,
 	desmarcarAccion,
 	enIsla,
+	esAreaUtil,
 	loseta,
 	marcarAccion,
 	pasoTerreno,

@@ -1,15 +1,19 @@
 import { crearRng } from "../rng.js";
-import {
-	type AccionMarcada,
-	type EstadoSantuario,
-	esAreaUtil,
-	type Loseta,
-	type SantuarioBalance,
-	type Tarea,
-	type Terreno,
-	type TipoLoseta,
+import type {
+	AccionMarcada,
+	EstadoSantuario,
+	Loseta,
+	SantuarioBalance,
+	Tarea,
+	Terreno,
+	TipoLoseta,
 } from "./estado.js";
 import type { EventoSantuario, Paso } from "./jornada.js";
+
+/** ¿Se puede construir sobre esta loseta? No cuentan yerma ni roca (GDD §11.6). */
+export function esAreaUtil(l: Loseta): boolean {
+	return l.tipo !== "yerma" && l.tipo !== "roca";
+}
 
 /** Jornadas que tarda un árbol joven en hacerse árbol. */
 const JORNADAS_ARBOL_JOVEN = 2;

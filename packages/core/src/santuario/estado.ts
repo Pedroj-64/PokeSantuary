@@ -262,11 +262,6 @@ export interface SantuarioBalance {
 	ceremonias: TablaCeremonias;
 }
 
-/** ¿Se puede construir sobre esta loseta? No cuentan yerma ni roca (GDD §11.6). */
-export function esAreaUtil(l: Loseta): boolean {
-	return l.tipo !== "yerma" && l.tipo !== "roca";
-}
-
 /**
  * Crea el Santuario inicial (GDD §11): jornada 1 al alba, recursos del balance,
  * el Árbol Cenit terminado en el centro y la isla rota de `terrenoInicial`.

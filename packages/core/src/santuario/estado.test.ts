@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
 	crearSantuario,
-	esAreaUtil,
 	type Loseta,
 	type SantuarioBalance,
 	type TipoLoseta,
 } from "./estado.js";
-import { terrenoInicial } from "./terreno.js";
+import { esAreaUtil, terrenoInicial } from "./terreno.js";
 
 // Este paquete no trae `@types/node`, así que el módulo se carga por su nombre
 // y se declara aquí el único tipo que se usa.

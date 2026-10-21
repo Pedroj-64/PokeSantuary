@@ -1,12 +1,12 @@
-import {
-	type Edificio,
-	type EstadoSantuario,
-	esAreaUtil,
-	type Residente,
-	type SantuarioBalance,
-	type Tarea,
+import type {
+	Edificio,
+	EstadoSantuario,
+	Residente,
+	SantuarioBalance,
+	Tarea,
 } from "./estado.js";
 import { zonaDe } from "./jornada.js";
+import { esAreaUtil } from "./terreno.js";
 
 /** Residentes que caben según el nivel del Árbol Cenit. */
 export function capacidadResidentes(
