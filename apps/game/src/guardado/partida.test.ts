@@ -97,6 +97,41 @@ describe("guardado de la partida", () => {
 		expect(await cargar(await guardar(p))).toEqual(p);
 	});
 
+	it("una expedición con llamas y un miembro con progresión sobrevive a guardar y cargar", async () => {
+		let p = ir(conResidentes(), { tipo: "comenzarDia" });
+		p = ir(p, {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+			llamas: 2,
+		});
+		const x = p.expedicion;
+		if (!x) throw new Error("sin expedición");
+		const [m] = x.equipo;
+		p = ir(p, {
+			tipo: "actualizarExpedicion",
+			expedicion: {
+				...x,
+				fallidos: ["1-0"],
+				repetir: "1-0",
+				equipo: [
+					{
+						...(m as NonNullable<typeof m>),
+						nivel: 12,
+						iv: { hp: 31, atk: 0, def: 5, spa: 6, spd: 7, spe: 8 },
+						naturaleza: "Timid",
+						movimientos: ["tackle", "growl"],
+						recordables: ["scratch"],
+						pendientesMovimiento: ["ember"],
+						amistad: 3,
+					},
+				],
+			},
+		});
+		expect(p.expedicion?.llamas).toBe(2);
+		expect(await cargar(await guardar(p))).toEqual(p);
+	});
+
 	it("la partida de después de volver (con campos undefined) también se carga", async () => {
 		let p = ir(conResidentes(), { tipo: "comenzarDia" });
 		p = ir(p, { tipo: "salirAExpedicion", uids: ["a1"], semilla: "sx" });

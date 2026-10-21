@@ -4,7 +4,7 @@ import type {
 	EstadoPartida,
 	EventoSantuario,
 } from "@santuario/core";
-import { crearRng } from "@santuario/core";
+import { crearRng, llamasIniciales } from "@santuario/core";
 import Phaser from "phaser";
 import losetasPng from "../assets/santuario/losetas.png?url";
 import protagonistaPng from "../assets/santuario/protagonista.png?url";
@@ -1223,6 +1223,10 @@ export class SantuarioMundo extends Phaser.Scene {
 			semilla: `${s.semilla}:exp:${s.jornada}`,
 			dinero: balance.dineroInicial,
 			mochila: bolasIniciales(balance),
+			llamas: llamasIniciales(balance.farol, {
+				rangoRama: 0,
+				farolTenue: false,
+			}),
 		});
 		if (!ok) return;
 		this.menu.cerrar();

@@ -1,3 +1,4 @@
+import { resolverDerrota, type TablaFarol } from "./farol.js";
 import type { IV } from "./individuo.js";
 import {
 	generarPiso,
@@ -56,6 +57,12 @@ export interface EstadoExpedicion {
 	/** Especies de Sombríos vencidos que se rindieron: esperan al Purificador del Santuario. */
 	pendientesPurificar: string[];
 	estado: "en-curso" | "victoria" | "derrota";
+	/** Llamas del Farol; si falta, una derrota termina la expedición (sin Farol). */
+	llamas?: number;
+	/** Nodos de combate perdidos con una llama, sin recompensa. */
+	fallidos?: string[];
+	/** Nodo perdido que se puede volver a intentar (jefes); lo borra `entrar`. */
+	repetir?: string;
 }
 
 /** Resultado de un combate: `psPct` va en el orden del equipo. */
@@ -150,7 +157,10 @@ export function elegibles(e: EstadoExpedicion): string[] {
 		return (e.mapa.capas[0] ?? []).map((nodo) => nodo.id);
 	}
 	const nodo = buscarNodo(e.mapa, e.actual);
-	return nodo === undefined ? [] : [...nodo.siguientes];
+	if (nodo === undefined) return [];
+	return e.repetir === undefined
+		? [...nodo.siguientes]
+		: [...nodo.siguientes, e.repetir];
 }
 
 /**
@@ -165,7 +175,8 @@ export function entrar(e: EstadoExpedicion, id: string): EstadoExpedicion {
 			`entrar(${id}): el nodo no es elegible desde ${e.actual ?? "la entrada"}`,
 		);
 	}
-	return { ...e, actual: id, visitados: [...e.visitados, id] };
+	const { repetir: _, ...resto } = e;
+	return { ...resto, actual: id, visitados: [...e.visitados, id] };
 }
 
 /**
@@ -204,6 +215,7 @@ function recompensaDeNodo(
 export function resolverCombate(
 	e: EstadoExpedicion,
 	r: ResultadoCombate,
+	farol?: TablaFarol,
 ): EstadoExpedicion {
 	if (e.estado !== "en-curso") {
 		throw new RangeError(
@@ -240,6 +252,26 @@ export function resolverCombate(
 	}));
 	const dinero = Math.max(0, e.dinero + Math.round(r.dinero));
 	if (!r.victoria || equipo.every((miembro) => miembro.psPct === 0)) {
+		if (farol !== undefined && e.llamas !== undefined) {
+			const d = resolverDerrota(farol, {
+				llamas: e.llamas,
+				psPct: equipo.map((m) => m.psPct),
+				fallidos: e.fallidos ?? [],
+				nodo: nodo.id,
+				tipoNodo: nodo.tipo,
+			});
+			if (d.tipo === "continua") {
+				const { repetir: _, ...resto } = e;
+				return {
+					...resto,
+					equipo,
+					dinero: e.dinero,
+					llamas: d.llamas,
+					fallidos: d.fallidos,
+					...(d.repetible && { repetir: nodo.id }),
+				};
+			}
+		}
 		return { ...e, equipo, dinero, estado: "derrota" };
 	}
 	if (nodo.tipo !== "jefe") {
@@ -257,6 +289,8 @@ export function resolverCombate(
 		mapa: generarPiso(e.semilla, piso),
 		actual: null,
 		visitados: [],
+		// Los ids de nodo se repiten de un piso a otro.
+		...(e.fallidos !== undefined && { fallidos: [] }),
 		equipo,
 		dinero,
 	};

@@ -195,6 +195,7 @@ export class Combate extends Phaser.Scene {
 						tamanos: cargarBalance().tamanoRival,
 						niveles: cargarBalance().nivelRival,
 						elites: cargarElites(),
+						alineacion: this.datosExpedicion.alineacion,
 					},
 				);
 				({ semilla, jugador, rival } = p);
@@ -724,6 +725,7 @@ export class Combate extends Phaser.Scene {
 				this.expedicion.estado,
 				resultado,
 				cargarBalance().curaTrasVictoriaPct,
+				cargarBalance().farol,
 			);
 			this.scene.start("Captura", {
 				estado,
@@ -922,6 +924,7 @@ export class Combate extends Phaser.Scene {
 				x.estado,
 				resultado,
 				cargarBalance().curaTrasVictoriaPct,
+				cargarBalance().farol,
 			);
 			this.scene.start(destinoTrasCombate(estado), { estado });
 		} catch (e) {

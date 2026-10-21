@@ -11,6 +11,7 @@ import {
 	type ResultadoCombate,
 	resolverCombate,
 } from "./expedicion.js";
+import type { TablaFarol } from "./farol.js";
 import {
 	generarPiso,
 	type MapaPiso,
@@ -588,5 +589,77 @@ describe("recompensas de nodo", () => {
 		expect(siguiente.piso).toBe(2);
 		expect(siguiente.runas).toHaveLength(1);
 		expect(siguiente.runas[0]).not.toBe("?");
+	});
+});
+
+describe("llamas del Farol", () => {
+	const FAROL: TablaFarol = {
+		base: 1,
+		extraPorRango: [0, 1, 2],
+		maximo: 3,
+		restaTenue: 1,
+		repetibles: ["jefe"],
+	};
+	const conLlamas = (e: EstadoExpedicion, llamas: number) => ({ ...e, llamas });
+
+	it("sin llamas (o sin tabla) perder termina la expedición, como siempre", () => {
+		const jefe = estadoEnJefe("f1");
+		expect(resolverCombate(jefe, pierde([50, 0])).estado).toBe("derrota");
+		expect(resolverCombate(conLlamas(jefe, 2), pierde([50, 0])).estado).toBe(
+			"derrota",
+		);
+		expect(resolverCombate(jefe, pierde([50, 0]), FAROL).estado).toBe(
+			"derrota",
+		);
+	});
+
+	it("perder con una llama sigue en el nodo, gasta una llama y marca el fallo", () => {
+		const jefe = conLlamas(estadoEnJefe("f1"), 2);
+		const r = resolverCombate(jefe, pierde([50, 0], 99), FAROL);
+		expect(r.estado).toBe("en-curso");
+		expect(r.llamas).toBe(1);
+		expect(r.fallidos).toEqual([jefe.actual]);
+		expect(r.actual).toBe(jefe.actual);
+		expect(r.dinero).toBe(jefe.dinero);
+		expect(r.equipo.map((m) => m.psPct)).toEqual([50, 0]);
+	});
+
+	it("un jefe perdido se puede repetir; entrar lo consume", () => {
+		const jefe = conLlamas(estadoEnJefe("f1"), 2);
+		const r = resolverCombate(jefe, pierde([50, 0]), FAROL);
+		expect(r.repetir).toBe(jefe.actual);
+		expect(elegibles(r)).toContain(jefe.actual as string);
+		const otra = entrar(r, jefe.actual as string);
+		expect(otra.repetir).toBeUndefined();
+		expect(otra.llamas).toBe(1);
+	});
+
+	it("sin llamas restantes o sin conscientes termina en derrota", () => {
+		const jefe = estadoEnJefe("f1");
+		expect(
+			resolverCombate(conLlamas(jefe, 0), pierde([50, 0]), FAROL).estado,
+		).toBe("derrota");
+		expect(
+			resolverCombate(conLlamas(jefe, 3), pierde([0, 0]), FAROL).estado,
+		).toBe("derrota");
+	});
+
+	it("un nodo que no es repetible no deja reintento", () => {
+		const base = conLlamas(estadoHasta("salvaje"), 1);
+		const r = resolverCombate(
+			base,
+			pierde(base.equipo.map((_, i) => (i === 0 ? 40 : 0))),
+			FAROL,
+		);
+		expect(r.estado).toBe("en-curso");
+		expect(r.repetir).toBeUndefined();
+		expect(elegibles(r)).not.toContain(base.actual as string);
+	});
+
+	it("no muta el estado de entrada", () => {
+		const jefe = congelar(conLlamas(estadoEnJefe("f1"), 2));
+		const antes = foto(jefe);
+		resolverCombate(jefe, pierde([50, 0]), FAROL);
+		expect(foto(jefe)).toBe(antes);
 	});
 });

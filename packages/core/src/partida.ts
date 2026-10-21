@@ -69,6 +69,8 @@ export type AccionPartida =
 			/** Dinero y mochila con los que empieza la expedición (los pone el balance de la expedición). */
 			dinero?: number;
 			mochila?: Record<string, number>;
+			/** Llamas del Farol con las que sale (las calcula `llamasIniciales`); sin ellas, perder termina la expedición. */
+			llamas?: number;
 	  }
 	/** La escena avanza la expedición con las funciones de `expedicion.ts` y la deja aquí. */
 	| { tipo: "actualizarExpedicion"; expedicion: EstadoExpedicion }
@@ -185,6 +187,7 @@ export function reducir(
 				...iniciarDesdeSantuario(s, a.uids, a.semilla),
 				dinero: a.dinero ?? 0,
 				mochila: a.mochila ?? {},
+				...(a.llamas !== undefined && { llamas: a.llamas, fallidos: [] }),
 			};
 			return {
 				partida: { ...p, expedicion, expedicionJornada: s.jornada },

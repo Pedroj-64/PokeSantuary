@@ -24,6 +24,18 @@ async function abrirSalvaje(page: Page, cambios: string) {
 	)) as string | null;
 	expect(id, "la entrada de m2 no tiene un salvaje").not.toBeNull();
 	await page.evaluate(`window.__santuario.mapa.elegir(${JSON.stringify(id)})`);
+	// Con más de 3 conscientes pide elegir quiénes combaten: los 3 primeros.
+	if (
+		await page.evaluate("window.__santuario.mapa?.alineacionAbierta() ?? false")
+	) {
+		for (let i = 0; i < 3; i++) {
+			await page.keyboard.press("Enter");
+			await page.keyboard.press("ArrowDown");
+		}
+		// Del cuarto a la fila «Combatir con estos».
+		for (let i = 0; i < 3; i++) await page.keyboard.press("ArrowDown");
+		await page.keyboard.press("Enter");
+	}
 	await expect
 		.poll(() =>
 			page.evaluate("window.__santuario.combate?.estado().fase ?? null"),

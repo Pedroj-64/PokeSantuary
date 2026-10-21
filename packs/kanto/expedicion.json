@@ -152,5 +152,12 @@
 		"gastly": 190,
 		"eevee": 45
 	},
-	"tasaCapturaPorDefecto": 120
+	"tasaCapturaPorDefecto": 120,
+	"farol": {
+		"base": 1,
+		"extraPorRango": [0, 1, 2],
+		"maximo": 3,
+		"restaTenue": 1,
+		"repetibles": ["jefe"]
+	}
 }

@@ -1,4 +1,6 @@
 import {
+	alineacionAutomatica,
+	conscientes,
 	crearRng,
 	curar,
 	curarAlMasHerido,
@@ -10,6 +12,8 @@ import {
 	type ResultadoCombate,
 	recompensa,
 	resolverCombate,
+	type TablaFarol,
+	validarAlineacion,
 } from "@santuario/core";
 import type { Elites, ExpedicionBalance, SetCombate } from "@santuario/data";
 import type { MiembroEquipo, TerrenoFisura } from "../combate.js";
@@ -19,6 +23,8 @@ import { conNivel, crearRival, type TamanosRival } from "./encuentros.js";
 export interface DatosCombate {
 	estado: EstadoExpedicion;
 	nodoId: string;
+	/** Miembros que combaten, si el jugador los eligió (ver `OpcionesRivales.alineacion`). */
+	alineacion?: number[];
 }
 
 /** Lo que necesita `abrirCombate` para el combate de un nodo, y qué miembros del equipo entran. */
@@ -42,13 +48,15 @@ export interface OpcionesRivales {
 	niveles?: TamanosRival;
 	/** Alfa y jefe del bioma; sin ellos, esos nodos usan el catálogo corriente. */
 	elites?: Elites;
+	/**
+	 * Posiciones del equipo que combaten (1 a 3, en orden). Sin ella entran los
+	 * 3 primeros conscientes.
+	 */
+	alineacion?: readonly number[];
 }
 
 /** Terreno del primer bioma (Bosque Verdemar). */
 const TERRENO_VERDEMAR: TerrenoFisura = "grassyterrain";
-
-/** El motor de combate admite hasta 3 por bando: entran los 3 primeros vivos del equipo. */
-const MAX_EN_COMBATE = 3;
 
 function buscarNodo(e: EstadoExpedicion, id: string): NodoMapa {
 	const nodo = e.mapa.capas.flat().find((n) => n.id === id);
@@ -99,12 +107,16 @@ export function prepararCombate(
 	sets: readonly SetCombate[],
 	opciones: OpcionesRivales = {},
 ): PreparacionCombate {
-	const { setsRival = sets, tamanos, niveles, elites } = opciones;
+	const { setsRival = sets, tamanos, niveles, elites, alineacion } = opciones;
 	const nodo = buscarNodo(e, nodoId);
-	const vivos = e.equipo
-		.flatMap((m, i) => (m.psPct > 0 ? [i] : []))
-		.slice(0, MAX_EN_COMBATE);
-	if (vivos.length === 0) throw new RangeError("no queda ningún miembro vivo");
+	const ps = e.equipo.map((m) => m.psPct);
+	if (conscientes(ps).length === 0) {
+		throw new RangeError("no queda ningún miembro vivo");
+	}
+	const vivos =
+		alineacion === undefined
+			? alineacionAutomatica(ps)
+			: validarAlineacion(ps, alineacion);
 	const jugador = vivos.map((i): MiembroEquipo => {
 		const { especie, psPct, nivel, iv, naturaleza, movimientos } = e.equipo[
 			i
@@ -189,8 +201,9 @@ export function cerrarCombate(
 	e: EstadoExpedicion,
 	resultado: ResultadoCombate,
 	curaTrasVictoriaPct = 0,
+	farol?: TablaFarol,
 ): EstadoExpedicion {
-	const siguiente = resolverCombate(e, resultado);
+	const siguiente = resolverCombate(e, resultado, farol);
 	if (!resultado.victoria || siguiente.estado !== "en-curso") return siguiente;
 	const curado =
 		curaTrasVictoriaPct > 0 ? curar(siguiente, curaTrasVictoriaPct) : siguiente;

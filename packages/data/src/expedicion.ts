@@ -83,6 +83,19 @@ const multBola = z.record(slug, z.number().positive());
 
 const tasaCaptura = z.record(slug, z.number().int().min(0).max(255));
 
+// Llamas del Farol (GDD §6.10): cuántas se tienen y en qué nodos se puede repetir tras perder.
+const farol = z
+	.object({
+		base: z.number().int().min(0),
+		extraPorRango: z.array(z.number().int().min(0)).min(1),
+		maximo: z.number().int().min(0),
+		restaTenue: z.number().int().min(0),
+		repetibles: z.array(
+			z.enum(["salvaje", "entrenador", "alfa", "sombrio", "jefe"]),
+		),
+	})
+	.strict();
+
 /**
  * Números de balance de la expedición (GDD §5). Los precios de la tienda son
  * precios base: el recargo por piso lo aplica `precioEnPiso` de `@santuario/core`.
@@ -99,6 +112,7 @@ export const ExpedicionBalanceSchema = z
 		multBola,
 		tasaCaptura,
 		tasaCapturaPorDefecto: z.number().int().min(0).max(255),
+		farol,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {

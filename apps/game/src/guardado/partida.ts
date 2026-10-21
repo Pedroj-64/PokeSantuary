@@ -53,6 +53,8 @@ const Residente = z
 		hambre: z.number().min(0).max(100),
 		animo: z.number().min(0).max(100),
 		amistad: z.number().int().min(0).max(5),
+		movimientos: z.array(slug).max(4).optional(),
+		recordables: z.array(slug).optional(),
 		estado: z.enum(["descansado", "agotado", "sombrio", "visitante"]),
 		sombrio: z.number().min(0).max(100).optional(),
 		tarea: Tarea,
@@ -152,6 +154,8 @@ const Mapa = z.custom<MapaPiso>((v) => {
 	}
 }, "mapa de expedición inválido");
 
+const iv31 = z.number().int().min(0).max(31);
+
 const Expedicion = z
 	.object({
 		semilla: z.string(),
@@ -166,6 +170,23 @@ const Expedicion = z
 						uid: slug.optional(),
 						especie: slug,
 						psPct: porcentaje,
+						nivel: z.number().int().min(1).max(100).optional(),
+						iv: z
+							.object({
+								hp: iv31,
+								atk: iv31,
+								def: iv31,
+								spa: iv31,
+								spd: iv31,
+								spe: iv31,
+							})
+							.strict()
+							.optional(),
+						naturaleza: slug.optional(),
+						movimientos: z.array(slug).max(4).optional(),
+						recordables: z.array(slug).optional(),
+						pendientesMovimiento: z.array(slug).optional(),
+						amistad: z.number().int().min(0).max(5).optional(),
 					})
 					.strict(),
 			)
@@ -176,6 +197,9 @@ const Expedicion = z
 		mochila: z.record(z.string(), noNegativo),
 		pendientesPurificar: z.array(slug),
 		estado: z.enum(["en-curso", "victoria", "derrota"]),
+		llamas: noNegativo.optional(),
+		fallidos: z.array(z.string()).optional(),
+		repetir: z.string().optional(),
 	})
 	.strict();
 

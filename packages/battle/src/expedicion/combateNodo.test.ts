@@ -112,6 +112,27 @@ describe("prepararCombate", () => {
 		expect(b).toEqual({ especie: "b", set: set("b"), psPct: 100 });
 	});
 
+	it("con alineación entran los elegidos, en su orden; sin ella, los 3 primeros conscientes", () => {
+		const [e0, id] = dentroDe("s1");
+		const e = {
+			...e0,
+			equipo: ["a", "b", "c", "d", "e"].map((especie, i) => ({
+				especie,
+				psPct: i === 1 ? 0 : 100,
+			})),
+		};
+		expect(prepararCombate(e, id, SETS).vivos).toEqual([0, 2, 3]);
+		const p = prepararCombate(e, id, SETS, { alineacion: [4, 0, 3] });
+		expect(p.vivos).toEqual([4, 0, 3]);
+		expect(p.jugador.map((m) => m.especie)).toEqual(["e", "a", "d"]);
+		expect(() =>
+			prepararCombate(e, id, SETS, { alineacion: [1, 0, 2] }),
+		).toThrow(RangeError);
+		expect(() => prepararCombate(e, id, SETS, { alineacion: [0, 2] })).toThrow(
+			RangeError,
+		);
+	});
+
 	it("el rival no repite especies del equipo mientras haya otras", () => {
 		for (let i = 0; i < 30; i++) {
 			const [e, id] = dentroDe(`s${i}`);

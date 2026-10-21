@@ -4,6 +4,8 @@ import {
 	elegibles,
 	entrar,
 	esNodoDeCombate,
+	necesitaElegir,
+	TAMANO_ALINEACION,
 	type TipoNodo,
 	totalBayas,
 	usarBayaAlMasHerido,
@@ -15,6 +17,7 @@ import { MUSICA, SFX } from "../audio/sonidos.js";
 import { cargarDatosCombate } from "../combate/datosPack.js";
 import { posicionesNodos } from "../expedicion/dibujoMapa.js";
 import { t } from "../i18n/index.js";
+import { type ItemMenu, PanelMenu } from "../santuario/panelMenu.js";
 import { alPulsarTecla } from "../teclado.js";
 import type { DatosEleccion } from "./Eleccion.js";
 import type { DatosTienda } from "./Tienda.js";
@@ -55,6 +58,9 @@ export class Mapa extends Phaser.Scene {
 	/** Esc pide confirmación cuando la expedición salió del Santuario (hay partida que guardar). */
 	private confirmandoSalida = false;
 	private enlace?: typeof import("../santuario/enlace.js");
+	/** Menú para elegir los 3 que combaten cuando hay más de 3 conscientes. */
+	private menu!: PanelMenu;
+	private alineados: number[] = [];
 
 	constructor() {
 		super("Mapa");
@@ -65,6 +71,7 @@ export class Mapa extends Phaser.Scene {
 		this.cambiando = false;
 		this.confirmandoSalida = false;
 		this.enlace = undefined;
+		this.alineados = [];
 	}
 
 	preload(): void {
@@ -123,8 +130,16 @@ export class Mapa extends Phaser.Scene {
 			})
 			.setOrigin(0.5, 1);
 
+		this.menu = new PanelMenu(this);
+		if (e.actual !== null && e.fallidos?.includes(e.actual)) {
+			this.etiqueta.setText(t("mapa.llamaGastada"));
+		}
 		const ids = elegibles(e);
 		alPulsarTecla(this, (ev) => {
+			if (this.menu.abierto) {
+				this.menu.tecla(ev.key);
+				return;
+			}
 			const id = ids[Number(ev.key) - 1];
 			if (id !== undefined) this.elegir(id);
 			else if (ev.key.toLowerCase() === "b") this.darBaya();
@@ -182,6 +197,12 @@ export class Mapa extends Phaser.Scene {
 			}),
 			estilo,
 		);
+		if (e.llamas !== undefined) {
+			this.add.text(8, 62, t("mapa.llamas", { n: e.llamas }), {
+				...estilo,
+				color: "#ffb347",
+			});
+		}
 		const nombres = cargarDatosCombate().nombres;
 		e.equipo.forEach((m, i) => {
 			this.add.text(
@@ -240,6 +261,13 @@ export class Mapa extends Phaser.Scene {
 						: SFX.aceptar,
 		);
 		if (nodo && esNodoDeCombate(nodo.tipo)) {
+			if (necesitaElegir(estado.equipo.map((m) => m.psPct))) {
+				// El menú decide: hasta que confirme, no se ha entrado en el nodo.
+				this.cambiando = false;
+				this.alineados = [];
+				this.menuAlineacion(estado, id);
+				return;
+			}
 			this.scene.start("Combate", {
 				estado,
 				nodoId: id,
@@ -262,6 +290,57 @@ export class Mapa extends Phaser.Scene {
 		} else {
 			this.scene.restart({ estado } satisfies DatosMapa);
 		}
+	}
+
+	/** Elegir los 3 Pokémon que combaten (más de 3 conscientes): se marcan y se confirma. */
+	private menuAlineacion(
+		estado: EstadoExpedicion,
+		id: string,
+		indice = 0,
+	): void {
+		const nombres = cargarDatosCombate().nombres;
+		const items: ItemMenu[] = estado.equipo.flatMap((m, i) =>
+			m.psPct === 0
+				? []
+				: [
+						{
+							texto: `${this.alineados.includes(i) ? "[x]" : "[ ]"} ${nombres.especie(m.especie)} ${m.psPct}%`,
+							alElegir: () => {
+								if (this.alineados.includes(i)) {
+									this.alineados = this.alineados.filter((x) => x !== i);
+								} else if (this.alineados.length < TAMANO_ALINEACION) {
+									this.alineados = [...this.alineados, i];
+								}
+								this.menuAlineacion(estado, id, this.indiceVisible(estado, i));
+							},
+						},
+					],
+		);
+		items.push({
+			texto: t("mapa.alineacion.confirmar", { n: this.alineados.length }),
+			activo: this.alineados.length === TAMANO_ALINEACION,
+			alElegir: () => {
+				this.menu.cerrar();
+				this.cambiando = true;
+				this.scene.start("Combate", {
+					estado,
+					nodoId: id,
+					alineacion: this.alineados,
+				} satisfies DatosCombate);
+			},
+		});
+		this.menu.mostrar(
+			t("mapa.alineacion.titulo"),
+			items,
+			t("mapa.alineacion.pie"),
+			() => this.menu.cerrar(),
+			indice,
+		);
+	}
+
+	/** Posición, entre los miembros conscientes, del miembro `i` del equipo (la que muestra el menú). */
+	private indiceVisible(estado: EstadoExpedicion, i: number): number {
+		return estado.equipo.slice(0, i).filter((m) => m.psPct > 0).length;
 	}
 
 	/** Solo con `?test=1`: mismos caminos que la interfaz. */
@@ -288,6 +367,8 @@ export class Mapa extends Phaser.Scene {
 			tipoDe: (id: string) =>
 				this.estado.mapa.capas.flat().find((n) => n.id === id)?.tipo,
 			elegir: (id: string) => this.elegir(id),
+			/** ¿Está abierto el menú de «quiénes combaten»? */
+			alineacionAbierta: () => this.menu.abierto,
 			/** Todos los nodos con su tipo. */
 			nodos: () =>
 				this.estado.mapa.capas.flat().map((n) => ({ id: n.id, tipo: n.tipo })),
