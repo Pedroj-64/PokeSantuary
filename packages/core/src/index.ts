@@ -126,6 +126,16 @@ export {
 	modificadores,
 	resolverMisterio,
 } from "./runas.js";
+export {
+	celebrar,
+	ceremoniasDisponibles,
+	type DefCeremonia,
+	type IdCeremonia,
+	motivoNoPuede,
+	puedeCelebrar,
+	type RegistroCeremonias,
+	type TablaCeremonias,
+} from "./santuario/ceremonias.js";
 export { esTemaDelDia, TEMAS_CHARLA, temasDelDia } from "./santuario/charla.js";
 export {
 	type AccionMarcada,
