@@ -303,6 +303,40 @@ test("expedición desde el Santuario: sale con el residente elegido, y al volver
 	expect(s.residentes.filter((r) => r.especie === "bulbasaur")).toHaveLength(1);
 });
 
+test("expedición desde el Santuario: el residente sale con nivel y movimientos propios, con una llama, y el rival va a su nivel", async ({
+	page,
+}) => {
+	await salirConElPrimero(page, "m-niv");
+	const mapa = (await page.evaluate("window.__santuario.mapa.estado()")) as {
+		niveles: (number | null)[];
+		movimientos: string[][];
+		llamas: number | null;
+		elegibles: string[];
+	};
+	expect(mapa.niveles).toEqual([8]); // nivel de salida de una forma base con Gimnasio 0
+	expect(mapa.movimientos[0]?.length).toBeGreaterThan(0);
+	expect(mapa.movimientos[0]?.length).toBeLessThanOrEqual(4);
+	expect(mapa.llamas).toBe(1);
+	const id = (await page.evaluate(
+		`(() => { const m = window.__santuario.mapa; return m.estado().elegibles.find((i) => ["salvaje","entrenador"].includes(m.tipoDe(i))) ?? null; })()`,
+	)) as string | null;
+	expect(id, "la entrada de m-niv no tiene un nodo de combate").not.toBeNull();
+	await page.evaluate(`window.__santuario.mapa.elegir(${JSON.stringify(id)})`);
+	await expect
+		.poll(() =>
+			page.evaluate("window.__santuario.combate?.estado().fase ?? null"),
+		)
+		.toBe("menu");
+	const c = (await page.evaluate(
+		"window.__santuario.combate.estado().niveles",
+	)) as { jugador: number[]; rival: number[] };
+	expect(c.jugador).toEqual([8]);
+	for (const n of c.rival) {
+		expect(n).toBeGreaterThanOrEqual(8);
+		expect(n).toBeLessThanOrEqual(11); // piso 1: base 8 + 0..3, no el 22 de la tabla antigua
+	}
+});
+
 test("expedición desde el Santuario: Esc pide confirmación y abandonar cuenta como derrota (mitad del dinero)", async ({
 	page,
 }) => {

@@ -4,13 +4,19 @@ import type {
 	EstadoPartida,
 	EventoSantuario,
 } from "@santuario/core";
-import { crearRng, llamasIniciales } from "@santuario/core";
+import {
+	crearRng,
+	generarIV,
+	llamasIniciales,
+	miembroDeResidente,
+} from "@santuario/core";
 import Phaser from "phaser";
 import losetasPng from "../assets/santuario/losetas.png?url";
 import protagonistaPng from "../assets/santuario/protagonista.png?url";
 import { musica } from "../audio/gestor.js";
 import { MUSICA } from "../audio/sonidos.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
+import { cargarProgresion } from "../expedicion/progresionPack.js";
 import { t } from "../i18n/index.js";
 import { asegurarSprite } from "../oficial/recursos.js";
 import {
@@ -1217,9 +1223,22 @@ export class SantuarioMundo extends Phaser.Scene {
 	private salirConEquipo(): void {
 		const s = this.p.santuario;
 		const balance = cargarBalance();
+		const catalogo = cargarProgresion().catalogo;
+		const uids = [...this.elegidos];
+		const miembros = uids.map((uid) => {
+			const r = s.residentes.find((q) => q.uid === uid);
+			if (r === undefined) throw new Error(`residente desconocido '${uid}'`);
+			return {
+				...miembroDeResidente(r, 0, catalogo),
+				naturaleza: r.naturaleza,
+				// Los IV no se guardan: salen siempre iguales de la semilla y el uid del residente.
+				iv: generarIV(crearRng(`${s.semilla}:iv:${uid}`)),
+			};
+		});
 		const ok = this.gestionar({
 			tipo: "salirAExpedicion",
-			uids: [...this.elegidos],
+			uids,
+			miembros,
 			semilla: `${s.semilla}:exp:${s.jornada}`,
 			dinero: balance.dineroInicial,
 			mochila: bolasIniciales(balance),

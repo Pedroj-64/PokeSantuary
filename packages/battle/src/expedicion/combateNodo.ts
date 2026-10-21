@@ -13,11 +13,13 @@ import {
 	recompensa,
 	resolverCombate,
 	type TablaFarol,
+	type TablaNiveles,
 	validarAlineacion,
 } from "@santuario/core";
 import type { Elites, ExpedicionBalance, SetCombate } from "@santuario/data";
 import type { MiembroEquipo, TerrenoFisura } from "../combate.js";
 import { conNivel, crearRival, type TamanosRival } from "./encuentros.js";
+import { nivelesDelRival } from "./niveles.js";
 
 /** Datos con los que el mapa abre la escena de combate de un nodo. */
 export interface DatosCombate {
@@ -53,6 +55,11 @@ export interface OpcionesRivales {
 	 * 3 primeros conscientes.
 	 */
 	alineacion?: readonly number[];
+	/**
+	 * Tabla de niveles del pack: si se da y el equipo del jugador trae niveles, el
+	 * rival usa estos niveles en lugar de los de `niveles`.
+	 */
+	tablaNiveles?: TablaNiveles;
 }
 
 /** Terreno del primer bioma (Bosque Verdemar). */
@@ -94,6 +101,20 @@ function rivalDe(
 	);
 }
 
+/** Con niveles en el equipo y tabla del pack, el rival sube a los niveles de la tabla. */
+function conNivelesDeTabla(
+	e: EstadoExpedicion,
+	nodo: NodoMapa,
+	rival: MiembroEquipo[],
+	tabla: TablaNiveles | undefined,
+): MiembroEquipo[] {
+	if (tabla === undefined || !e.equipo.some((m) => m.nivel !== undefined)) {
+		return rival;
+	}
+	const niveles = nivelesDelRival(tabla, e.semilla, e.piso, nodo, rival.length);
+	return rival.map((m, i) => ({ ...m, nivel: niveles[i] as number }));
+}
+
 /**
  * Equipos y semilla del combate de un nodo. Los debilitados se quedan fuera, el
  * resto entra con los PS que arrastra y el rival sale de `crearRival`. La semilla
@@ -107,7 +128,14 @@ export function prepararCombate(
 	sets: readonly SetCombate[],
 	opciones: OpcionesRivales = {},
 ): PreparacionCombate {
-	const { setsRival = sets, tamanos, niveles, elites, alineacion } = opciones;
+	const {
+		setsRival = sets,
+		tamanos,
+		niveles,
+		elites,
+		alineacion,
+		tablaNiveles,
+	} = opciones;
 	const nodo = buscarNodo(e, nodoId);
 	const ps = e.equipo.map((m) => m.psPct);
 	if (conscientes(ps).length === 0) {
@@ -137,7 +165,12 @@ export function prepararCombate(
 	return {
 		semilla: `${e.semilla}:p${e.piso}:${nodoId}:combate`,
 		jugador,
-		rival: rivalDe(e, nodo, setsRival, tamanos, niveles, elites),
+		rival: conNivelesDeTabla(
+			e,
+			nodo,
+			rivalDe(e, nodo, setsRival, tamanos, niveles, elites),
+			tablaNiveles,
+		),
 		vivos,
 		...(nodo.tipo === "jefe" && e.piso === 3 && { terreno: TERRENO_VERDEMAR }),
 	};

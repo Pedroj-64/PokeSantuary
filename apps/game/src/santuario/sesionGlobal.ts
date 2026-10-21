@@ -4,6 +4,7 @@ import habitats from "@packs/kanto/habitats.json";
 import balance from "@packs/kanto/santuario.json";
 import type { ContextoPartida, EventoSantuario } from "@santuario/core";
 import type { Especie } from "@santuario/data";
+import { cargarProgresion } from "../expedicion/progresionPack.js";
 import { abrirAlmacen } from "../guardado/almacen.js";
 import { obtenerSemilla } from "../semilla.js";
 import { crearFabrica } from "./fabricar.js";
@@ -20,6 +21,7 @@ export const contextoPartida = (): ContextoPartida => ({
 		especiesCrudas as unknown as Especie[],
 		especialidades,
 	),
+	progresion: cargarProgresion().catalogo,
 	especiesDisponibles: (especiesCrudas as unknown as Especie[]).map(
 		(e) => e.id,
 	),

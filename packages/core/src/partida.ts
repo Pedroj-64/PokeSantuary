@@ -1,6 +1,7 @@
 import type {
 	EstadoExpedicion,
 	EstadoExpedicion as Expedicion,
+	MiembroExp,
 } from "./expedicion.js";
 import type {
 	SantuarioBalance,
@@ -24,6 +25,7 @@ import {
 	type EventoSantuario,
 	resolverAtardecer,
 } from "./santuario/jornada.js";
+import { aplicarRetorno, type CatalogoProgresion } from "./santuario/puente.js";
 import {
 	colocarCamino,
 	colocarDecoracion,
@@ -47,7 +49,13 @@ export interface EstadoPartida {
 }
 
 /** Datos que necesita el reductor y que no se guardan: balance, hábitats y fábrica de residentes. */
-export type ContextoPartida = { balance: SantuarioBalance } & ContextoJornada;
+export type ContextoPartida = {
+	balance: SantuarioBalance;
+	/** Datos de progresión por especie; sin ellos, la expedición no lleva niveles ni movimientos. */
+	progresion?: CatalogoProgresion;
+	/** Nivel del Gimnasio del Santuario (0 por defecto): fija el nivel de salida de los residentes. */
+	nivelGimnasio?: number;
+} & ContextoJornada;
 
 export type AccionPartida =
 	| { tipo: "elegirTema"; tema: TemaCharla }
@@ -71,6 +79,8 @@ export type AccionPartida =
 			mochila?: Record<string, number>;
 			/** Llamas del Farol con las que sale (las calcula `llamasIniciales`); sin ellas, perder termina la expedición. */
 			llamas?: number;
+			/** Miembros ya armados con `miembroDeResidente`, en el orden de `uids`. */
+			miembros?: MiembroExp[];
 	  }
 	/** La escena avanza la expedición con las funciones de `expedicion.ts` y la deja aquí. */
 	| { tipo: "actualizarExpedicion"; expedicion: EstadoExpedicion }
@@ -183,8 +193,15 @@ export function reducir(
 					"salirAExpedicion: ya salió una expedición en esta jornada",
 				);
 			}
+			const base = iniciarDesdeSantuario(s, a.uids, a.semilla);
+			if (a.miembros !== undefined && a.miembros.length !== a.uids.length) {
+				throw new RangeError(
+					"salirAExpedicion: 'miembros' debe tener uno por residente",
+				);
+			}
 			const expedicion = {
-				...iniciarDesdeSantuario(s, a.uids, a.semilla),
+				...base,
+				equipo: base.equipo.map((m, i) => ({ ...m, ...a.miembros?.[i] })),
 				dinero: a.dinero ?? 0,
 				mochila: a.mochila ?? {},
 				...(a.llamas !== undefined && { llamas: a.llamas, fallidos: [] }),
@@ -207,9 +224,28 @@ export function reducir(
 				throw new RangeError("volverDeExpedicion: no hay expedición");
 			}
 			const liquidada = liquidarEnSantuario(s, p.expedicion, b, ctx.fabricar);
+			const catalogo = ctx.progresion;
+			let liquidado = liquidada.estado;
+			if (catalogo !== undefined) {
+				// Lo aprendido y las evoluciones vuelven con el residente; los niveles, no (GDD §6.10).
+				const volvieron = new Map(
+					p.expedicion.equipo.flatMap((m) =>
+						m.uid === undefined ? [] : [[m.uid, m] as const],
+					),
+				);
+				liquidado = {
+					...liquidado,
+					residentes: liquidado.residentes.map((r) => {
+						const m = volvieron.get(r.uid);
+						return m === undefined
+							? r
+							: aplicarRetorno(r, m, catalogo, ctx.nivelGimnasio ?? 0);
+					}),
+				};
+			}
 			// Al volver se cierra el día: el Atardecer se resuelve de una vez.
 			const atardecer = resolverAtardecer(
-				{ ...liquidada.estado, momento: "atardecer" },
+				{ ...liquidado, momento: "atardecer" },
 				b,
 				ctx,
 			);

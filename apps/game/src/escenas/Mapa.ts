@@ -362,6 +362,9 @@ export class Mapa extends Phaser.Scene {
 				runas: [...this.estado.runas],
 				equipo: this.estado.equipo.map((m) => m.psPct),
 				especies: this.estado.equipo.map((m) => m.especie),
+				niveles: this.estado.equipo.map((m) => m.nivel ?? null),
+				movimientos: this.estado.equipo.map((m) => m.movimientos ?? []),
+				llamas: this.estado.llamas ?? null,
 			}),
 			/** Tipo de un nodo del mapa (para que las pruebas elijan uno de combate). */
 			tipoDe: (id: string) =>

@@ -2,10 +2,12 @@ import {
 	capturar,
 	type EstadoExpedicion,
 	equipoLleno,
+	miembroNuevoDeCaptura,
 	sustituirMiembro,
 } from "@santuario/core";
 import Phaser from "phaser";
 import { cargarDatosCombate } from "../combate/datosPack.js";
+import { cargarProgresion } from "../expedicion/progresionPack.js";
 import { t } from "../i18n/index.js";
 import { alPulsarTecla } from "../teclado.js";
 
@@ -15,6 +17,8 @@ export interface DatosCaptura {
 	estado: EstadoExpedicion;
 	especie: string;
 	psPct: number;
+	/** Nivel del Pokémon capturado (el del salvaje), si la expedición lleva niveles. */
+	nivel?: number;
 }
 
 /** Tras capturar: el Pokémon se une al equipo o, si está lleno, se elige a quién soltar. */
@@ -22,6 +26,7 @@ export class Captura extends Phaser.Scene {
 	private estado!: EstadoExpedicion;
 	private especie = "";
 	private psPct = 100;
+	private nivel?: number;
 	private teclas = new Map<string, () => void>();
 
 	constructor() {
@@ -32,6 +37,7 @@ export class Captura extends Phaser.Scene {
 		this.estado = datos.estado;
 		this.especie = datos.especie;
 		this.psPct = datos.psPct;
+		this.nivel = datos.nivel;
 		this.teclas = new Map();
 	}
 
@@ -61,7 +67,10 @@ export class Captura extends Phaser.Scene {
 		alPulsarTecla(this, (ev) => this.teclas.get(ev.key)?.());
 
 		if (!equipoLleno(this.estado)) {
-			this.estado = capturar(this.estado, this.especie, this.psPct);
+			this.estado = this.conNivel(
+				capturar(this.estado, this.especie, this.psPct),
+				this.estado.equipo.length,
+			);
 			texto(20, t("captura.seUne", { especie: nuevo }), {
 				fontSize: "16px",
 				color: "#7dff9a",
@@ -78,11 +87,9 @@ export class Captura extends Phaser.Scene {
 						ps: m.psPct,
 					}),
 					() => {
-						this.estado = sustituirMiembro(
-							this.estado,
+						this.estado = this.conNivel(
+							sustituirMiembro(this.estado, i, this.especie, this.psPct),
 							i,
-							this.especie,
-							this.psPct,
 						);
 						salir();
 					},
@@ -92,6 +99,30 @@ export class Captura extends Phaser.Scene {
 			fila(230, t("captura.dejar", { especie: nuevo }), salir, "Escape");
 		}
 		this.exponerGancho();
+	}
+
+	/** Si el equipo lleva niveles, el recién llegado entra con el del salvaje y sus movimientos iniciales. */
+	private conNivel(e: EstadoExpedicion, indice: number): EstadoExpedicion {
+		const nuevo = e.equipo[indice];
+		if (
+			this.nivel === undefined ||
+			nuevo === undefined ||
+			!e.equipo.some((m, i) => i !== indice && m.nivel !== undefined)
+		) {
+			return e;
+		}
+		const { nivel, movimientos } = miembroNuevoDeCaptura(
+			this.especie,
+			nuevo.psPct,
+			this.nivel,
+			cargarProgresion().catalogo,
+		);
+		return {
+			...e,
+			equipo: e.equipo.map((m, i) =>
+				i === indice ? { ...m, nivel, movimientos } : m,
+			),
+		};
 	}
 
 	/** Solo con `?test=1`: mismos caminos que la interfaz. */

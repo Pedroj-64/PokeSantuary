@@ -234,6 +234,97 @@ describe("expedición", () => {
 		expect(r.partida.expedicionJornada).toBe(1);
 	});
 
+	it("salir con miembros armados los fusiona con el uid; con otra cantidad lanza", () => {
+		const p = ir(enElDia(), {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+			miembros: [
+				{
+					uid: "a1",
+					especie: "pikachu",
+					psPct: 100,
+					nivel: 8,
+					movimientos: ["thunder-shock"],
+				},
+			],
+		});
+		expect(p.expedicion?.equipo).toEqual([
+			{
+				uid: "a1",
+				especie: "pikachu",
+				psPct: 100,
+				nivel: 8,
+				movimientos: ["thunder-shock"],
+			},
+		]);
+		expect(() =>
+			ir(enElDia(), {
+				tipo: "salirAExpedicion",
+				uids: ["a1"],
+				semilla: "sx",
+				miembros: [],
+			}),
+		).toThrow(RangeError);
+	});
+
+	it("volver con catálogo devuelve lo aprendido y la evolución, pero no el nivel de la expedición", () => {
+		const catalogo = {
+			pikachu: {
+				aprendizaje: [],
+				nivelEtapa: 0,
+				tipos: ["electric"],
+				preferidos: ["aserrar"],
+				especialidades: [],
+			},
+			raichu: {
+				aprendizaje: [],
+				nivelEtapa: 16,
+				tipos: ["electric"],
+				preferidos: ["aserrar"],
+				especialidades: ["encender"],
+			},
+		};
+		const p = saliendo();
+		const x = p.expedicion;
+		if (!x) throw new Error("sin expedición");
+		const terminada = ir(p, {
+			tipo: "actualizarExpedicion",
+			expedicion: {
+				...x,
+				estado: "victoria",
+				equipo: [
+					{
+						uid: "a1",
+						especie: "raichu",
+						psPct: 50,
+						nivel: 30,
+						movimientos: ["thunderbolt"],
+						recordables: ["growl"],
+					},
+				],
+			},
+		});
+		const r = reducir(
+			terminada,
+			{ tipo: "volverDeExpedicion" },
+			{ ...ctx(), progresion: catalogo, nivelGimnasio: 0 },
+		);
+		const a1 = r.partida.santuario.residentes.find((q) => q.uid === "a1");
+		expect(a1).toMatchObject({
+			especie: "raichu",
+			movimientos: ["thunderbolt"],
+			recordables: ["growl"],
+			nivel: 14,
+		});
+		expect(a1?.especialidades).toEqual({ encender: 1 });
+		// Sin catálogo, el residente vuelve tal cual (sin evolucionar).
+		const sin = ir(terminada, { tipo: "volverDeExpedicion" });
+		expect(sin.santuario.residentes.find((q) => q.uid === "a1")?.especie).toBe(
+			"pikachu",
+		);
+	});
+
 	it("lo que no cabe queda en pendientesDeSitio y no se pierde", () => {
 		let p = enElDia();
 		p = {

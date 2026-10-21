@@ -3,6 +3,7 @@ import {
 	esNodoDeCombate,
 	generarPiso,
 	iniciarExpedicion,
+	type TablaNiveles,
 	type TipoNodo,
 } from "@santuario/core";
 import type { ExpedicionBalance, SetCombate } from "@santuario/data";
@@ -131,6 +132,30 @@ describe("prepararCombate", () => {
 		expect(() => prepararCombate(e, id, SETS, { alineacion: [0, 2] })).toThrow(
 			RangeError,
 		);
+	});
+
+	it("con niveles en el equipo y tabla del pack, el rival usa la tabla; sin niveles, no", () => {
+		const tabla = {
+			basePorPiso: [8, 18, 28, 38],
+			desplazamiento: { salvaje: 0, rival: 3, alfa: 5, sombrio: 3, jefe: 4 },
+			desplazamientoAs: { jefe: 6 },
+			emboscada: 2,
+			salvajeExtra: 0,
+			porRangoFurioso: 2,
+		} as unknown as TablaNiveles;
+		const [e0, id] = dentroDe("s1", "entrenador");
+		const sinNivel = prepararCombate(e0, id, SETS, { tablaNiveles: tabla });
+		expect(sinNivel.rival.map((m) => m.nivel)).not.toContain(11);
+		const e = {
+			...e0,
+			equipo: e0.equipo.map((m) => ({ ...m, nivel: 8 })),
+		};
+		const conNivel = prepararCombate(e, id, SETS, { tablaNiveles: tabla });
+		expect(conNivel.rival.map((m) => m.nivel)).toEqual(
+			conNivel.rival.map(() => 11),
+		);
+		// Sin tabla, aunque haya niveles, no se toca.
+		expect(prepararCombate(e, id, SETS).rival).toEqual(sinNivel.rival);
 	});
 
 	it("el rival no repite especies del equipo mientras haya otras", () => {

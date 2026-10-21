@@ -17,8 +17,16 @@ import {
 	type ResultadoTurno,
 	resultadoDeCombate,
 	type TerrenoFisura,
+	techoDelPiso,
+	tipoRivalDeNodo,
 } from "@santuario/battle";
-import { cuantos, gastar, intentarCaptura } from "@santuario/core";
+import {
+	cuantos,
+	type EstadoExpedicion,
+	gastar,
+	intentarCaptura,
+	registrarVictoria,
+} from "@santuario/core";
 import Phaser from "phaser";
 import { efecto, musica, pararMusica } from "../audio/gestor.js";
 import { MUSICA, SFX, sonidoDeMovimiento } from "../audio/sonidos.js";
@@ -26,10 +34,12 @@ import { cargarDatosCombate } from "../combate/datosPack.js";
 import { mensajeDe } from "../combate/mensajes.js";
 import { cargarBalance } from "../expedicion/balancePack.js";
 import { cargarElites } from "../expedicion/elitesPack.js";
+import { cargarProgresion } from "../expedicion/progresionPack.js";
 import { t } from "../i18n/index.js";
 import { asegurarSprite } from "../oficial/recursos.js";
 import { obtenerSemilla } from "../semilla.js";
 import { alPulsarTecla } from "../teclado.js";
+import type { DatosProgresion } from "./Progresion.js";
 
 const FUENTE = "monospace";
 const NIVEL = 50;
@@ -101,6 +111,8 @@ export class Combate extends Phaser.Scene {
 	private rivalEspecie = "";
 	/** Nivel de cada especie rival de este combate (para la placa de nombre). */
 	private nivelesRival = new Map<string, number>();
+	/** Nivel de cada especie del equipo del jugador (solo si la expedición trae niveles). */
+	private nivelesJugador = new Map<string, number>();
 	private intentosCaptura = 0;
 	private equipoFinal?: { especie: string; psPct: number }[];
 	private datosExpedicion?: DatosCombate;
@@ -114,12 +126,17 @@ export class Combate extends Phaser.Scene {
 	init(datos?: Partial<DatosCombate>): void {
 		this.datosExpedicion =
 			datos?.estado && datos.nodoId
-				? { estado: datos.estado, nodoId: datos.nodoId }
+				? {
+						estado: datos.estado,
+						nodoId: datos.nodoId,
+						alineacion: datos.alineacion,
+					}
 				: undefined;
 		this.expedicion = undefined;
 		this.equipoFinal = undefined;
 		this.rivalEspecie = "";
 		this.nivelesRival = new Map();
+		this.nivelesJugador = new Map();
 		this.intentosCaptura = 0;
 	}
 
@@ -196,11 +213,17 @@ export class Combate extends Phaser.Scene {
 						niveles: cargarBalance().nivelRival,
 						elites: cargarElites(),
 						alineacion: this.datosExpedicion.alineacion,
+						tablaNiveles: cargarProgresion().niveles.nivel,
 					},
 				);
 				({ semilla, jugador, rival } = p);
 				this.nivelesRival = new Map(
 					rival.map((m) => [m.especie, m.nivel ?? NIVEL]),
+				);
+				this.nivelesJugador = new Map(
+					jugador.flatMap((m) =>
+						m.nivel === undefined ? [] : [[m.especie, m.nivel] as const],
+					),
 				);
 				terreno = p.terreno;
 				this.expedicion = { ...this.datosExpedicion, vivos: p.vivos };
@@ -442,7 +465,7 @@ export class Combate extends Phaser.Scene {
 						n:
 							e.lado === "rival"
 								? (this.nivelesRival.get(e.especie) ?? NIVEL)
-								: NIVEL,
+								: (this.nivelesJugador.get(e.especie) ?? NIVEL),
 					}),
 				);
 				this.pintarBarra(l);
@@ -727,10 +750,14 @@ export class Combate extends Phaser.Scene {
 				cargarBalance().curaTrasVictoriaPct,
 				cargarBalance().farol,
 			);
-			this.scene.start("Captura", {
-				estado,
-				especie: this.rivalEspecie,
-				psPct,
+			this.irTrasVictoria(estado, "salvaje", x, {
+				escena: "Captura",
+				datos: {
+					estado,
+					especie: this.rivalEspecie,
+					psPct,
+					nivel: this.nivelesRival.get(this.rivalEspecie),
+				},
 			});
 		} catch (e) {
 			this.mostrarError(e);
@@ -926,10 +953,53 @@ export class Combate extends Phaser.Scene {
 				cargarBalance().curaTrasVictoriaPct,
 				cargarBalance().farol,
 			);
-			this.scene.start(destinoTrasCombate(estado), { estado });
+			const siguiente = {
+				escena: destinoTrasCombate(estado),
+				datos: { estado },
+			};
+			if (resultado.victoria)
+				this.irTrasVictoria(estado, undefined, x, siguiente);
+			else this.scene.start(siguiente.escena, siguiente.datos);
 		} catch (e) {
 			this.mostrarError(e);
 		}
+	}
+
+	/**
+	 * Tras ganar: sube de nivel al equipo y enseña movimientos (solo a quien lleva nivel).
+	 * Si ocurrió algo, pasa por la pantalla de progresión; si no, sigue directo.
+	 */
+	private irTrasVictoria(
+		estado: EstadoExpedicion,
+		rival: "salvaje" | undefined,
+		x: DatosCombate & { vivos: number[] },
+		siguiente: DatosProgresion["siguiente"],
+	): void {
+		const nodo = x.estado.mapa.capas.flat().find((n) => n.id === x.nodoId);
+		const { niveles, contexto } = cargarProgresion();
+		// El piso es el del combate: tras vencer a un jefe, `estado` ya está en el siguiente.
+		const r = registrarVictoria(
+			estado,
+			{
+				rival: rival ?? tipoRivalDeNodo(nodo?.tipo ?? "salvaje"),
+				participantes: x.vivos,
+				techo: techoDelPiso(niveles.nivel, x.estado.piso),
+			},
+			contexto,
+		);
+		if (r.eventos.length === 0) {
+			this.scene.start(siguiente.escena, siguiente.datos);
+			return;
+		}
+		const nuevo = {
+			...siguiente,
+			datos: { ...siguiente.datos, estado: r.estado },
+		};
+		this.scene.start("Progresion", {
+			estado: r.estado,
+			eventos: r.eventos,
+			siguiente: nuevo,
+		} satisfies DatosProgresion);
 	}
 
 	private tecla(clave: string, repetida: boolean): void {
@@ -951,6 +1021,10 @@ export class Combate extends Phaser.Scene {
 				terminado: this.terminado,
 				bolas: this.expedicion ? { ...this.expedicion.estado.mochila } : {},
 				rival: this.rivalEspecie,
+				niveles: {
+					jugador: [...this.nivelesJugador.values()],
+					rival: [...this.nivelesRival.values()],
+				},
 				panel: this.tituloPanel,
 				mensajes: [...this.mensajes],
 				hpJugador: this.campo.jugador.hp,
