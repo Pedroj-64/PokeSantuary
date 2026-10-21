@@ -721,3 +721,46 @@ describe("HabitatsSchema", () => {
 		).toBe(false);
 	});
 });
+
+describe("ceremonias del Altar", () => {
+	const pack = SantuarioBalanceSchema.parse(LEIDO).ceremonias;
+
+	it("el pack trae las cifras del GDD §11.10", () => {
+		expect(pack["festin-bayas"]).toEqual({
+			armoniaMin: 30,
+			coste: { bayas: 20 },
+			espera: 3,
+		});
+		expect(pack["fogata-ascuas"]).toMatchObject({
+			armoniaMin: 40,
+			coste: { madera: 10 },
+			soloDeNoche: true,
+			requiereEspecialidad: "encender",
+		});
+		expect(pack["bendicion-viajero"].coste).toEqual({
+			bayas: 30,
+			recuerdos: 1,
+		});
+		expect(pack.purificacion.coste).toEqual({ fragmentos: 2 });
+		for (const c of Object.values(pack)) expect(c.espera).toBe(3);
+	});
+
+	it("rechaza una ceremonia con coste cero o sin las cuatro", () => {
+		type Crudo = { ceremonias: Record<string, { coste: unknown }> };
+		const roto = (cambio: (c: Crudo["ceremonias"]) => void) => {
+			const crudo = structuredClone(LEIDO) as Crudo;
+			cambio(crudo.ceremonias);
+			return SantuarioBalanceSchema.safeParse(crudo).success;
+		};
+		expect(
+			roto((c) => {
+				c["festin-bayas"] = { coste: { bayas: 0 } };
+			}),
+		).toBe(false);
+		expect(
+			roto((c) => {
+				delete c.purificacion;
+			}),
+		).toBe(false);
+	});
+});

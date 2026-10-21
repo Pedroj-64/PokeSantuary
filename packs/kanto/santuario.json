@@ -181,5 +181,25 @@
 		{ "id": "estatua-unown", "puntos": 3, "coste": { "piedra": 6 } },
 		{ "id": "piedra-luna", "puntos": 3, "coste": { "piedra": 8 } }
 	],
-	"camino": { "costePiedra": 1 }
+	"camino": { "costePiedra": 1 },
+	"ceremonias": {
+		"festin-bayas": { "armoniaMin": 30, "coste": { "bayas": 20 }, "espera": 3 },
+		"fogata-ascuas": {
+			"armoniaMin": 40,
+			"coste": { "madera": 10 },
+			"espera": 3,
+			"soloDeNoche": true,
+			"requiereEspecialidad": "encender"
+		},
+		"bendicion-viajero": {
+			"armoniaMin": 50,
+			"coste": { "bayas": 30, "recuerdos": 1 },
+			"espera": 3
+		},
+		"purificacion": {
+			"armoniaMin": 40,
+			"coste": { "fragmentos": 2 },
+			"espera": 3
+		}
+	}
 }

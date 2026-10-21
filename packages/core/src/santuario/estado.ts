@@ -1,3 +1,4 @@
+import type { TablaCeremonias } from "./ceremonias.js";
 import { terrenoInicial } from "./terreno.js";
 
 /** Momento del día; la jornada avanza alba → dia → atardecer → noche. */
@@ -257,6 +258,8 @@ export interface SantuarioBalance {
 	edificios: EdificioBalance[];
 	decoraciones: DecoracionBalance[];
 	camino: { costePiedra: number };
+	/** Ceremonias del Altar; la forma es la de `TablaCeremonias`. */
+	ceremonias: TablaCeremonias;
 }
 
 /** ¿Se puede construir sobre esta loseta? No cuentan yerma ni roca (GDD §11.6). */

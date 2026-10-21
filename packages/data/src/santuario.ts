@@ -202,6 +202,26 @@ const decoracion = z
  * Números de balance del Santuario (GDD §11). Todos los valores del juego viven
  * aquí y en `packs/kanto/santuario.json`, nunca en el código del núcleo.
  */
+// Ceremonias del Altar (GDD §11.10): las cuatro del Pack 1, con su coste y requisitos.
+const ceremonia = z
+	.object({
+		armoniaMin: z.number().int().min(0).max(100),
+		coste: z.record(recurso, enteroPositivo),
+		espera: enteroNoNegativo,
+		soloDeNoche: z.boolean().optional(),
+		requiereEspecialidad: recurso.optional(),
+	})
+	.strict();
+
+const ceremonias = z
+	.object({
+		"festin-bayas": ceremonia,
+		"fogata-ascuas": ceremonia,
+		"bendicion-viajero": ceremonia,
+		purificacion: ceremonia,
+	})
+	.strict();
+
 export const SantuarioBalanceSchema = z
 	.object({
 		isla,
@@ -217,6 +237,7 @@ export const SantuarioBalanceSchema = z
 		edificios: z.array(edificio).min(1),
 		decoraciones: z.array(decoracion),
 		camino: z.object({ costePiedra: enteroPositivo }).strict(),
+		ceremonias,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {
