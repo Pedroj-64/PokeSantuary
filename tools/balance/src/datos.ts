@@ -4,13 +4,16 @@ import { nivelBaseGimnasio } from "@santuario/core";
 import {
 	AprendizajeSchema,
 	ElitesSchema,
+	EspecieSchema,
 	EventosSchema,
 	EvolucionesSchema,
 	ExpedicionBalanceSchema,
+	MovimientoSchema,
 	NivelesSchema,
 	SetCombateSchema,
 } from "@santuario/data";
 import { z } from "zod";
+import type { DatosPolitica } from "./politica.js";
 import type { DatosSimulacion } from "./simular.js";
 
 const pack = (f: string): unknown =>
@@ -30,12 +33,18 @@ export interface OpcionesCarga {
 	progresion?: boolean;
 	/** Nivel de gimnasio (0..5) cuando la progresión está activa. */
 	nivelGimnasio?: number;
+	/**
+	 * Activa la política inteligente. Por defecto no se adjunta para que el
+	 * simulador se comporte exactamente como antes.
+	 */
+	politica?: boolean;
 }
 
 /**
  * Datos del pack kanto tal como los usa el juego; lanza si no validan. Siempre
- * valida `niveles.json`, `aprendizaje.json` y `evoluciones.json`, pero solo los
- * adjunta a `progresion` si se piden.
+ * valida también `niveles.json`, `aprendizaje.json`, `evoluciones.json`,
+ * `movimientos.json` y `especies.json`, pero solo adjunta la progresión y la
+ * política si se piden.
  *
  * @throws {RangeError} Si `nivelGimnasio` no es un entero entre 0 y 5 con la
  * progresión activa.
@@ -46,6 +55,27 @@ export function cargarDatosPack(opciones: OpcionesCarga = {}): DatosSimulacion {
 	const niveles = NivelesSchema.parse(pack("niveles.json"));
 	const aprendizaje = AprendizajeSchema.parse(pack("aprendizaje.json"));
 	const evoluciones = EvolucionesSchema.parse(pack("evoluciones.json"));
+	const movimientos = z.array(MovimientoSchema).parse(pack("movimientos.json"));
+	const especies = z.array(EspecieSchema).parse(pack("especies.json"));
+
+	const politica: DatosPolitica | undefined =
+		opciones.politica === true
+			? {
+					movimientos: Object.fromEntries(
+						movimientos.map((m) => [
+							m.id,
+							{
+								tipo: m.tipo,
+								categoria: m.categoria,
+								potencia: m.potencia,
+								precision: m.precision,
+							},
+						]),
+					),
+					tiposDe: Object.fromEntries(especies.map((e) => [e.id, e.tipos])),
+				}
+			: undefined;
+
 	return {
 		sets: z.array(SetCombateSchema).parse(pack("sets.json")),
 		balance: ExpedicionBalanceSchema.parse(pack("expedicion.json")),
@@ -56,5 +86,6 @@ export function cargarDatosPack(opciones: OpcionesCarga = {}): DatosSimulacion {
 					progresion: { niveles, aprendizaje, evoluciones, nivelGimnasio },
 				}
 			: {}),
+		...(politica !== undefined ? { politica } : {}),
 	};
 }

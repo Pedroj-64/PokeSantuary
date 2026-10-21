@@ -9,6 +9,7 @@ if (!Number.isInteger(n) || n < 1) {
 }
 
 const conNiveles = process.argv.includes("--niveles");
+const inteligente = process.argv.includes("--inteligente");
 const argGimnasio = process.argv.indexOf("--gimnasio");
 const nivelGimnasio =
 	argGimnasio >= 0 ? Number(process.argv[argGimnasio + 1]) : 0;
@@ -29,11 +30,16 @@ if (argGimnasio >= 0 && !conNiveles) {
 
 const r = await simular(
 	Array.from({ length: n }, (_, i) => `balance${i}`),
-	cargarDatosPack({ progresion: conNiveles, nivelGimnasio }),
+	cargarDatosPack({
+		progresion: conNiveles,
+		nivelGimnasio,
+		politica: inteligente,
+	}),
 );
 console.log(`Expediciones: ${r.total}`);
 console.log(`Victorias: ${r.victorias} (${(r.tasa * 100).toFixed(1)} %)`);
 console.log(`Derrotas por piso: ${r.muertesPorPiso.join(" / ")}`);
+if (inteligente) console.log("Política: inteligente");
 if (r.nivelMedioAlJefe !== undefined) {
 	console.log(
 		`Nivel medio al jefe: ${r.nivelMedioAlJefe

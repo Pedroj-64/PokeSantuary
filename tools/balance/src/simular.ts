@@ -1,6 +1,7 @@
 import {
 	cerrarCombate,
 	dineroDeNodo,
+	type Eleccion,
 	expedicionInicial,
 	type Peticion,
 	prepararCombate,
@@ -34,6 +35,11 @@ import {
 	setsConEvoluciones,
 	trasVictoria,
 } from "./niveles.js";
+import {
+	type DatosPolitica,
+	elegirJugadaInteligente,
+	poderDeMovimientos,
+} from "./politica.js";
 
 /** Tope de turnos de un combate: pasado, se da por perdido (nadie hace daño). */
 const MAX_TURNOS = 300;
@@ -57,6 +63,11 @@ export interface DatosSimulacion {
 	 * los miembros combaten sin nivel ni movimientos propios.
 	 */
 	progresion?: ProgresionSimulacion;
+	/**
+	 * Política inteligente. Si falta, se sigue eligiendo el primer movimiento
+	 * con PP, como antes.
+	 */
+	politica?: DatosPolitica;
 }
 
 export interface ResumenSimulacion {
@@ -78,7 +89,7 @@ export interface ResumenSimulacion {
  * Política fija: el primer movimiento con PP y, al cambiar (a la fuerza o si
  * no queda ningún movimiento), el primer compañero vivo.
  */
-function elegirJugada(p: Peticion) {
+function elegirJugada(p: Peticion): Eleccion {
 	if (p.tipo === "movimiento") {
 		const indice = p.movimientos.findIndex((m) => !m.deshabilitado);
 		if (indice >= 0) return { tipo: "movimiento", indice } as const;
@@ -127,7 +138,11 @@ async function jugarCombate(
 				vivos: prep.vivos,
 			};
 		}
-		r = await sesion.elegirJugador(elegirJugada(r.peticion));
+		const eleccion =
+			datos.politica === undefined
+				? elegirJugada(r.peticion)
+				: elegirJugadaInteligente(r.peticion, datos.politica);
+		r = await sesion.elegirJugador(eleccion);
 	}
 	return {
 		resultado: resultadoDeCombate(
@@ -242,7 +257,14 @@ export async function simularExpedicion(
 	const progresion = datos.progresion;
 	if (progresion !== undefined) e = equipoConNiveles(e, progresion);
 	const ctx =
-		progresion === undefined ? undefined : contextoDeProgresion(progresion);
+		progresion === undefined
+			? undefined
+			: contextoDeProgresion(
+					progresion,
+					datos.politica === undefined
+						? undefined
+						: poderDeMovimientos(datos.politica),
+				);
 
 	const nivelesAlJefe: {
 		1: number | null;
