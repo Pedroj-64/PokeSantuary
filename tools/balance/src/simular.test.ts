@@ -1,4 +1,4 @@
-import type { SetCombate } from "@santuario/data";
+import type { Aprendizaje, SetCombate } from "@santuario/data";
 import { describe, expect, it } from "vitest";
 import { cargarDatosPack } from "./datos.js";
 import { simular } from "./simular.js";
@@ -46,5 +46,43 @@ describe("simular", () => {
 			tasa: 0,
 			muertesPorPiso: [0, 0, 0],
 		});
+	});
+});
+
+describe("simular con progresión", () => {
+	const conProgresion = cargarDatosPack({ progresion: true }).progresion;
+	if (conProgresion === undefined)
+		throw new Error("el pack no cargó la progresión");
+
+	// Todos aprenden un movimiento que hace daño desde el nivel 1: así todos los
+	// combates terminan y se llega a los tres jefes con rivales inofensivos. Se
+	// usa Fuego (no Normal) para que los rivales Fantasma no sean inmunes.
+	const aprendizaje: Aprendizaje = Object.fromEntries(
+		[...new Set(datos.sets.map((s) => s.especie))].map((especie) => [
+			especie,
+			[{ nivel: 1, movimiento: "flamethrower" }],
+		]),
+	);
+
+	const datosConNiveles = {
+		...datos,
+		setsRival: inofensivos(datos.sets),
+		elites: undefined,
+		progresion: { ...conProgresion, aprendizaje },
+	};
+
+	it("es determinista y mide el nivel medio al jefe de cada piso", async () => {
+		const a = await simular(SEMILLAS, datosConNiveles);
+		expect(await simular(SEMILLAS, datosConNiveles)).toEqual(a);
+		expect(a.victorias).toBe(SEMILLAS.length);
+		expect(a.nivelMedioAlJefe).toHaveLength(3);
+		for (const nivel of a.nivelMedioAlJefe ?? []) {
+			expect(nivel).toBeGreaterThanOrEqual(8);
+		}
+	});
+
+	it("sin progresión no añade nivelMedioAlJefe", async () => {
+		const r = await simular(["b0"], datos);
+		expect(r).not.toHaveProperty("nivelMedioAlJefe");
 	});
 });

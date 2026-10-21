@@ -27,6 +27,13 @@ import type {
 	ExpedicionBalance,
 	SetCombate,
 } from "@santuario/data";
+import {
+	contextoDeProgresion,
+	equipoConNiveles,
+	type ProgresionSimulacion,
+	setsConEvoluciones,
+	trasVictoria,
+} from "./niveles.js";
 
 /** Tope de turnos de un combate: pasado, se da por perdido (nadie hace daño). */
 const MAX_TURNOS = 300;
@@ -45,6 +52,11 @@ export interface DatosSimulacion {
 	balance: ExpedicionBalance;
 	eventos: readonly Evento[];
 	elites?: Elites;
+	/**
+	 * Datos de progresión. Si falta, el simulador se comporta como siempre:
+	 * los miembros combaten sin nivel ni movimientos propios.
+	 */
+	progresion?: ProgresionSimulacion;
 }
 
 export interface ResumenSimulacion {
@@ -54,6 +66,12 @@ export interface ResumenSimulacion {
 	tasa: number;
 	/** Expediciones perdidas en el piso 1, 2 y 3. */
 	muertesPorPiso: [number, number, number];
+	/**
+	 * Nivel medio del equipo consciente justo antes del jefe de cada piso,
+	 * promediado sobre las expediciones que llegaron (0 si no llegó ninguna).
+	 * Solo existe con progresión.
+	 */
+	nivelMedioAlJefe?: [number, number, number];
 }
 
 /**
@@ -69,14 +87,24 @@ function elegirJugada(p: Peticion) {
 	return { tipo: "cambio", indice } as const;
 }
 
-/** Juega un combate de nodo hasta el final; null si se acaba el tope de turnos. */
+/**
+ * Juega un combate de nodo hasta el final. Devuelve también los índices del
+ * equipo que entraron, que son los participantes de la progresión.
+ */
 async function jugarCombate(
 	e: EstadoExpedicion,
 	nodoId: string,
 	datos: DatosSimulacion,
-): Promise<ResultadoCombate> {
-	const prep = prepararCombate(e, nodoId, datos.sets, {
-		setsRival: datos.setsRival,
+): Promise<{ resultado: ResultadoCombate; vivos: number[] }> {
+	// Con progresión puede haber especies evolucionadas sin set propio en el
+	// pack; se les presta el de su especie base. El rival usa siempre el
+	// catálogo original.
+	const sets =
+		datos.progresion === undefined
+			? datos.sets
+			: setsConEvoluciones(datos.sets, e.equipo, datos.progresion.evoluciones);
+	const prep = prepararCombate(e, nodoId, sets, {
+		setsRival: datos.setsRival ?? datos.sets,
 		tamanos: datos.balance.tamanoRival,
 		niveles: datos.balance.nivelRival,
 		elites: datos.elites,
@@ -90,17 +118,27 @@ async function jugarCombate(
 	});
 	for (let turno = 0; r.terminado === null; turno++) {
 		if (turno >= MAX_TURNOS || r.peticion === null) {
-			return { victoria: false, psPct: e.equipo.map(() => 0), dinero: 0 };
+			return {
+				resultado: {
+					victoria: false,
+					psPct: e.equipo.map(() => 0),
+					dinero: 0,
+				},
+				vivos: prep.vivos,
+			};
 		}
 		r = await sesion.elegirJugador(elegirJugada(r.peticion));
 	}
-	return resultadoDeCombate(
-		e,
-		prep.vivos,
-		r.terminado,
-		r.equipoFinal ?? [],
-		dineroDeNodo(datos.balance, e, nodoId),
-	);
+	return {
+		resultado: resultadoDeCombate(
+			e,
+			prep.vivos,
+			r.terminado,
+			r.equipoFinal ?? [],
+			dineroDeNodo(datos.balance, e, nodoId),
+		),
+		vivos: prep.vivos,
+	};
 }
 
 /** Resuelve un nodo de elección con la primera opción, sin combates ni cambio de runas. */
@@ -175,27 +213,67 @@ function curarConBayas(e: EstadoExpedicion): EstadoExpedicion {
 	return estado;
 }
 
-/** Una expedición completa con rutas al azar (sembradas); devuelve el estado final. */
+/** Estado final de una expedición y nivel medio al jefe de cada piso. */
+export interface ResultadoExpedicion {
+	estado: EstadoExpedicion;
+	/** Nivel medio consciente antes del jefe de los pisos 1, 2 y 3; null si no se llegó. */
+	nivelMedioAlJefe: readonly (number | null)[];
+}
+
+/** Nivel medio del equipo consciente (los que tienen `psPct` > 0). */
+function nivelMedioConsciente(e: EstadoExpedicion): number {
+	const vivos = e.equipo.filter((m) => m.psPct > 0 && m.nivel !== undefined);
+	if (vivos.length === 0) return 0;
+	let suma = 0;
+	for (const m of vivos) suma += m.nivel ?? 0;
+	return suma / vivos.length;
+}
+
+/**
+ * Una expedición completa con rutas al azar (sembradas). Con `progresion`,
+ * arranca con `equipoConNiveles` y aplica `trasVictoria` después de cada
+ * combate ganado; sin ella se comporta exactamente como antes.
+ */
 export async function simularExpedicion(
 	semilla: string,
 	datos: DatosSimulacion,
-): Promise<EstadoExpedicion> {
+): Promise<ResultadoExpedicion> {
 	let e = expedicionInicial(semilla, datos.sets, datos.balance);
+	const progresion = datos.progresion;
+	if (progresion !== undefined) e = equipoConNiveles(e, progresion);
+	const ctx =
+		progresion === undefined ? undefined : contextoDeProgresion(progresion);
+
+	const nivelesAlJefe: {
+		1: number | null;
+		2: number | null;
+		3: number | null;
+	} = { 1: null, 2: null, 3: null };
+
 	const ruta = crearRng(`${semilla}:balance:ruta`);
 	while (e.estado === "en-curso") {
 		const opciones = elegibles(e);
 		const id = elegirRuta(e, opciones, () =>
 			ruta.entero(0, opciones.length - 1),
 		);
-		e = entrar(e, id);
 		const tipo = e.mapa.capas.flat().find((n) => n.id === id)?.tipo;
 		if (tipo === undefined) throw new RangeError(`nodo ${id} sin tipo`);
+		const pisoCombate = e.piso;
+		// El nivel se mide justo antes de entrar al jefe, con el equipo que llega.
+		if (tipo === "jefe" && progresion !== undefined) {
+			nivelesAlJefe[pisoCombate] = nivelMedioConsciente(e);
+		}
+		e = entrar(e, id);
 		if (esNodoDeCombate(tipo)) {
+			const combate = await jugarCombate(e, id, datos);
 			e = cerrarCombate(
 				e,
-				await jugarCombate(e, id, datos),
+				combate.resultado,
 				datos.balance.curaTrasVictoriaPct,
 			);
+			if (combate.resultado.victoria && ctx !== undefined) {
+				e = trasVictoria(e, tipo, combate.vivos, ctx, pisoCombate);
+			}
 			if (e.estado === "en-curso") e = curarConBayas(e);
 		} else if (tipo === "tienda") {
 			e = comprarBayas(e, datos);
@@ -203,7 +281,10 @@ export async function simularExpedicion(
 			e = resolverEleccion(e, id, tipo, datos);
 		}
 	}
-	return e;
+	return {
+		estado: e,
+		nivelMedioAlJefe: [nivelesAlJefe[1], nivelesAlJefe[2], nivelesAlJefe[3]],
+	};
 }
 
 /** Simula una expedición por semilla y resume victorias y piso de la derrota. */
@@ -212,19 +293,38 @@ export async function simular(
 	datos: DatosSimulacion,
 ): Promise<ResumenSimulacion> {
 	const muertesPorPiso: [number, number, number] = [0, 0, 0];
+	const acumulado: [number[], number[], number[]] = [[], [], []];
 	let victorias = 0;
 	for (const semilla of semillas) {
-		const final = await simularExpedicion(semilla, datos);
+		const { estado: final, nivelMedioAlJefe } = await simularExpedicion(
+			semilla,
+			datos,
+		);
 		if (final.estado === "victoria") victorias++;
 		else
 			muertesPorPiso[final.piso - 1] =
 				(muertesPorPiso[final.piso - 1] ?? 0) + 1;
+		for (const [piso, nivel] of nivelMedioAlJefe.entries()) {
+			if (nivel !== null) acumulado[piso]?.push(nivel);
+		}
 	}
 	const total = semillas.length;
-	return {
+	const resumen: ResumenSimulacion = {
 		victorias,
 		total,
 		tasa: total === 0 ? 0 : victorias / total,
 		muertesPorPiso,
 	};
+	if (datos.progresion !== undefined) {
+		const medios: [number, number, number] = [0, 0, 0];
+		for (let piso = 0; piso < 3; piso++) {
+			const valores = acumulado[piso] ?? [];
+			if (valores.length > 0) {
+				medios[piso] =
+					valores.reduce((suma, nivel) => suma + nivel, 0) / valores.length;
+			}
+		}
+		resumen.nivelMedioAlJefe = medios;
+	}
+	return resumen;
 }
