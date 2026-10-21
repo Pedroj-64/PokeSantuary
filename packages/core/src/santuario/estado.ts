@@ -1,4 +1,5 @@
-import type { TablaCeremonias } from "./ceremonias.js";
+import type { RegistroCeremonias, TablaCeremonias } from "./ceremonias.js";
+import type { EleccionesCodigos, TablaCodigos } from "./codigos.js";
 import type { TablaGimnasio } from "./gimnasio.js";
 import { terrenoInicial } from "./terreno.js";
 
@@ -171,6 +172,14 @@ export interface EstadoSantuario {
 	habitatsPendientes: string[];
 	/** Contador para generar uids deterministas. */
 	siguienteUid: number;
+	/** Nivel del Gimnasio (0 a 5); si falta, 0. */
+	nivelGimnasio?: number;
+	/** Códigos del Altar elegidos (nivel del Altar → opción); si falta, ninguno. */
+	codigos?: EleccionesCodigos;
+	/** Última jornada en que se celebró cada ceremonia. */
+	ceremonias?: RegistroCeremonias;
+	/** La Bendición del Viajero está lista: la próxima expedición empieza con una runa elegida de 3. */
+	bendicionViajero?: boolean;
 }
 
 /** Entrada de un edificio en el balance; repite la forma de los datos. */
@@ -263,6 +272,8 @@ export interface SantuarioBalance {
 	ceremonias: TablaCeremonias;
 	/** Costes de subir el Gimnasio (GDD §11.5). */
 	gimnasio: TablaGimnasio;
+	/** Códigos del Altar por nivel (GDD §11.10). */
+	codigos: TablaCodigos;
 }
 
 /**

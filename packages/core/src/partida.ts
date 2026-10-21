@@ -3,6 +3,8 @@ import type {
 	EstadoExpedicion as Expedicion,
 	MiembroExp,
 } from "./expedicion.js";
+import { celebrar, type IdCeremonia } from "./santuario/ceremonias.js";
+import { elegirCodigo, type Opcion } from "./santuario/codigos.js";
 import type {
 	SantuarioBalance,
 	Tarea,
@@ -19,6 +21,7 @@ import {
 	colocarKit,
 	mejorarEdificio,
 } from "./santuario/gestion.js";
+import { subirGimnasio } from "./santuario/gimnasio.js";
 import type { ContextoJornada } from "./santuario/habitats.js";
 import {
 	amanecer,
@@ -84,7 +87,11 @@ export type AccionPartida =
 	  }
 	/** La escena avanza la expedición con las funciones de `expedicion.ts` y la deja aquí. */
 	| { tipo: "actualizarExpedicion"; expedicion: EstadoExpedicion }
-	| { tipo: "volverDeExpedicion" };
+	| { tipo: "volverDeExpedicion" }
+	/** En el Altar, de día o de noche y sin expedición en curso. */
+	| { tipo: "celebrarCeremonia"; id: IdCeremonia }
+	| { tipo: "elegirCodigo"; nivel: number; opcion: Opcion }
+	| { tipo: "subirGimnasio" };
 
 /** Estado nuevo y lo que la escena anima ("llegó un visitante", "se terminó una obra"...). */
 export interface ResultadoPartida {
@@ -122,6 +129,17 @@ function exigirGestion(p: EstadoPartida, accion: string): void {
 	if (p.expedicion !== undefined) {
 		throw new RangeError(`${accion}: hay una expedición en curso`);
 	}
+}
+
+/** Un edificio de ese tipo ya terminado, con su nivel más alto; undefined si no hay. */
+export function nivelDeEdificio(
+	e: EstadoSantuario,
+	tipo: string,
+): number | undefined {
+	const niveles = e.edificios
+		.filter((x) => x.tipo === tipo && x.obraRestante === 0)
+		.map((x) => x.nivel);
+	return niveles.length === 0 ? undefined : Math.max(...niveles);
 }
 
 /** Cambia solo el Santuario de la partida. */
@@ -218,6 +236,68 @@ export function reducir(
 				);
 			}
 			return { partida: { ...p, expedicion: a.expedicion }, eventos: [] };
+		case "celebrarCeremonia": {
+			if (
+				p.expedicion !== undefined ||
+				s.momento === "alba" ||
+				s.momento === "atardecer"
+			) {
+				throw new RangeError(
+					"celebrarCeremonia: solo de día o de noche y sin expedición en curso",
+				);
+			}
+			const r = celebrar(
+				s,
+				a.id,
+				b.ceremonias,
+				s.ceremonias ?? {},
+				nivelDeEdificio(s, "altar") !== undefined,
+			);
+			return {
+				partida: {
+					...p,
+					santuario: {
+						...r.estado,
+						ceremonias: r.registro,
+						...(r.bendicionViajero && { bendicionViajero: true }),
+					},
+				},
+				eventos: r.eventos,
+			};
+		}
+		case "elegirCodigo": {
+			exigirGestion(p, "elegirCodigo");
+			const nivelAltar = nivelDeEdificio(s, "altar");
+			if (nivelAltar === undefined) {
+				throw new RangeError("elegirCodigo: no hay un Altar terminado");
+			}
+			const codigos = elegirCodigo(
+				s.codigos ?? {},
+				a.nivel,
+				a.opcion,
+				nivelAltar,
+				b.codigos,
+			);
+			return conSantuario(p, { ...s, codigos });
+		}
+		case "subirGimnasio": {
+			exigirGestion(p, "subirGimnasio");
+			if (nivelDeEdificio(s, "gimnasio") === undefined) {
+				throw new RangeError("subirGimnasio: no hay un Gimnasio terminado");
+			}
+			const r = subirGimnasio(
+				s.nivelGimnasio ?? 0,
+				s.recursos,
+				b.gimnasio,
+				// Sable aún no es vecino: lo será al redimirlo (Fase 5).
+				{ sableVecino: false },
+			);
+			return conSantuario(p, {
+				...s,
+				nivelGimnasio: r.nivel,
+				recursos: r.recursos,
+			});
+		}
 		case "volverDeExpedicion": {
 			exigirMomento(p, "dia", "volverDeExpedicion");
 			if (p.expedicion === undefined) {
@@ -239,7 +319,12 @@ export function reducir(
 						const m = volvieron.get(r.uid);
 						return m === undefined
 							? r
-							: aplicarRetorno(r, m, catalogo, ctx.nivelGimnasio ?? 0);
+							: aplicarRetorno(
+									r,
+									m,
+									catalogo,
+									s.nivelGimnasio ?? ctx.nivelGimnasio ?? 0,
+								);
 					}),
 				};
 			}

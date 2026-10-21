@@ -1,7 +1,13 @@
-import type {
-	AccionPartida,
-	EstadoPartida,
-	SantuarioBalance,
+import {
+	type AccionPartida,
+	costeDeSubir,
+	type EstadoPartida,
+	type IdCeremonia,
+	motivoNoPuede,
+	motivoNoPuedeSubir,
+	nivelDeEdificio,
+	nivelesPendientes,
+	type SantuarioBalance,
 } from "@santuario/core";
 import type Phaser from "phaser";
 import { t } from "../i18n/index.js";
@@ -76,16 +82,21 @@ export class MenusGestion {
 	}
 
 	abrir(): void {
+		const p = this.a.partida();
+		const noche = p.santuario.momento === "noche";
 		if (
-			this.a.partida().santuario.momento !== "dia" ||
-			this.a.partida().expedicion
+			(p.santuario.momento !== "dia" && !noche) ||
+			p.expedicion ||
+			(noche && nivelDeEdificio(p.santuario, "altar") === undefined)
 		) {
 			this.a.aviso(t("gestion.aviso.soloDia"));
 			return;
 		}
 		this.a.alAbrirMenu();
 		this.a.ayuda("");
-		this.menuPrincipal();
+		// De noche solo se puede ir al Altar (la Fogata de Ascuas es nocturna).
+		if (noche) this.menuAltar();
+		else this.menuPrincipal();
 	}
 
 	cerrar(): void {
@@ -111,6 +122,7 @@ export class MenusGestion {
 				texto: t("gestion.principal.terreno"),
 				alElegir: () => this.menuTerreno(),
 			},
+			...this.itemsAltarYGimnasio(),
 			{
 				texto: t("gestion.principal.cerrar"),
 				alElegir: () => this.cerrar(),
@@ -567,5 +579,166 @@ export class MenusGestion {
 			},
 			cancelar: () => this.menuDecorar(volverA),
 		});
+	}
+
+	// ------------------------------------------------------- Altar y Gimnasio
+
+	/** Entradas del menú principal para los edificios que ya están terminados. */
+	private itemsAltarYGimnasio(): ItemMenu[] {
+		const s = this.a.partida().santuario;
+		const items: ItemMenu[] = [];
+		if (nivelDeEdificio(s, "altar") !== undefined)
+			items.push({
+				texto: t("gestion.principal.altar"),
+				alElegir: () => this.menuAltar(),
+			});
+		if (nivelDeEdificio(s, "gimnasio") !== undefined)
+			items.push({
+				texto: t("gestion.principal.gimnasio"),
+				alElegir: () => this.menuGimnasio(),
+			});
+		return items;
+	}
+
+	private menuAltar(indice = 0): void {
+		const noche = this.a.partida().santuario.momento === "noche";
+		const items: ItemMenu[] = [
+			{
+				texto: t("altar.ceremonias"),
+				alElegir: () => this.menuCeremonias(),
+			},
+			{
+				texto: t("altar.codigos"),
+				// Los Códigos son permanentes y se eligen de día, con la gestión.
+				activo: !noche,
+				alElegir: () => this.menuCodigos(),
+			},
+		];
+		this.menu.mostrar(
+			t("gestion.principal.altar"),
+			items,
+			t("gestion.pie"),
+			() => (noche ? this.cerrar() : this.menuPrincipal(4)),
+			indice,
+		);
+	}
+
+	private menuCeremonias(indice = 0): void {
+		const s = this.a.partida().santuario;
+		const b = this.balance;
+		const ids = Object.keys(b.ceremonias) as IdCeremonia[];
+		const items: ItemMenu[] = ids.map((id, i) => {
+			const motivo = motivoNoPuede(
+				s,
+				id,
+				b.ceremonias,
+				s.ceremonias ?? {},
+				true,
+			);
+			return {
+				texto: `${t(`ceremonia.${id}`)}  (${this.textoCoste(b.ceremonias[id].coste)})${
+					motivo === undefined ? "" : `  [${t(`ceremonia.motivo.${motivo}`)}]`
+				}`,
+				activo: motivo === undefined,
+				alElegir: () => {
+					if (!this.a.gestionar({ tipo: "celebrarCeremonia", id })) return;
+					this.a.aviso(t("ceremonia.hecha", { nombre: t(`ceremonia.${id}`) }));
+					this.menuCeremonias(i);
+				},
+			};
+		});
+		this.menu.mostrar(
+			t("altar.ceremonias"),
+			items,
+			t("gestion.pie"),
+			() => this.menuAltar(0),
+			indice,
+		);
+	}
+
+	private menuCodigos(indice = 0): void {
+		const s = this.a.partida().santuario;
+		const b = this.balance;
+		const nivelAltar = nivelDeEdificio(s, "altar") ?? 0;
+		const pendientes = nivelesPendientes(
+			nivelAltar,
+			s.codigos ?? {},
+			b.codigos,
+		);
+		const items: ItemMenu[] = b.codigos
+			.filter((d) => d.nivel <= nivelAltar)
+			.map((d, i) => {
+				const elegido = s.codigos?.[d.nivel];
+				return {
+					texto:
+						elegido === undefined
+							? t("altar.codigo.sinElegir", { n: d.nivel })
+							: t("altar.codigo.elegido", {
+									n: d.nivel,
+									codigo: t(`codigo.${d[elegido].id}`),
+								}),
+					// Uno ya elegido es permanente: se muestra pero no se cambia.
+					activo: pendientes.includes(d.nivel),
+					alElegir: () => this.menuCodigo(d.nivel, i),
+				};
+			});
+		this.menu.mostrar(
+			t("altar.codigos"),
+			items.length
+				? items
+				: [{ texto: t("gestion.vacio"), activo: false, alElegir: () => {} }],
+			t("gestion.pie"),
+			() => this.menuAltar(1),
+			indice,
+		);
+	}
+
+	private menuCodigo(nivel: number, volverA: number): void {
+		const def = this.balance.codigos.find((d) => d.nivel === nivel);
+		if (def === undefined) {
+			this.menuCodigos();
+			return;
+		}
+		const items: ItemMenu[] = (["A", "B"] as const).map((opcion) => ({
+			texto: t(`codigo.${def[opcion].id}`),
+			alElegir: () => {
+				if (!this.a.gestionar({ tipo: "elegirCodigo", nivel, opcion })) return;
+				this.menuCodigos(volverA);
+			},
+		}));
+		this.menu.mostrar(
+			t("altar.codigo.titulo", { n: nivel }),
+			items,
+			t("altar.codigo.pie"),
+			() => this.menuCodigos(volverA),
+		);
+	}
+
+	private menuGimnasio(): void {
+		const s = this.a.partida().santuario;
+		const b = this.balance;
+		const nivel = s.nivelGimnasio ?? 0;
+		// Sable aún no es vecino: no hay descuento ni niveles 4 y 5.
+		const opciones = { sableVecino: false };
+		const motivo = motivoNoPuedeSubir(nivel, s.recursos, b.gimnasio, opciones);
+		const titulo = t("gimnasio.subir", { n: nivel + 1 });
+		const subir: ItemMenu = {
+			texto:
+				motivo === "maximo" || motivo === "sable"
+					? `${titulo}  [${t(`gimnasio.motivo.${motivo}`)}]`
+					: `${titulo}  (${this.textoCoste({ ...costeDeSubir(nivel, b.gimnasio, opciones) })})${
+							motivo === undefined ? "" : `  [${t("gestion.faltan")}]`
+						}`,
+			activo: motivo === undefined,
+			alElegir: () => {
+				if (this.a.gestionar({ tipo: "subirGimnasio" })) this.menuGimnasio();
+			},
+		};
+		this.menu.mostrar(
+			t("gimnasio.titulo", { n: nivel }),
+			[subir],
+			t("gestion.pie"),
+			() => this.menuPrincipal(5),
+		);
 	}
 }

@@ -232,6 +232,43 @@ const gimnasio = z
 	})
 	.strict();
 
+// Códigos del Altar (GDD §11.10): por nivel del Altar, dos doctrinas entre las que se elige una.
+const efectoCodigo = z
+	.object({
+		multProduccion: z.number().positive().optional(),
+		animoPorJornada: z.number().int().optional(),
+		nivelesPorEco: enteroNoNegativo.optional(),
+		debilitadosNoAgotan: z.boolean().optional(),
+		multHuerto: z.number().positive().optional(),
+		visitanteCada: enteroPositivo.optional(),
+	})
+	.strict();
+
+const defCodigo = z
+	.object({
+		id: z.enum([
+			"manos-ocupadas",
+			"ritmo-propio",
+			"disciplina",
+			"cuidado-mutuo",
+			"cosecha-abundante",
+			"bosque-libre",
+		]),
+		efecto: efectoCodigo,
+	})
+	.strict();
+
+const codigos = z.array(
+	z
+		.object({
+			nivel: enteroPositivo,
+			categoria: z.enum(["trabajo", "combate", "naturaleza"]),
+			A: defCodigo,
+			B: defCodigo,
+		})
+		.strict(),
+);
+
 export const SantuarioBalanceSchema = z
 	.object({
 		isla,
@@ -249,6 +286,7 @@ export const SantuarioBalanceSchema = z
 		camino: z.object({ costePiedra: enteroPositivo }).strict(),
 		ceremonias,
 		gimnasio,
+		codigos,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {

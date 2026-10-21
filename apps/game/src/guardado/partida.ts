@@ -135,6 +135,20 @@ const Santuario = z
 		habitatsPendientes: z.array(slug),
 		vistas: z.array(slug),
 		siguienteUid: z.number().int().min(1),
+		nivelGimnasio: z.number().int().min(0).max(5).optional(),
+		codigos: z
+			.record(z.string().regex(/^[1-9][0-9]*$/), z.enum(["A", "B"]))
+			.optional(),
+		ceremonias: z
+			.object({
+				"festin-bayas": z.number().int().min(1).optional(),
+				"fogata-ascuas": z.number().int().min(1).optional(),
+				"bendicion-viajero": z.number().int().min(1).optional(),
+				purificacion: z.number().int().min(1).optional(),
+			})
+			.strict()
+			.optional(),
+		bendicionViajero: z.boolean().optional(),
 	})
 	.strict()
 	.superRefine((s, ctx) => {

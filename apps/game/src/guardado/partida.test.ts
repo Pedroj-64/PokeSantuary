@@ -132,6 +132,21 @@ describe("guardado de la partida", () => {
 		expect(await cargar(await guardar(p))).toEqual(p);
 	});
 
+	it("el Altar y el Gimnasio guardados sobreviven a guardar y cargar", async () => {
+		const p = conResidentes();
+		const con: typeof p = {
+			...p,
+			santuario: {
+				...p.santuario,
+				nivelGimnasio: 2,
+				codigos: { 1: "A", 2: "B" },
+				ceremonias: { "festin-bayas": 3, purificacion: 5 },
+				bendicionViajero: true,
+			},
+		};
+		expect(await cargar(await guardar(con))).toEqual(con);
+	});
+
 	it("la partida de después de volver (con campos undefined) también se carga", async () => {
 		let p = ir(conResidentes(), { tipo: "comenzarDia" });
 		p = ir(p, { tipo: "salirAExpedicion", uids: ["a1"], semilla: "sx" });

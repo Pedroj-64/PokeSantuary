@@ -741,7 +741,7 @@ export class SantuarioMundo extends Phaser.Scene {
 			const r = s.residentes.find((q) => q.uid === uid);
 			if (r === undefined) throw new Error(`residente desconocido '${uid}'`);
 			return {
-				...miembroDeResidente(r, 0, catalogo),
+				...miembroDeResidente(r, s.nivelGimnasio ?? 0, catalogo),
 				naturaleza: r.naturaleza,
 				// Los IV no se guardan: salen siempre iguales de la semilla y el uid del residente.
 				iv: generarIV(crearRng(`${s.semilla}:iv:${uid}`)),

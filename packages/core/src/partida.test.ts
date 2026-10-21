@@ -366,3 +366,157 @@ describe("determinismo e inmutabilidad", () => {
 		expect(() => reducir(d, { tipo: "pasarDia" }, ctx())).not.toThrow();
 	});
 });
+
+describe("Altar y Gimnasio", () => {
+	const edificio = (tipo: string, nivel = 1, obraRestante = 0) => ({
+		uid: `e-${tipo}`,
+		tipo,
+		x: 1,
+		y: 1,
+		nivel,
+		obraRestante,
+		resto: {},
+	});
+	/** Día de la jornada 1 con los edificios y recursos dados. */
+	const con = (
+		edificios: ReturnType<typeof edificio>[],
+		recursos: Record<string, number> = {},
+	): EstadoPartida => {
+		const p = enElDia();
+		return {
+			...p,
+			santuario: {
+				...p.santuario,
+				armonia: 100,
+				edificios: [...p.santuario.edificios, ...edificios],
+				recursos: { ...p.santuario.recursos, ...recursos },
+			},
+		};
+	};
+
+	it("celebrar exige un Altar terminado y anota la jornada y el efecto", () => {
+		expect(() =>
+			ir(con([], { "baya:neutro": 30 }), {
+				tipo: "celebrarCeremonia",
+				id: "festin-bayas",
+			}),
+		).toThrow(RangeError);
+		expect(() =>
+			ir(con([edificio("altar", 1, 3)], { "baya:neutro": 30 }), {
+				tipo: "celebrarCeremonia",
+				id: "festin-bayas",
+			}),
+		).toThrow(RangeError);
+		const p = ir(con([edificio("altar")], { "baya:neutro": 30 }), {
+			tipo: "celebrarCeremonia",
+			id: "festin-bayas",
+		});
+		expect(p.santuario.ceremonias).toEqual({ "festin-bayas": 1 });
+		expect(p.santuario.recursos["baya:neutro"]).toBe(10);
+		// la espera de 3 jornadas impide repetirla ya
+		expect(() =>
+			ir(p, { tipo: "celebrarCeremonia", id: "festin-bayas" }),
+		).toThrow(RangeError);
+	});
+
+	it("la Bendición del Viajero deja la marca para la próxima expedición", () => {
+		const p = ir(
+			con([edificio("altar")], { "baya:neutro": 30, recuerdos: 1 }),
+			{ tipo: "celebrarCeremonia", id: "bendicion-viajero" },
+		);
+		expect(p.santuario.bendicionViajero).toBe(true);
+		expect(p.santuario.recursos.recuerdos).toBe(0);
+	});
+
+	it("no se celebra con una expedición en curso", () => {
+		const x = ir(con([edificio("altar")], { "baya:neutro": 30 }), {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+		});
+		expect(() =>
+			ir(x, { tipo: "celebrarCeremonia", id: "festin-bayas" }),
+		).toThrow(RangeError);
+	});
+
+	it("elegir Código guarda la elección, es permanente y respeta el nivel del Altar", () => {
+		const base = con([edificio("altar", 1)]);
+		const p = ir(base, { tipo: "elegirCodigo", nivel: 1, opcion: "A" });
+		expect(p.santuario.codigos).toEqual({ 1: "A" });
+		expect(() =>
+			ir(p, { tipo: "elegirCodigo", nivel: 1, opcion: "B" }),
+		).toThrow(RangeError);
+		expect(() =>
+			ir(base, { tipo: "elegirCodigo", nivel: 2, opcion: "A" }),
+		).toThrow(RangeError);
+		expect(() =>
+			ir(con([]), { tipo: "elegirCodigo", nivel: 1, opcion: "A" }),
+		).toThrow(RangeError);
+	});
+
+	it("subir el Gimnasio gasta fragmentos y ₽ y sube el nivel; sin edificio o sin recursos lanza", () => {
+		const recursos = { fragmentos: 10, pokedolares: 500 };
+		const p = ir(con([edificio("gimnasio")], recursos), {
+			tipo: "subirGimnasio",
+		});
+		expect(p.santuario.nivelGimnasio).toBe(1);
+		expect(p.santuario.recursos.fragmentos).toBe(8);
+		expect(p.santuario.recursos.pokedolares).toBe(400);
+		expect(() => ir(con([], recursos), { tipo: "subirGimnasio" })).toThrow(
+			RangeError,
+		);
+		expect(() =>
+			ir(con([edificio("gimnasio")], { fragmentos: 0, pokedolares: 0 }), {
+				tipo: "subirGimnasio",
+			}),
+		).toThrow(RangeError);
+	});
+
+	it("sin Sable el Gimnasio se detiene en el nivel 3", () => {
+		let p = con([edificio("gimnasio")], { fragmentos: 99, pokedolares: 999 });
+		for (let i = 0; i < 3; i++) p = ir(p, { tipo: "subirGimnasio" });
+		expect(p.santuario.nivelGimnasio).toBe(3);
+		expect(() => ir(p, { tipo: "subirGimnasio" })).toThrow(/sable/);
+	});
+
+	it("el nivel del Gimnasio fija el nivel de salida al volver de una expedición", () => {
+		const catalogo = {
+			pikachu: {
+				aprendizaje: [],
+				nivelEtapa: 0,
+				tipos: ["electric"],
+				preferidos: ["aserrar"],
+				especialidades: [],
+			},
+			raichu: {
+				aprendizaje: [],
+				nivelEtapa: 24,
+				tipos: ["electric"],
+				preferidos: ["aserrar"],
+				especialidades: [],
+			},
+		};
+		let p = con([], {});
+		p = { ...p, santuario: { ...p.santuario, nivelGimnasio: 2 } };
+		p = ir(p, { tipo: "salirAExpedicion", uids: ["a1"], semilla: "sx" });
+		const x = p.expedicion;
+		if (!x) throw new Error("sin expedición");
+		p = ir(p, {
+			tipo: "actualizarExpedicion",
+			expedicion: {
+				...x,
+				estado: "victoria",
+				equipo: [{ uid: "a1", especie: "raichu", psPct: 50, nivel: 30 }],
+			},
+		});
+		const r = reducir(
+			p,
+			{ tipo: "volverDeExpedicion" },
+			{ ...ctx(), progresion: catalogo },
+		);
+		// Gimnasio 2: base 12, tope 18; con Gimnasio 0 saldría 14
+		expect(
+			r.partida.santuario.residentes.find((q) => q.uid === "a1")?.nivel,
+		).toBe(18);
+	});
+});

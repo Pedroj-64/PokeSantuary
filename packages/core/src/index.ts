@@ -97,6 +97,7 @@ export {
 	type ContextoPartida,
 	crearPartida,
 	type EstadoPartida,
+	nivelDeEdificio,
 	type ResultadoPartida,
 	reducir,
 	VERSION_PARTIDA,

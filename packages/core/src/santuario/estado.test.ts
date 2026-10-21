@@ -133,7 +133,7 @@ describe("crearSantuario", () => {
 		e.recursos.madera = 999;
 		e.edificios.length = 0;
 		expect(original.recursosIniciales.madera).toBe(10);
-		expect(original.edificios).toHaveLength(7);
+		expect(original.edificios).toHaveLength(9);
 	});
 
 	it("lanza si el balance no trae el Árbol Cenit", () => {

@@ -213,7 +213,7 @@ describe("SantuarioBalanceSchema", () => {
 		});
 	});
 
-	it("el pack trae los siete edificios del GDD con sus cifras", () => {
+	it("el pack trae los edificios del GDD con sus cifras", () => {
 		const datos = SantuarioBalanceSchema.parse(LEIDO);
 		expect(datos.edificios.map((e) => e.id)).toEqual([
 			"arbol-cenit",
@@ -223,6 +223,8 @@ describe("SantuarioBalanceSchema", () => {
 			"almacen",
 			"aserradero",
 			"cantera",
+			"gimnasio",
+			"altar",
 		]);
 
 		const arbol = datos.edificios.find((e) => e.id === "arbol-cenit");
@@ -795,5 +797,23 @@ describe("Gimnasio", () => {
 				g.fragmentos = [2, 0];
 			}),
 		).toBe(false);
+	});
+});
+
+describe("Gimnasio y Altar como edificios", () => {
+	const edificios = SantuarioBalanceSchema.parse(LEIDO).edificios;
+
+	it("traen las cifras de la tabla de edificios del GDD §11.5", () => {
+		expect(edificios.find((e) => e.id === "gimnasio")).toMatchObject({
+			kit: { madera: 10, piedra: 15, pokedolares: 150 },
+			obra: 12,
+			requiereArbol: 2,
+		});
+		expect(edificios.find((e) => e.id === "altar")).toMatchObject({
+			kit: { madera: 15, piedra: 15, fragmentos: 5 },
+			obra: 15,
+			nivelMax: 3,
+			requiereArbol: 3,
+		});
 	});
 });
