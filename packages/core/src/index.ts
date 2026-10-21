@@ -225,6 +225,16 @@ export {
 	nivelDeSalida,
 } from "./santuario/puente.js";
 export {
+	comprarRama,
+	costeDelSiguiente,
+	costeTotal,
+	motivoNoPuedeComprar,
+	type RangosRamas,
+	rangoDe,
+	rangoMaximo,
+	type TablaRamas,
+} from "./santuario/ramas.js";
+export {
 	accionesPosibles,
 	colocarCamino,
 	colocarDecoracion,
