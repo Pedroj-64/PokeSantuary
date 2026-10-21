@@ -519,3 +519,77 @@ describe("obra y producción en la misma jornada", () => {
 		expect(manana.estado.recursos["baya:neutro"]).toBeGreaterThan(0);
 	});
 });
+
+describe("efectos de los Códigos del Altar", () => {
+	/** Un aserradero con producción base 10 y un residente con Ánimo 0: 10 × 0,5 = 5 de madera por jornada. */
+	const conTrabajador = (codigos?: EstadoSantuario["codigos"]) => {
+		const b = balance();
+		const aserradero = b.edificios.find((d) => d.id === "aserradero");
+		if (aserradero?.produce === undefined)
+			throw new Error("falta el aserradero");
+		aserradero.produce.base = 10;
+		const e = conEdificio(
+			estado([residente("r1", { animo: 0, tarea: trabajo("ed2") })], {
+				recursos: {},
+				...(codigos !== undefined && { codigos }),
+			}),
+			"aserradero",
+			"ed2",
+		);
+		return { b, e };
+	};
+
+	it("sin Códigos la producción es la de siempre", () => {
+		const { b, e } = conTrabajador();
+		expect(pasoProduccion(e, b, rng()).estado.recursos.madera).toBe(5);
+	});
+
+	it("Manos ocupadas (×1,2) y Ritmo propio (×0,9) multiplican la producción", () => {
+		const a = conTrabajador({ 1: "A" });
+		expect(pasoProduccion(a.e, a.b, rng()).estado.recursos.madera).toBe(6);
+		const bb = conTrabajador({ 1: "B" });
+		const r = pasoProduccion(bb.e, bb.b, rng()).estado;
+		expect(r.recursos.madera).toBe(4); // 4,5: el medio se queda de resto
+		expect(edificioDe(r, "ed2").resto.madera).toBeCloseTo(0.5, 5);
+	});
+
+	it("Cosecha abundante (×1,3) solo afecta al Huerto, no al aserradero", () => {
+		const { b, e } = conTrabajador({ 3: "A" });
+		expect(pasoProduccion(e, b, rng()).estado.recursos.madera).toBe(5);
+		const huertoB = balance();
+		const huerto = huertoB.edificios.find((d) => d.id === "huerto-bayas");
+		if (huerto?.produce === undefined) throw new Error("falta el huerto");
+		huerto.produce.base = 10;
+		const h = (codigos?: EstadoSantuario["codigos"]) =>
+			pasoProduccion(
+				conEdificio(
+					estado([residente("r1", { animo: 0, tarea: trabajo("ed2") })], {
+						recursos: {},
+						...(codigos !== undefined && { codigos }),
+					}),
+					"huerto-bayas",
+					"ed2",
+				),
+				huertoB,
+				rng(),
+			).estado.recursos["baya:neutro"];
+		expect(h()).toBe(5);
+		expect(h({ 3: "A" })).toBe(6); // 5 × 1,3 = 6,5
+	});
+});
+
+describe("Ánimo por jornada de los Códigos", () => {
+	it("Manos ocupadas resta 3 y Ritmo propio suma 5 al Ánimo de cada residente", () => {
+		const animo = (codigos?: EstadoSantuario["codigos"]) =>
+			resolverAtardecer(
+				estado([residente("r1", { animo: 60 })], {
+					momento: "atardecer",
+					...(codigos !== undefined && { codigos }),
+				}),
+				balance(),
+			).estado.residentes[0]?.animo as number;
+		const base = animo();
+		expect(animo({ 1: "A" })).toBeCloseTo(base - 3, 5);
+		expect(animo({ 1: "B" })).toBeCloseTo(base + 5, 5);
+	});
+});

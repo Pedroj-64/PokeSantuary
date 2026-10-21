@@ -4,6 +4,7 @@ import {
 	liquidar,
 } from "../expedicion.js";
 import { crearRng, type Rng } from "../rng.js";
+import { efectoDeCodigos } from "./codigos.js";
 import type {
 	EstadoSantuario,
 	OrigenResidente,
@@ -95,6 +96,11 @@ export function liquidarEnSantuario(
 	fabricar: Fabricar,
 ): ResultadoLiquidacion {
 	const { dineroConservado } = liquidar(x);
+	// Código "Cuidado mutuo": los debilitados nunca quedan agotados.
+	const cuidadoMutuo = efectoDeCodigos(
+		e.codigos ?? {},
+		b.codigos,
+	).debilitadosNoAgotan;
 	const volvieron = new Map(
 		x.equipo.flatMap((m) => (m.uid === undefined ? [] : [[m.uid, m.psPct]])),
 	);
@@ -110,7 +116,7 @@ export function liquidarEnSantuario(
 			return {
 				...r,
 				tarea: { tipo: "nada" },
-				estado: ps === 0 ? "agotado" : "descansado",
+				estado: ps === 0 && !cuidadoMutuo ? "agotado" : "descansado",
 			};
 		}),
 	};

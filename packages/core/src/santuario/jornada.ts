@@ -1,4 +1,5 @@
 import { crearRng, type Rng } from "../rng.js";
+import { efectoDeCodigos } from "./codigos.js";
 import type {
 	EstadoSantuario,
 	Residente,
@@ -156,8 +157,13 @@ const pasoAnimo: Paso = (e, b) => {
 		return valor;
 	};
 
+	// Códigos del Altar: Ánimo fijo por jornada para todos (puede ser negativo).
+	const animoCodigos = efectoDeCodigos(
+		e.codigos ?? {},
+		b.codigos,
+	).animoPorJornada;
 	const residentes = e.residentes.map((r) => {
-		let delta = 0;
+		let delta = animoCodigos;
 		if (r.trabajoHoy === "preferido") delta += b.animo.preferido;
 		else if (r.trabajoHoy === "no-preferido") delta += b.animo.noPreferido;
 		delta += b.animo.confortFactor * (confortDe(r.zona) - b.animo.confortBase);

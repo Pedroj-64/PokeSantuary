@@ -1,3 +1,4 @@
+import { efectoDeCodigos } from "./codigos.js";
 import type { Edificio, EstadoSantuario, SantuarioBalance } from "./estado.js";
 import type { EventoSantuario, Paso } from "./jornada.js";
 
@@ -91,6 +92,8 @@ export const pasoObra: Paso = (e, b) => {
 export const pasoProduccion: Paso = (e, b) => {
 	const recursos = { ...e.recursos };
 	const eventos: EventoSantuario[] = [];
+	// Códigos del Altar: multiplican la producción (y la del Huerto aparte).
+	const codigos = efectoDeCodigos(e.codigos ?? {}, b.codigos);
 
 	// Copia de los restos sin la marca de obra y lista de quién terminó hoy.
 	const restos = new Map<string, Record<string, number>>();
@@ -165,7 +168,9 @@ export const pasoProduccion: Paso = (e, b) => {
 			(afin ? b.produccion.multEspecialidad : 1) *
 			(e.armonia >= b.armonia.umbralAlto ? b.armonia.multProduccionAlta : 1) *
 			(r.diasInquieto > 0 ? b.inquietud.multProduccion : 1) *
-			(e.temaCharla === "trabajo" ? b.produccion.multCharlaTrabajo : 1);
+			(e.temaCharla === "trabajo" ? b.produccion.multCharlaTrabajo : 1) *
+			codigos.multProduccion *
+			(edificio.tipo === "huerto-bayas" ? codigos.multHuerto : 1);
 		const recurso =
 			def.produce.recurso === "baya"
 				? `baya:${edificio.variedad ?? "neutro"}`

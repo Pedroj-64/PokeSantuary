@@ -181,6 +181,26 @@ describe("liquidarEnSantuario", () => {
 		);
 	});
 
+	it("con Cuidado mutuo el miembro que volvió a 0 PS no queda agotado", () => {
+		const x = terminada(ini(), "derrota", 0);
+		const conCodigo = { ...base, codigos: { 2: "B" as const } };
+		const r = liquidarEnSantuario(
+			conCodigo,
+			{
+				...x,
+				equipo: [
+					{ uid: "r1", especie: "abra", psPct: 0 },
+					{ uid: "r2", especie: "geodude", psPct: 40 },
+				],
+			},
+			balance(),
+			fabricar,
+		);
+		expect(r.estado.residentes.find((q) => q.uid === "r1")?.estado).toBe(
+			"descansado",
+		);
+	});
+
 	it("un capturado se vuelve residente nuevo con origen captura", () => {
 		const x = terminada(ini(), "victoria", 0);
 		const r = liquidarEnSantuario(
