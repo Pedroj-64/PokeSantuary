@@ -6,6 +6,7 @@ import type {
 import { opcionesDeRuna } from "./runas.js";
 import { celebrar, type IdCeremonia } from "./santuario/ceremonias.js";
 import { elegirCodigo, type Opcion } from "./santuario/codigos.js";
+import { efectosDeRamas } from "./santuario/efectosRamas.js";
 import type {
 	SantuarioBalance,
 	Tarea,
@@ -37,6 +38,9 @@ import {
 	desmarcarAccion,
 	marcarAccion,
 } from "./santuario/terreno.js";
+
+/** Miembros del equipo de expedición sin Ramas (GDD §6): las Ramas suben a 4, 5 y 6. */
+const EQUIPO_BASE = 3;
 
 /** Versión del formato de la partida; sube con cada cambio que necesite migración. */
 export const VERSION_PARTIDA = 1;
@@ -215,6 +219,14 @@ export function reducir(
 					"salirAExpedicion: ya salió una expedición en esta jornada",
 				);
 			}
+			// Ramas del Árbol: tamaño del equipo, opciones de runa y rendición sombría.
+			const ramas = efectosDeRamas(s.ramas ?? {}, b.efectosRamas);
+			const maxEquipo = ramas.equipoMax ?? EQUIPO_BASE;
+			if (a.uids.length > maxEquipo) {
+				throw new RangeError(
+					`salirAExpedicion: el equipo admite como mucho ${maxEquipo} (recibidos ${a.uids.length})`,
+				);
+			}
 			const base = iniciarDesdeSantuario(s, a.uids, a.semilla);
 			if (a.miembros !== undefined && a.miembros.length !== a.uids.length) {
 				throw new RangeError(
@@ -227,6 +239,9 @@ export function reducir(
 				dinero: a.dinero ?? 0,
 				mochila: a.mochila ?? {},
 				...(a.llamas !== undefined && { llamas: a.llamas, fallidos: [] }),
+				...(ramas.bonusRendicion !== undefined && {
+					bonusRendicion: ramas.bonusRendicion,
+				}),
 			};
 			// Bendición del Viajero: se gasta al salir y ofrece 3 runas para elegir.
 			const bendicion = s.bendicionViajero === true;
@@ -238,7 +253,11 @@ export function reducir(
 					expedicion: bendicion
 						? {
 								...expedicion,
-								runaPendiente: opcionesDeRuna(a.semilla, expedicion.runas, 3),
+								runaPendiente: opcionesDeRuna(
+									a.semilla,
+									expedicion.runas,
+									ramas.opcionesRuna ?? 3,
+								),
 							}
 						: expedicion,
 					expedicionJornada: s.jornada,

@@ -1,5 +1,6 @@
 import type { RegistroCeremonias, TablaCeremonias } from "./ceremonias.js";
 import type { EleccionesCodigos, TablaCodigos } from "./codigos.js";
+import type { TablaEfectosRamas } from "./efectosRamas.js";
 import type { TablaGimnasio } from "./gimnasio.js";
 import type { RangosRamas, TablaRamas } from "./ramas.js";
 import { terrenoInicial } from "./terreno.js";
@@ -279,6 +280,8 @@ export interface SantuarioBalance {
 	codigos: TablaCodigos;
 	/** Coste de cada rango de las Ramas del Árbol (GDD §12.2). */
 	ramas: TablaRamas;
+	/** Qué da cada rango de cada Rama. */
+	efectosRamas: TablaEfectosRamas;
 }
 
 /**

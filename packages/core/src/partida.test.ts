@@ -598,3 +598,54 @@ describe("Ramas del Árbol", () => {
 		);
 	});
 });
+
+describe("efectos de las Ramas al salir de expedición", () => {
+	const cuatro = (ramas?: Record<string, number>) => {
+		const p = enElDia();
+		return {
+			...p,
+			santuario: {
+				...p.santuario,
+				residentes: ["a1", "a2", "a3", "a4"].map((uid) => residente(uid)),
+				...(ramas !== undefined && { ramas }),
+			},
+		};
+	};
+	const salir = (p: EstadoPartida, uids: string[]) =>
+		ir(p, { tipo: "salirAExpedicion", uids, semilla: "sx" });
+
+	it("sin Rama el equipo es de 3 como mucho; con Equipo de expedición, más", () => {
+		expect(() => salir(cuatro(), ["a1", "a2", "a3", "a4"])).toThrow(RangeError);
+		expect(salir(cuatro(), ["a1", "a2", "a3"]).expedicion?.equipo).toHaveLength(
+			3,
+		);
+		const p = salir(cuatro({ "equipo-expedicion": 1 }), [
+			"a1",
+			"a2",
+			"a3",
+			"a4",
+		]);
+		expect(p.expedicion?.equipo).toHaveLength(4);
+	});
+
+	it("Ojo del Coro ofrece 4 runas en la Bendición del Viajero en lugar de 3", () => {
+		const bendecida = (ramas?: Record<string, number>) => {
+			const p = cuatro(ramas);
+			return { ...p, santuario: { ...p.santuario, bendicionViajero: true } };
+		};
+		expect(salir(bendecida(), ["a1"]).expedicion?.runaPendiente).toHaveLength(
+			3,
+		);
+		expect(
+			salir(bendecida({ "ojo-del-coro": 1 }), ["a1"]).expedicion?.runaPendiente,
+		).toHaveLength(4);
+	});
+
+	it("Afinidad sombría lleva su bonus de rendición a la expedición", () => {
+		expect(salir(cuatro(), ["a1"]).expedicion?.bonusRendicion).toBeUndefined();
+		expect(
+			salir(cuatro({ "afinidad-sombria": 2 }), ["a1"]).expedicion
+				?.bonusRendicion,
+		).toBe(0.2);
+	});
+});

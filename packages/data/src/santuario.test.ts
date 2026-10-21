@@ -817,3 +817,39 @@ describe("Gimnasio y Altar como edificios", () => {
 		});
 	});
 });
+
+describe("efectos de las Ramas del Árbol", () => {
+	const pack = SantuarioBalanceSchema.parse(LEIDO);
+
+	it("el pack trae un efecto por cada rango de cada rama y las cifras del GDD §12.2", () => {
+		for (const [rama, costes] of Object.entries(pack.ramas))
+			expect(pack.efectosRamas[rama]).toHaveLength(costes.length);
+		expect(pack.efectosRamas.farol?.map((e) => e.llamas)).toEqual([2, 3]);
+		expect(
+			pack.efectosRamas["equipo-expedicion"]?.map((e) => e.equipoMax),
+		).toEqual([4, 5, 6]);
+		expect(pack.efectosRamas["ojo-del-coro"]?.[0]?.opcionesRuna).toBe(4);
+	});
+
+	it("rechaza una rama sin efectos o con un rango de más o de menos", () => {
+		const roto = (
+			cambio: (c: { efectosRamas: Record<string, unknown[]> }) => void,
+		) => {
+			const crudo = structuredClone(LEIDO) as {
+				efectosRamas: Record<string, unknown[]>;
+			};
+			cambio(crudo);
+			return SantuarioBalanceSchema.safeParse(crudo).success;
+		};
+		expect(
+			roto((c) => {
+				delete c.efectosRamas.farol;
+			}),
+		).toBe(false);
+		expect(
+			roto((c) => {
+				c.efectosRamas.farol?.push({ llamas: 4 });
+			}),
+		).toBe(false);
+	});
+});

@@ -263,5 +263,29 @@
 		"raices-firmes": [15, 35],
 		"afinidad-sombria": [10, 30],
 		"memoria-del-eco": [20]
+	},
+	"efectosRamas": {
+		"farol": [{ "llamas": 2 }, { "llamas": 3 }],
+		"mochila-amplia": [
+			{ "bolasExtra": 1, "bayasExtra": 1, "objetosAlmacen": 1 },
+			{ "bolasExtra": 2, "bayasExtra": 2, "objetosAlmacen": 1 },
+			{ "bolasExtra": 3, "bayasExtra": 3, "objetosAlmacen": 1 }
+		],
+		"equipo-expedicion": [
+			{ "equipoMax": 4 },
+			{ "equipoMax": 5 },
+			{ "equipoMax": 6 }
+		],
+		"ojo-del-coro": [{ "opcionesRuna": 4 }],
+		"bendicion-del-alba": [
+			{ "bendicionEnRaiz": true },
+			{ "bendicionEnRaiz": true, "bendicionDeLamento": true }
+		],
+		"raices-firmes": [
+			{ "curaEntrePisosPct": 45 },
+			{ "curaEntrePisosPct": 60, "reviveAlPct": 25 }
+		],
+		"afinidad-sombria": [{ "bonusRendicion": 0.1 }, { "bonusRendicion": 0.2 }],
+		"memoria-del-eco": [{ "recuerdosAlDejarIr": 1, "pistasBitacora": true }]
 	}
 }

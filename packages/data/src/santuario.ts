@@ -272,6 +272,26 @@ const codigos = z.array(
 // Ramas del Árbol (GDD §12.2): coste en Recuerdos de cada rango, en orden.
 const ramas = z.record(slug, z.array(enteroPositivo).min(1));
 
+// Efecto de cada rango de cada Rama (GDD §12.2); el rango r usa la posición r - 1.
+const efectoRama = z
+	.object({
+		llamas: enteroNoNegativo.optional(),
+		bolasExtra: enteroNoNegativo.optional(),
+		bayasExtra: enteroNoNegativo.optional(),
+		objetosAlmacen: enteroNoNegativo.optional(),
+		equipoMax: z.number().int().min(1).max(6).optional(),
+		opcionesRuna: enteroPositivo.optional(),
+		bendicionEnRaiz: z.boolean().optional(),
+		bendicionDeLamento: z.boolean().optional(),
+		curaEntrePisosPct: z.number().int().min(0).max(100).optional(),
+		reviveAlPct: z.number().int().min(0).max(100).optional(),
+		bonusRendicion: z.number().min(0).max(1).optional(),
+		recuerdosAlDejarIr: enteroNoNegativo.optional(),
+		pistasBitacora: z.boolean().optional(),
+	})
+	.strict();
+const efectosRamas = z.record(slug, z.array(efectoRama).min(1));
+
 export const SantuarioBalanceSchema = z
 	.object({
 		isla,
@@ -291,9 +311,19 @@ export const SantuarioBalanceSchema = z
 		gimnasio,
 		codigos,
 		ramas,
+		efectosRamas,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {
+		for (const [rama, costes] of Object.entries(datos.ramas)) {
+			if (datos.efectosRamas[rama]?.length !== costes.length) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["efectosRamas", rama],
+					message: `${rama}: debe tener un efecto por cada rango de ramas (${costes.length})`,
+				});
+			}
+		}
 		const idsEdificio = new Set<string>();
 		datos.edificios.forEach((e, i) => {
 			if (idsEdificio.has(e.id)) {

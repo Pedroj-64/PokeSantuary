@@ -691,3 +691,27 @@ describe("Bendición del Viajero: elegirRunaInicial", () => {
 		expect(foto(e)).toBe(antes);
 	});
 });
+
+describe("Afinidad sombría: bonusRendicion", () => {
+	it("con un bonus que sube la probabilidad por encima de 1, el Sombrío vencido siempre se rinde", () => {
+		const base = estadoHasta("sombrio");
+		const gana = (e: EstadoExpedicion) =>
+			resolverCombate(e, { ...gana1(e), rival: "gastly" });
+		const gana1 = (e: EstadoExpedicion) =>
+			({
+				victoria: true,
+				psPct: e.equipo.map(() => 100),
+				dinero: 0,
+			}) as ResultadoCombate;
+		const sin = [];
+		const con = [];
+		for (let i = 0; i < 12; i++) {
+			const e = { ...base, semilla: `rend${i}` };
+			sin.push(gana(e).pendientesPurificar.length);
+			con.push(gana({ ...e, bonusRendicion: 1 }).pendientesPurificar.length);
+		}
+		expect(con.every((n) => n === 1)).toBe(true);
+		// sin bonus, la base es 0,6: en 12 semillas alguna no se rinde
+		expect(sin.some((n) => n === 0)).toBe(true);
+	});
+});

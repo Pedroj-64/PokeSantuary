@@ -66,6 +66,8 @@ export interface EstadoExpedicion {
 	repetir?: string;
 	/** Bendición del Viajero: runas entre las que hay que elegir una antes de empezar. */
 	runaPendiente?: IdRuna[];
+	/** Rama Afinidad sombría: se suma a la probabilidad de que un Sombrío vencido se rinda. */
+	bonusRendicion?: number;
 }
 
 /** Resultado de un combate: `psPct` va en el orden del equipo. */
@@ -197,7 +199,10 @@ function recompensaDeNodo(
 			: e;
 	}
 	if (nodo.tipo === "sombrio" && rival !== undefined) {
-		const prob = RENDICION_BASE + modificadores(e.runas).bonusRendicionSombria;
+		const prob =
+			RENDICION_BASE +
+			modificadores(e.runas).bonusRendicionSombria +
+			(e.bonusRendicion ?? 0);
 		const rng = crearRng(`${e.semilla}:p${e.piso}:${nodo.id}:rendicion`);
 		return rng.siguiente() < prob
 			? { ...e, pendientesPurificar: [...e.pendientesPurificar, rival] }

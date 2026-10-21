@@ -6,9 +6,11 @@ import type {
 } from "@santuario/core";
 import {
 	crearRng,
+	efectosDeRamas,
 	generarIV,
 	llamasIniciales,
 	miembroDeResidente,
+	rangoDe,
 } from "@santuario/core";
 import Phaser from "phaser";
 import losetasPng from "../assets/santuario/losetas.png?url";
@@ -714,7 +716,8 @@ export class SantuarioMundo extends Phaser.Scene {
 			texto: `${this.elegidos.has(r.uid) ? "[x]" : "[ ]"} ${nombreDeEspecie(r.especie)}`,
 			alElegir: () => {
 				if (this.elegidos.has(r.uid)) this.elegidos.delete(r.uid);
-				else if (this.elegidos.size < 6) this.elegidos.add(r.uid);
+				else if (this.elegidos.size < this.equipoMax())
+					this.elegidos.add(r.uid);
 				this.menuEquipo(i);
 			},
 		}));
@@ -724,12 +727,37 @@ export class SantuarioMundo extends Phaser.Scene {
 			alElegir: () => this.salirConEquipo(),
 		});
 		this.menu.mostrar(
-			t("equipo.titulo"),
+			t("equipo.titulo", { max: this.equipoMax() }),
 			items,
 			t("gestion.pie"),
 			() => this.gestion.cerrar(),
 			indice,
 		);
+	}
+
+	/** Efectos de las Ramas del Árbol comprados hasta ahora. */
+	private efectosRamas() {
+		return efectosDeRamas(
+			this.p.santuario.ramas ?? {},
+			this.sesion.ctx.balance.efectosRamas,
+		);
+	}
+
+	/** Miembros que admite el equipo de expedición: 3, o más con la Rama. */
+	private equipoMax(): number {
+		return this.efectosRamas().equipoMax ?? 3;
+	}
+
+	/** Bolas de siempre más las extras de la Rama «Mochila amplia» (y sus Bayas Aranja). */
+	private mochilaDeSalida(
+		balance: ReturnType<typeof cargarBalance>,
+	): Record<string, number> {
+		const mochila = bolasIniciales(balance);
+		const { bolasExtra = 0, bayasExtra = 0 } = this.efectosRamas();
+		const bola = Object.keys(mochila)[0] ?? "poke-ball";
+		if (bolasExtra > 0) mochila[bola] = (mochila[bola] ?? 0) + bolasExtra;
+		if (bayasExtra > 0) mochila["baya-aranja"] = bayasExtra;
+		return mochila;
 	}
 
 	private salirConEquipo(): void {
@@ -753,9 +781,9 @@ export class SantuarioMundo extends Phaser.Scene {
 			miembros,
 			semilla: `${s.semilla}:exp:${s.jornada}`,
 			dinero: balance.dineroInicial,
-			mochila: bolasIniciales(balance),
+			mochila: this.mochilaDeSalida(balance),
 			llamas: llamasIniciales(balance.farol, {
-				rangoRama: 0,
+				rangoRama: rangoDe(s.ramas ?? {}, "farol"),
 				farolTenue: false,
 			}),
 		});
