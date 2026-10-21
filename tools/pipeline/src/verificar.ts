@@ -19,7 +19,7 @@ import {
 	TrabajosPorTipoSchema,
 } from "@santuario/data";
 import { z } from "zod";
-import { aprendizajePorNivel } from "./aprendizaje.js";
+import { aprendizajePorNivel, conAtaqueMinimo } from "./aprendizaje.js";
 import { archivosDelPack } from "./construir.js";
 import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { resolverEnPack, sha256 } from "./manifiesto.js";
@@ -135,6 +135,9 @@ export async function verificar(
 			if (!(especie in aprendizaje))
 				errores.push(`aprendizaje.json: falta ${especie}`);
 		const ids = new Set(movs.map((m) => m.id));
+		const setsDelPack = z
+			.array(SetCombateSchema)
+			.parse(leer(dirPack, "sets.json"));
 		for (const [especie, entradas] of Object.entries(aprendizaje)) {
 			if (!especies.includes(especie))
 				errores.push(`aprendizaje.json: ${especie} no está en especies.json`);
@@ -145,7 +148,12 @@ export async function verificar(
 					);
 			let esperado: { nivel: number; movimiento: string }[];
 			try {
-				esperado = await aprendizajePorNivel(especie);
+				const bruto = await aprendizajePorNivel(especie);
+				// La misma regla del generador: sin ataques, entra el primero del set.
+				esperado =
+					conAtaqueMinimo({ [especie]: bruto }, setsDelPack, movs).aprendizaje[
+						especie
+					] ?? bruto;
 			} catch (e) {
 				errores.push(
 					`aprendizaje.json: ${especie}: ${e instanceof Error ? e.message : String(e)}`,

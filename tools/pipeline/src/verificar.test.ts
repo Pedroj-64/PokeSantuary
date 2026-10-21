@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Movimiento, Oficial } from "@santuario/data";
 import { describe, expect, it } from "vitest";
-import { aprendizajePorNivel } from "./aprendizaje.js";
+import { aprendizajePorNivel, conAtaqueMinimo } from "./aprendizaje.js";
 import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { sha256 } from "./manifiesto.js";
 import {
@@ -34,10 +34,6 @@ const ESPECIES_PACK: string[] = (
 // El pack real todavía no trae aprendizaje.json ni los movimientos que se
 // aprenden (los genera `pnpm data:build`); la copia temporal los sintetiza con
 // el mismo canal para probar verificar.
-const APRENDIZAJE: Record<string, { nivel: number; movimiento: string }[]> = {};
-for (const especie of [...ESPECIES_PACK].sort())
-	APRENDIZAJE[especie] = await aprendizajePorNivel(especie);
-const APRENDIZAJE_TEXTO = `${JSON.stringify(APRENDIZAJE, null, "\t")}\n`;
 
 /** Respuesta de PokeAPI `move/{slug}` mínima, derivada de @pkmn/data. */
 const recorte = (id: string): MovimientoApi => {
@@ -71,6 +67,20 @@ for (const slug of JSON.parse(
 		MOVIMIENTOS_PACK.push(unirMovimiento(recortarMovimiento(recorte(slug))));
 }
 const MOVIMIENTOS_TEXTO = `${JSON.stringify(MOVIMIENTOS_PACK, null, "\t")}\n`;
+
+// Mismo canal que `data:build`: @pkmn/data más el ataque mínimo de quien no tiene ninguno.
+const APRENDIZAJE_BRUTO: Record<
+	string,
+	{ nivel: number; movimiento: string }[]
+> = {};
+for (const especie of [...ESPECIES_PACK].sort())
+	APRENDIZAJE_BRUTO[especie] = await aprendizajePorNivel(especie);
+const APRENDIZAJE = conAtaqueMinimo(
+	APRENDIZAJE_BRUTO,
+	JSON.parse(readFileSync(join(PACK_REAL, "sets.json"), "utf8")),
+	MOVIMIENTOS_PACK,
+).aprendizaje;
+const APRENDIZAJE_TEXTO = `${JSON.stringify(APRENDIZAJE, null, "\t")}\n`;
 
 const EVOLUCIONES: Record<
 	string,

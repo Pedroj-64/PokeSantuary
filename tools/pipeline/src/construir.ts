@@ -6,12 +6,18 @@ import {
 	type Evolucion,
 	type Evoluciones,
 	EvolucionesSchema,
+	type Movimiento,
 	MovimientoSchema,
+	type SetCombate,
 	SetCombateSchema,
 	TrabajosPorTipoSchema,
 } from "@santuario/data";
 import { z } from "zod";
-import { type AprendizajeNivel, aprendizajePorNivel } from "./aprendizaje.js";
+import {
+	type AprendizajeNivel,
+	aprendizajePorNivel,
+	conAtaqueMinimo,
+} from "./aprendizaje.js";
 import { descargar, descargarMovimiento, type Red } from "./descargar.js";
 import { evolucionesDe, nivelEtapa } from "./evolucion.js";
 import { sha256 } from "./manifiesto.js";
@@ -46,6 +52,8 @@ export const aJson = (v: unknown) => `${JSON.stringify(v, null, "\t")}\n`;
 async function generarAprendizaje(
 	especies: string[],
 	movimientosDisponibles: string[],
+	sets: readonly SetCombate[],
+	movimientos: readonly Movimiento[],
 ): Promise<Aprendizaje> {
 	const crudo: Record<string, AprendizajeNivel[]> = {};
 	for (const especie of [...especies].sort())
@@ -65,7 +73,8 @@ async function generarAprendizaje(
 		throw new Error(
 			`aprendizaje.json: faltan movimientos en tools/pipeline/movimientos.json: ${faltan.join(", ")}`,
 		);
-	return aprendizaje;
+	// Una especie sin ningún ataque en su lista (Abra) recibe el primero de su set.
+	return conAtaqueMinimo(aprendizaje, sets, movimientos).aprendizaje;
 }
 
 // Etapa y evoluciones de todas las especies, con las claves ordenadas.
@@ -123,6 +132,8 @@ export async function construir(o: OpcionesConstruir): Promise<number> {
 			await generarAprendizaje(
 				lista.map((e) => e.id),
 				slugsMov,
+				sets,
+				movs,
 			),
 		),
 	);

@@ -2,6 +2,7 @@ import aprendizajeCrudo from "@packs/kanto/aprendizaje.json?raw";
 import especialidadesCrudo from "@packs/kanto/especialidades.json?raw";
 import especiesCrudo from "@packs/kanto/especies.json?raw";
 import evolucionesCrudo from "@packs/kanto/evoluciones.json?raw";
+import movimientosCrudo from "@packs/kanto/movimientos.json?raw";
 import nivelesCrudo from "@packs/kanto/niveles.json?raw";
 import type { CatalogoProgresion, ContextoProgresion } from "@santuario/core";
 import {
@@ -9,6 +10,7 @@ import {
 	EspecialidadesSchema,
 	EspecieSchema,
 	EvolucionesSchema,
+	MovimientoSchema,
 	NivelesSchema,
 } from "@santuario/data";
 import { z } from "zod";
@@ -34,6 +36,13 @@ export function cargarProgresion(): DatosProgresion {
 		JSON.parse(especialidadesCrudo),
 	);
 	const especies = z.array(EspecieSchema).parse(JSON.parse(especiesCrudo));
+	// Potencia de cada movimiento: la selección de movimientos iniciales exige al menos dos ataques.
+	const poder = Object.fromEntries(
+		z
+			.array(MovimientoSchema)
+			.parse(JSON.parse(movimientosCrudo))
+			.map((m) => [m.id, m.potencia ?? 0]),
+	);
 	const catalogo: CatalogoProgresion = Object.fromEntries(
 		Object.entries(evoluciones).map(([id, datos]) => {
 			const especie = especies.find((e) => e.id === id);
@@ -45,6 +54,7 @@ export function cargarProgresion(): DatosProgresion {
 					tipos: especie?.tipos ?? [],
 					preferidos: especie?.trabajos ?? [],
 					especialidades: especialidades[id] ?? [],
+					poder,
 				},
 			];
 		}),

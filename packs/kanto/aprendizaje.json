@@ -2,6 +2,10 @@
 	"abra": [
 		{
 			"nivel": 1,
+			"movimiento": "psychic"
+		},
+		{
+			"nivel": 1,
 			"movimiento": "teleport"
 		}
 	],
