@@ -153,6 +153,12 @@ export {
 	type TablaCodigos,
 } from "./santuario/codigos.js";
 export {
+	type EfectoRama,
+	efectoDeRama,
+	efectosDeRamas,
+	type TablaEfectosRamas,
+} from "./santuario/efectosRamas.js";
+export {
 	type AccionMarcada,
 	crearSantuario,
 	type DecoracionBalance,
