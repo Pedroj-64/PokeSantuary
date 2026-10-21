@@ -79,6 +79,99 @@ describe("movimientosIniciales", () => {
 	});
 });
 
+describe("movimientosIniciales con poder", () => {
+	// Caso del enunciado: Impactrueno es un ataque antiguo que no entra en los
+	// cuatro últimos; Electropelota no tiene potencia directa en el pack.
+	const PIKACHU: readonly EntradaAprendizaje[] = congelar([
+		{ nivel: 1, movimiento: "impactrueno" },
+		{ nivel: 4, movimiento: "onda-trueno" },
+		{ nivel: 8, movimiento: "doble-equipo" },
+		{ nivel: 12, movimiento: "electropelota" },
+		{ nivel: 16, movimiento: "finta" },
+	]);
+	const PODER = congelar({
+		impactrueno: 40,
+		electropelota: 0,
+		finta: 30,
+	});
+
+	it("sin poder mantiene exactamente la regla anterior", () => {
+		expect(movimientosIniciales(PIKACHU, 18)).toEqual([
+			"onda-trueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("con poder mete los mejores ataques en los huecos más antiguos", () => {
+		expect(movimientosIniciales(PIKACHU, 18, PODER)).toEqual([
+			"impactrueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("no cambia si la selección ya tiene dos ataques", () => {
+		const yaDos: readonly EntradaAprendizaje[] = congelar([
+			{ nivel: 1, movimiento: "impactrueno" },
+			{ nivel: 4, movimiento: "onda-trueno" },
+			{ nivel: 8, movimiento: "doble-equipo" },
+			{ nivel: 16, movimiento: "finta" },
+		]);
+		expect(movimientosIniciales(yaDos, 18, PODER)).toEqual([
+			"impactrueno",
+			"onda-trueno",
+			"doble-equipo",
+			"finta",
+		]);
+	});
+
+	it("con un solo ataque disponible no inventa más", () => {
+		expect(movimientosIniciales(PIKACHU, 18, { impactrueno: 40 })).toEqual([
+			"impactrueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("sin ataques no cambia nada", () => {
+		expect(movimientosIniciales(PIKACHU, 18, {})).toEqual([
+			"onda-trueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("desempata por el aprendido más tarde y no repite", () => {
+		const empate: readonly EntradaAprendizaje[] = congelar([
+			{ nivel: 1, movimiento: "temprano" },
+			{ nivel: 2, movimiento: "tarde" },
+			{ nivel: 3, movimiento: "estado-1" },
+			{ nivel: 4, movimiento: "estado-2" },
+			{ nivel: 5, movimiento: "estado-3" },
+			{ nivel: 6, movimiento: "estado-4" },
+		]);
+		const salida = movimientosIniciales(empate, 6, {
+			temprano: 40,
+			tarde: 40,
+		});
+		expect(salida).toEqual(["tarde", "temprano", "estado-3", "estado-4"]);
+		expect(new Set(salida).size).toBe(salida.length);
+	});
+
+	it("no muta la lista ni el mapa de poder", () => {
+		const antesLista = structuredClone(PIKACHU);
+		const antesPoder = structuredClone(PODER);
+		movimientosIniciales(PIKACHU, 18, PODER);
+		expect(PIKACHU).toEqual(antesLista);
+		expect(PODER).toEqual(antesPoder);
+	});
+});
+
 describe("nuevosMovimientos", () => {
 	it("devuelve los de los niveles intermedios, en orden", () => {
 		expect(nuevosMovimientos(LISTA, 4, 12)).toEqual(["c", "d", "e"]);

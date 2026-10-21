@@ -17,6 +17,8 @@ export interface DatosEspecieProgresion {
 	tipos: readonly string[];
 	preferidos: readonly string[];
 	especialidades: readonly string[];
+	/** Potencia por movimiento para elegir los iniciales (opcional). */
+	poder?: Readonly<Record<string, number>>;
 }
 
 /** Datos de progresión por id de especie. */
@@ -58,7 +60,8 @@ export function nivelDeSalida(
 /**
  * Miembro de expedición que corresponde a un residente: a plena salud y con el
  * nivel de salida de su especie. Si el residente no tiene movimientos propios,
- * usa los iniciales de su nivel; sus `recordables` y su amistad pasan tal cual.
+ * usa los iniciales de su nivel (con el poder del catálogo, si lo trae); sus
+ * `recordables` y su amistad pasan tal cual.
  *
  * No muta el residente ni el catálogo.
  *
@@ -78,7 +81,7 @@ export function miembroDeResidente(
 		nivel,
 		movimientos:
 			r.movimientos === undefined
-				? movimientosIniciales(datos.aprendizaje, nivel)
+				? movimientosIniciales(datos.aprendizaje, nivel, datos.poder)
 				: r.movimientos.slice(0, MAX_MOVIMIENTOS),
 		recordables: [...(r.recordables ?? [])],
 		amistad: r.amistad,
@@ -142,7 +145,8 @@ export function aplicarRetorno(
 
 /**
  * Miembro para un Pokémon capturado durante la expedición: nivel indicado,
- * movimientos iniciales de ese nivel y sin `uid` (todavía no es residente).
+ * movimientos iniciales de ese nivel (con el poder del catálogo, si lo trae) y
+ * sin `uid` (todavía no es residente).
  *
  * @throws {RangeError} Si la especie no está en el catálogo o si el nivel no es
  * un entero >= 1.
@@ -158,7 +162,7 @@ export function miembroNuevoDeCaptura(
 		especie,
 		psPct,
 		nivel,
-		movimientos: movimientosIniciales(datos.aprendizaje, nivel),
+		movimientos: movimientosIniciales(datos.aprendizaje, nivel, datos.poder),
 	};
 }
 

@@ -16,6 +16,7 @@ import {
 	tipoRivalDeNodo,
 	trasVictoria,
 } from "./niveles.js";
+import { poderDeMovimientos } from "./politica.js";
 
 function congelar<T>(valor: T): T {
 	if (Array.isArray(valor)) {
@@ -73,6 +74,17 @@ describe("cargarDatosPack", () => {
 				?.nivelGimnasio,
 		).toBe(3);
 	});
+
+	it("adjunta el poder de los movimientos solo con la política", () => {
+		const sinPolitica = cargarDatosPack({ progresion: true });
+		const conPolitica = cargarDatosPack({
+			progresion: true,
+			politica: true,
+		});
+		expect(sinPolitica.progresion?.poder).toBeUndefined();
+		expect(conPolitica.progresion?.poder?.["thunder-shock"]).toBe(40);
+		expect(conPolitica.progresion?.poder?.["thunder-wave"]).toBe(0);
+	});
 });
 
 describe("equipoConNiveles", () => {
@@ -122,6 +134,30 @@ describe("equipoConNiveles", () => {
 		equipoConNiveles(e, p);
 		expect(e).toEqual(antesE);
 		expect(p).toEqual(antesP);
+	});
+});
+
+describe("equipoConNiveles con poder", () => {
+	it("con política, los movimientos iniciales incluyen ataques", () => {
+		const datos = cargarDatosPack({
+			progresion: true,
+			politica: true,
+			nivelGimnasio: 5,
+		});
+		const progresion = datos.progresion;
+		const politica = datos.politica;
+		if (progresion === undefined || politica === undefined)
+			throw new Error("el pack no cargó progresión y política");
+		const r = equipoConNiveles(expedicion([miembro("pikachu")]), progresion);
+		const movimientos = r.equipo[0]?.movimientos ?? [];
+		const poder = poderDeMovimientos(politica);
+		expect(movimientos).toEqual([
+			"thunder-shock",
+			"double-team",
+			"electro-ball",
+			"feint",
+		]);
+		expect(movimientos.filter((m) => (poder[m] ?? 0) > 0)).toHaveLength(2);
 	});
 });
 

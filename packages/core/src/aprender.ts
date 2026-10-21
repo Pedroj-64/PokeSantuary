@@ -32,6 +32,63 @@ function exigirEnteroMinimo(
 	}
 }
 
+/** Ataque directo según el mapa de poder: ausente o 0 no hace daño. */
+function esAtaque(
+	movimiento: string,
+	poder: Readonly<Record<string, number>>,
+): boolean {
+	return (poder[movimiento] ?? 0) > 0;
+}
+
+/**
+ * Completa una selección con ataques aprendidos hasta el nivel: si tiene menos
+ * de dos, sustituye sus movimientos sin potencia más antiguos por los ataques
+ * de mayor potencia no seleccionados. Los empates los gana el aprendido más
+ * tarde. Mantiene el tamaño y el orden relativo de los movimientos que quedan.
+ */
+function completarConAtaques(
+	hasta: readonly EntradaAprendizaje[],
+	seleccion: readonly string[],
+	poder: Readonly<Record<string, number>>,
+): string[] {
+	const ataques = seleccion.filter((movimiento) =>
+		esAtaque(movimiento, poder),
+	).length;
+	if (ataques >= 2) return [...seleccion];
+
+	// Aparición más reciente de cada movimiento aprendido: decide qué ataques
+	// están disponibles y resuelve los empates de potencia.
+	const ultimaAparicion = new Map<string, number>();
+	for (const [indice, entrada] of hasta.entries()) {
+		ultimaAparicion.set(entrada.movimiento, indice);
+	}
+	const yaSeleccionados = new Set(seleccion);
+	const candidatos = [...ultimaAparicion.entries()]
+		.filter(
+			([movimiento]) =>
+				!yaSeleccionados.has(movimiento) && esAtaque(movimiento, poder),
+		)
+		.sort(([movimientoA, indiceA], [movimientoB, indiceB]) => {
+			const potenciaA = poder[movimientoA] ?? 0;
+			const potenciaB = poder[movimientoB] ?? 0;
+			if (potenciaA !== potenciaB) return potenciaB - potenciaA;
+			return indiceB - indiceA;
+		});
+
+	const resultado = [...seleccion];
+	let faltan = 2 - ataques;
+	let siguienteCandidato = 0;
+	for (let i = 0; i < resultado.length && faltan > 0; i++) {
+		if (esAtaque(resultado[i] as string, poder)) continue;
+		const candidato = candidatos[siguienteCandidato];
+		if (candidato === undefined) break;
+		resultado[i] = candidato[0];
+		siguienteCandidato++;
+		faltan--;
+	}
+	return resultado;
+}
+
 /**
  * Los cuatro últimos movimientos por nivel (GDD §7.3): de las entradas con
  * `nivel <= nivel`, los últimos `MAX_MOVIMIENTOS` según el orden de la lista
@@ -39,13 +96,19 @@ function exigirEnteroMinimo(
  * reciente y sin repetir. Si una misma especie vuelve a aprender un movimiento,
  * solo cuenta su aparición más reciente.
  *
- * No muta la lista.
+ * Con `poder`, si la selección tiene menos de dos ataques (movimientos con
+ * potencia > 0), sustituye los movimientos sin potencia más antiguos por los
+ * ataques aprendidos de mayor potencia que no estén ya seleccionados, hasta
+ * tener dos o agotar los candidatos. Sin `poder`, se comporta como siempre.
+ *
+ * No muta la lista ni el mapa de poder.
  *
  * @throws {RangeError} Si `nivel` no es un entero >= 1.
  */
 export function movimientosIniciales(
 	lista: readonly EntradaAprendizaje[],
 	nivel: number,
+	poder?: Readonly<Record<string, number>>,
 ): string[] {
 	const quien = "movimientosIniciales";
 	exigirEnteroMinimo(nivel, "nivel", 1, quien);
@@ -62,7 +125,9 @@ export function movimientosIniciales(
 		vistos.add(movimiento);
 		ultimos.push(movimiento);
 	}
-	return ultimos.reverse();
+	const seleccion = ultimos.reverse();
+	if (poder === undefined) return seleccion;
+	return completarConAtaques(hasta, seleccion, poder);
 }
 
 /**

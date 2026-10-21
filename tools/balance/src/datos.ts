@@ -13,7 +13,7 @@ import {
 	SetCombateSchema,
 } from "@santuario/data";
 import { z } from "zod";
-import type { DatosPolitica } from "./politica.js";
+import { type DatosPolitica, poderDeMovimientos } from "./politica.js";
 import type { DatosSimulacion } from "./simular.js";
 
 const pack = (f: string): unknown =>
@@ -75,6 +75,8 @@ export function cargarDatosPack(opciones: OpcionesCarga = {}): DatosSimulacion {
 					tiposDe: Object.fromEntries(especies.map((e) => [e.id, e.tipos])),
 				}
 			: undefined;
+	const poder =
+		politica === undefined ? undefined : poderDeMovimientos(politica);
 
 	return {
 		sets: z.array(SetCombateSchema).parse(pack("sets.json")),
@@ -83,7 +85,13 @@ export function cargarDatosPack(opciones: OpcionesCarga = {}): DatosSimulacion {
 		elites: ElitesSchema.parse(pack("elites.json")),
 		...(opciones.progresion === true
 			? {
-					progresion: { niveles, aprendizaje, evoluciones, nivelGimnasio },
+					progresion: {
+						niveles,
+						aprendizaje,
+						evoluciones,
+						nivelGimnasio,
+						...(poder !== undefined ? { poder } : {}),
+					},
 				}
 			: {}),
 		...(politica !== undefined ? { politica } : {}),

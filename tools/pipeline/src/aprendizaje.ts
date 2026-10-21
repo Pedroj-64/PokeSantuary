@@ -1,3 +1,4 @@
+import type { Aprendizaje, Movimiento, SetCombate } from "@santuario/data";
 import { gen9 } from "./unir.js";
 
 /** Movimiento que una especie aprende al alcanzar un nivel. */
@@ -74,4 +75,71 @@ export async function aprendizajePorNivel(
 		);
 	entradas.sort(porNivel);
 	return entradas;
+}
+
+/** Resultado de completar las listas de aprendizaje con un ataque mínimo. */
+export interface ResultadoAtaqueMinimo {
+	/** Listas nuevas; las de la entrada no se reutilizan ni se mutan. */
+	aprendizaje: Aprendizaje;
+	/** Especies a las que se añadió un ataque de nivel 1, ordenadas. */
+	cambiadas: string[];
+	/** Especies sin ataque en su lista y sin ataque disponible en su set. */
+	avisos: string[];
+}
+
+/**
+ * Garantiza que cada especie con una lista de aprendizaje sin ningún movimiento
+ * con potencia reciba a nivel 1 el primer ataque de su set de combate. Si el
+ * set tampoco tiene ataques, la especie se deja igual y se avisa en el
+ * resultado. El ataque se inserta respetando el orden del esquema (nivel y
+ * movimiento) y nunca se duplica.
+ *
+ * No muta `aprendizaje`, `sets` ni `movimientos`.
+ */
+export function conAtaqueMinimo(
+	aprendizaje: Aprendizaje,
+	sets: readonly SetCombate[],
+	movimientos: readonly Movimiento[],
+): ResultadoAtaqueMinimo {
+	const potencia = new Map(
+		movimientos.map((movimiento) => [movimiento.id, movimiento.potencia ?? 0]),
+	);
+	const setPorEspecie = new Map<string, SetCombate>();
+	for (const set of sets) {
+		if (!setPorEspecie.has(set.especie)) setPorEspecie.set(set.especie, set);
+	}
+
+	const resultado: Aprendizaje = {};
+	const cambiadas: string[] = [];
+	const avisos: string[] = [];
+	for (const especie of Object.keys(aprendizaje).sort()) {
+		const lista = aprendizaje[especie] ?? [];
+		const tieneAtaque = lista.some(
+			(entrada) => (potencia.get(entrada.movimiento) ?? 0) > 0,
+		);
+		if (tieneAtaque) {
+			resultado[especie] = [...lista];
+			continue;
+		}
+
+		const set = setPorEspecie.get(especie);
+		const ataque = set?.movimientos.find(
+			(movimiento) =>
+				(potencia.get(movimiento) ?? 0) > 0 &&
+				!lista.some((entrada) => entrada.movimiento === movimiento),
+		);
+		if (ataque === undefined) {
+			resultado[especie] = [...lista];
+			avisos.push(
+				`${especie}: sin ningún ataque disponible en su set de combate`,
+			);
+			continue;
+		}
+
+		resultado[especie] = [...lista, { nivel: 1, movimiento: ataque }].sort(
+			porNivel,
+		);
+		cambiadas.push(especie);
+	}
+	return { aprendizaje: resultado, cambiadas, avisos };
 }

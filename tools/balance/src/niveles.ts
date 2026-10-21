@@ -32,6 +32,11 @@ export interface ProgresionSimulacion {
 	evoluciones: Evoluciones;
 	/** Nivel de gimnasio con el que sale el equipo (0 por defecto). */
 	nivelGimnasio: number;
+	/**
+	 * Potencia por movimiento, si la simulación usa la política inteligente.
+	 * Sirve para que los movimientos iniciales incluyan ataques.
+	 */
+	poder?: Readonly<Record<string, number>>;
 }
 
 /**
@@ -56,7 +61,7 @@ export interface ContextoNiveles extends ContextoProgresion {
  */
 export function contextoDeProgresion(
 	p: ProgresionSimulacion,
-	poder?: Readonly<Record<string, number>>,
+	poder: Readonly<Record<string, number>> | undefined = p.poder,
 ): ContextoNiveles {
 	const evoluciones: Record<string, readonly Evolucion[]> = {};
 	for (const [especie, datos] of Object.entries(p.evoluciones)) {
@@ -75,7 +80,8 @@ export function contextoDeProgresion(
 /**
  * Da nivel y movimientos iniciales a todo el equipo: el nivel sale de
  * `nivelInicial(nivelGimnasio, nivelEtapa)` y los movimientos de
- * `movimientosIniciales(aprendizaje, nivel)`.
+ * `movimientosIniciales(aprendizaje, nivel, poder)`. Si `p` no trae `poder`,
+ * se mantiene la regla anterior.
  *
  * No muta `e` ni `p`.
  *
@@ -105,7 +111,7 @@ export function equipoConNiveles(
 			return {
 				...m,
 				nivel,
-				movimientos: movimientosIniciales(lista, nivel),
+				movimientos: movimientosIniciales(lista, nivel, p.poder),
 			};
 		}),
 	};

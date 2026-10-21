@@ -99,6 +99,41 @@ const CATALOGO: CatalogoProgresion = congelar({
 	},
 });
 
+const APRENDIZAJE_PIKACHU = [
+	{ nivel: 1, movimiento: "impactrueno" },
+	{ nivel: 4, movimiento: "onda-trueno" },
+	{ nivel: 8, movimiento: "doble-equipo" },
+	{ nivel: 12, movimiento: "electropelota" },
+	{ nivel: 16, movimiento: "finta" },
+];
+
+const PODER_PIKACHU = {
+	impactrueno: 40,
+	electropelota: 0,
+	finta: 30,
+};
+
+const CATALOGO_PODER: CatalogoProgresion = congelar({
+	pikachu: {
+		aprendizaje: APRENDIZAJE_PIKACHU,
+		nivelEtapa: 0,
+		tipos: ["electric"],
+		preferidos: ["central"],
+		especialidades: ["chispa"],
+		poder: PODER_PIKACHU,
+	},
+});
+
+const CATALOGO_SIN_PODER: CatalogoProgresion = congelar({
+	pikachu: {
+		aprendizaje: APRENDIZAJE_PIKACHU,
+		nivelEtapa: 0,
+		tipos: ["electric"],
+		preferidos: ["central"],
+		especialidades: ["chispa"],
+	},
+});
+
 describe("nivelDeSalida", () => {
 	it("calcula el nivel inicial con la nivelEtapa del catálogo", () => {
 		expect(nivelDeSalida(0, "charmander", CATALOGO)).toBe(8);
@@ -167,6 +202,40 @@ describe("miembroDeResidente", () => {
 		const antes = structuredClone(r);
 		miembroDeResidente(r, 0, CATALOGO);
 		expect(r).toEqual(antes);
+	});
+});
+
+describe("poder de los movimientos en el puente", () => {
+	it("miembroDeResidente usa el poder del catálogo", () => {
+		const r = residente("r1", { especie: "pikachu" });
+		expect(miembroDeResidente(r, 5, CATALOGO_PODER).movimientos).toEqual([
+			"impactrueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("miembroDeResidente sin poder conserva la regla anterior", () => {
+		const r = residente("r1", { especie: "pikachu" });
+		expect(miembroDeResidente(r, 5, CATALOGO_SIN_PODER).movimientos).toEqual([
+			"onda-trueno",
+			"doble-equipo",
+			"electropelota",
+			"finta",
+		]);
+	});
+
+	it("miembroNuevoDeCaptura usa el poder del catálogo", () => {
+		expect(
+			miembroNuevoDeCaptura("pikachu", 40, 18, CATALOGO_PODER).movimientos,
+		).toEqual(["impactrueno", "doble-equipo", "electropelota", "finta"]);
+	});
+
+	it("no muta el catálogo con poder", () => {
+		const antes = structuredClone(CATALOGO_PODER);
+		miembroNuevoDeCaptura("pikachu", 40, 18, CATALOGO_PODER);
+		expect(CATALOGO_PODER).toEqual(antes);
 	});
 });
 
