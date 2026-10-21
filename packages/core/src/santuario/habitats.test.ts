@@ -463,7 +463,12 @@ describe("visitantes del Alba", () => {
 					...(codigos !== undefined && { codigos }),
 				});
 				const r = amanecer(e, balance(), ctx());
-				if (r.eventos.some((x) => x.habitat === "bosque-libre")) hay.push(j);
+				if (
+					r.eventos.some(
+						(x) => (x as { habitat?: string }).habitat === "bosque-libre",
+					)
+				)
+					hay.push(j);
 			}
 			return hay;
 		};

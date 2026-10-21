@@ -149,6 +149,7 @@ const Santuario = z
 			.strict()
 			.optional(),
 		bendicionViajero: z.boolean().optional(),
+		ramas: z.record(slug, z.number().int().min(1)).optional(),
 	})
 	.strict()
 	.superRefine((s, ctx) => {

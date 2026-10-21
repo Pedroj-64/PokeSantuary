@@ -143,6 +143,7 @@ describe("guardado de la partida", () => {
 				codigos: { 1: "A", 2: "B" },
 				ceremonias: { "festin-bayas": 3, purificacion: 5 },
 				bendicionViajero: true,
+				ramas: { farol: 2, "mochila-amplia": 1 },
 			},
 		};
 		expect(await cargar(await guardar(con))).toEqual(con);

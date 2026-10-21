@@ -269,6 +269,9 @@ const codigos = z.array(
 		.strict(),
 );
 
+// Ramas del Árbol (GDD §12.2): coste en Recuerdos de cada rango, en orden.
+const ramas = z.record(slug, z.array(enteroPositivo).min(1));
+
 export const SantuarioBalanceSchema = z
 	.object({
 		isla,
@@ -287,6 +290,7 @@ export const SantuarioBalanceSchema = z
 		ceremonias,
 		gimnasio,
 		codigos,
+		ramas,
 	})
 	.strict()
 	.superRefine((datos, ctx) => {

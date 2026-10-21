@@ -30,6 +30,7 @@ import {
 	resolverAtardecer,
 } from "./santuario/jornada.js";
 import { aplicarRetorno, type CatalogoProgresion } from "./santuario/puente.js";
+import { comprarRama } from "./santuario/ramas.js";
 import {
 	colocarCamino,
 	colocarDecoracion,
@@ -92,7 +93,9 @@ export type AccionPartida =
 	/** En el Altar, de día o de noche y sin expedición en curso. */
 	| { tipo: "celebrarCeremonia"; id: IdCeremonia }
 	| { tipo: "elegirCodigo"; nivel: number; opcion: Opcion }
-	| { tipo: "subirGimnasio" };
+	| { tipo: "subirGimnasio" }
+	/** En el Árbol Cenit: se paga con Recuerdos. */
+	| { tipo: "comprarRama"; rama: string };
 
 /** Estado nuevo y lo que la escena anima ("llegó un visitante", "se terminó una obra"...). */
 export interface ResultadoPartida {
@@ -310,6 +313,20 @@ export function reducir(
 				...s,
 				nivelGimnasio: r.nivel,
 				recursos: r.recursos,
+			});
+		}
+		case "comprarRama": {
+			exigirGestion(p, "comprarRama");
+			const r = comprarRama(
+				a.rama,
+				s.ramas ?? {},
+				s.recursos.recuerdos ?? 0,
+				b.ramas,
+			);
+			return conSantuario(p, {
+				...s,
+				ramas: r.rangos,
+				recursos: { ...s.recursos, recuerdos: r.recuerdos },
 			});
 		}
 		case "volverDeExpedicion": {

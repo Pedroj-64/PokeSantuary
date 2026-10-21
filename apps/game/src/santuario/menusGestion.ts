@@ -4,9 +4,12 @@ import {
 	type EstadoPartida,
 	type IdCeremonia,
 	motivoNoPuede,
+	motivoNoPuedeComprar,
 	motivoNoPuedeSubir,
 	nivelDeEdificio,
 	nivelesPendientes,
+	rangoDe,
+	rangoMaximo,
 	type SantuarioBalance,
 } from "@santuario/core";
 import type Phaser from "phaser";
@@ -121,6 +124,10 @@ export class MenusGestion {
 			{
 				texto: t("gestion.principal.terreno"),
 				alElegir: () => this.menuTerreno(),
+			},
+			{
+				texto: t("gestion.principal.ramas"),
+				alElegir: () => this.menuRamas(),
 			},
 			...this.itemsAltarYGimnasio(),
 			{
@@ -618,7 +625,7 @@ export class MenusGestion {
 			t("gestion.principal.altar"),
 			items,
 			t("gestion.pie"),
-			() => (noche ? this.cerrar() : this.menuPrincipal(4)),
+			() => (noche ? this.cerrar() : this.menuPrincipal(5)),
 			indice,
 		);
 	}
@@ -738,7 +745,44 @@ export class MenusGestion {
 			t("gimnasio.titulo", { n: nivel }),
 			[subir],
 			t("gestion.pie"),
-			() => this.menuPrincipal(5),
+			() => this.menuPrincipal(6),
+		);
+	}
+
+	/** Ramas del Árbol Cenit: mejoras permanentes que se pagan con Recuerdos. */
+	private menuRamas(indice = 0): void {
+		const s = this.a.partida().santuario;
+		const b = this.balance;
+		const recuerdos = s.recursos.recuerdos ?? 0;
+		const items: ItemMenu[] = Object.keys(b.ramas).map((rama, i) => {
+			const rango = rangoDe(s.ramas ?? {}, rama);
+			const maximo = rangoMaximo(rama, b.ramas);
+			const motivo = motivoNoPuedeComprar(
+				rama,
+				s.ramas ?? {},
+				recuerdos,
+				b.ramas,
+			);
+			const coste = b.ramas[rama]?.[rango];
+			return {
+				texto: `${t(`rama.${rama}`)}  [${rango}/${maximo}]${
+					motivo === "maximo" || coste === undefined
+						? ""
+						: `  (${t("rama.coste", { n: coste })})`
+				}${motivo === "recuerdos" ? `  [${t("gestion.faltan")}]` : ""}`,
+				activo: motivo === undefined,
+				alElegir: () => {
+					if (this.a.gestionar({ tipo: "comprarRama", rama }))
+						this.menuRamas(i);
+				},
+			};
+		});
+		this.menu.mostrar(
+			t("rama.titulo", { n: recuerdos }),
+			items,
+			t("gestion.pie"),
+			() => this.menuPrincipal(4),
+			indice,
 		);
 	}
 }

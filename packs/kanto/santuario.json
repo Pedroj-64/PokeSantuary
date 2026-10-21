@@ -253,5 +253,15 @@
 			"A": { "id": "cosecha-abundante", "efecto": { "multHuerto": 1.3 } },
 			"B": { "id": "bosque-libre", "efecto": { "visitanteCada": 4 } }
 		}
-	]
+	],
+	"ramas": {
+		"farol": [15, 40],
+		"mochila-amplia": [5, 10, 20],
+		"equipo-expedicion": [10, 25, 50],
+		"ojo-del-coro": [30],
+		"bendicion-del-alba": [20, 45],
+		"raices-firmes": [15, 35],
+		"afinidad-sombria": [10, 30],
+		"memoria-del-eco": [20]
+	}
 }

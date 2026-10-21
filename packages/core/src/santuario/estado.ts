@@ -1,6 +1,7 @@
 import type { RegistroCeremonias, TablaCeremonias } from "./ceremonias.js";
 import type { EleccionesCodigos, TablaCodigos } from "./codigos.js";
 import type { TablaGimnasio } from "./gimnasio.js";
+import type { RangosRamas, TablaRamas } from "./ramas.js";
 import { terrenoInicial } from "./terreno.js";
 
 /** Momento del día; la jornada avanza alba → dia → atardecer → noche. */
@@ -180,6 +181,8 @@ export interface EstadoSantuario {
 	ceremonias?: RegistroCeremonias;
 	/** La Bendición del Viajero está lista: la próxima expedición empieza con una runa elegida de 3. */
 	bendicionViajero?: boolean;
+	/** Rango comprado de cada Rama del Árbol; si falta, ninguno. */
+	ramas?: RangosRamas;
 }
 
 /** Entrada de un edificio en el balance; repite la forma de los datos. */
@@ -274,6 +277,8 @@ export interface SantuarioBalance {
 	gimnasio: TablaGimnasio;
 	/** Códigos del Altar por nivel (GDD §11.10). */
 	codigos: TablaCodigos;
+	/** Coste de cada rango de las Ramas del Árbol (GDD §12.2). */
+	ramas: TablaRamas;
 }
 
 /**

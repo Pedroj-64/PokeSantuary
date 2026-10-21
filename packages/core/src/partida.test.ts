@@ -542,3 +542,59 @@ describe("Altar y Gimnasio", () => {
 		).toBe(18);
 	});
 });
+
+describe("Ramas del Árbol", () => {
+	const con = (recuerdos: number, ramas?: Record<string, number>) => {
+		const p = enElDia();
+		return {
+			...p,
+			santuario: {
+				...p.santuario,
+				recursos: { ...p.santuario.recursos, recuerdos },
+				...(ramas !== undefined && { ramas }),
+			},
+		};
+	};
+
+	it("comprar un rango gasta los Recuerdos y lo anota", () => {
+		const p = ir(con(20), { tipo: "comprarRama", rama: "farol" });
+		expect(p.santuario.ramas).toEqual({ farol: 1 });
+		expect(p.santuario.recursos.recuerdos).toBe(5);
+		// el segundo rango cuesta 40
+		expect(() => ir(p, { tipo: "comprarRama", rama: "farol" })).toThrow(
+			RangeError,
+		);
+		const q = ir(con(100, { farol: 1 }), {
+			tipo: "comprarRama",
+			rama: "farol",
+		});
+		expect(q.santuario.ramas).toEqual({ farol: 2 });
+		expect(q.santuario.recursos.recuerdos).toBe(60);
+	});
+
+	it("rechaza una rama inexistente, una al máximo y la falta de Recuerdos", () => {
+		expect(() => ir(con(99), { tipo: "comprarRama", rama: "nada" })).toThrow(
+			RangeError,
+		);
+		expect(() =>
+			ir(con(99, { "ojo-del-coro": 1 }), {
+				tipo: "comprarRama",
+				rama: "ojo-del-coro",
+			}),
+		).toThrow(RangeError);
+		expect(() =>
+			ir(con(4), { tipo: "comprarRama", rama: "mochila-amplia" }),
+		).toThrow(RangeError);
+	});
+
+	it("no se compra con una expedición en curso", () => {
+		const x = ir(con(50), {
+			tipo: "salirAExpedicion",
+			uids: ["a1"],
+			semilla: "sx",
+		});
+		expect(() => ir(x, { tipo: "comprarRama", rama: "farol" })).toThrow(
+			RangeError,
+		);
+	});
+});
