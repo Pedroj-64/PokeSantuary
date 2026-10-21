@@ -40,3 +40,4 @@ export {
 } from "./expedicion/niveles.js";
 export type { DatosMovimiento, Estimador } from "./ia.js";
 export type { EventoCombate, Lado } from "./protocolo.js";
+export { multiplicadorDeTipo, tiposDeEspecie } from "./tipos.js";
